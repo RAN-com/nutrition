@@ -66,13 +66,6 @@
   src: url('./fonts/Syne/Syne-ExtraBold.ttf') format('truetype');
 }
 
-@font-face {
-  font-family: 'Syne';
-  font-weight: 400; /* Italic */
-  font-style: italic;
-  src: url('./fonts/Syne/Syne-Italic.ttf') format('truetype'); /* Assuming correct file */
-}
-
 * {
   padding: 0px;
   margin: 0px;

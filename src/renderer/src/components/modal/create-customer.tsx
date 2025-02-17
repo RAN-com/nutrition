@@ -1,4 +1,14 @@
-import { Backdrop, Button, Dialog, MenuItem, Select } from '@mui/material'
+import {
+  Button,
+  debounce,
+  Dialog,
+  FormControlLabel,
+  MenuItem,
+  Modal,
+  Radio,
+  RadioGroup,
+  Select
+} from '@mui/material'
 import CustomTypography from '../typography'
 import { useFormik } from 'formik'
 import CustomTextInput from '../text-input'
@@ -28,7 +38,10 @@ const validationSchema = Yup.object({
   phone: Yup.string()
     .required('Phone number is required')
     .matches(/^[0-9]{10}$/, 'Phone number must be exactly 10 digits'),
-  assigned_staff: Yup.string().required('Assign a staff'),
+  assigned_staff: Yup.object({
+    sid: Yup.string().required(),
+    name: Yup.string().required()
+  }).required('Assign a staff'),
   address: Yup.string()
     .required('Address is required')
     .min(10, 'Address must be at least 10 characters long'),
@@ -58,14 +71,14 @@ const CreateCustomerModal = ({
   const dispatch = useAppDispatch()
   const staffs = useAppSelector((s) => s.staffs.staffs)
   const formik = useFormik({
-    enableReinitialize: !!edit,
+    enableReinitialize: !!edit || open,
     initialValues: {
       name: edit?.data?.name ?? '',
       email: edit?.data?.email ?? '',
       gender: edit?.data?.gender ?? '',
       phone: edit?.data?.phone ?? '',
       address: edit?.data?.address ?? '',
-      assigned_staff: edit?.data?.assigned_staff?.sid ?? '',
+      assigned_staff: edit?.data?.assigned_staff ?? undefined,
       date_of_birth: edit?.data?.date_of_birth ?? '',
       medical_issues: edit?.data?.medical_issues ?? '',
       photo_url: edit?.data?.photo_url ?? ''
@@ -82,11 +95,7 @@ const CreateCustomerModal = ({
         if (edit?.data) {
           updateCustomer(edit?.data?.created_by.uid, edit?.data?.cid, {
             ...edit?.data,
-            ...formik.values,
-            assigned_staff: {
-              name: formik.values.assigned_staff,
-              sid: formik.values.assigned_staff
-            }
+            ...formik.values
           })
             .then(() => {
               setLoading(false)
@@ -107,8 +116,8 @@ const CreateCustomerModal = ({
             available_limit: user?.subscription?.total_customers as number,
             ...formik.values,
             assigned_staff: {
-              name: formik.values.assigned_staff,
-              sid: formik.values.assigned_staff
+              name: formik.values.assigned_staff?.name as string,
+              sid: formik.values.assigned_staff?.sid as string
             }
           })
             .then(() => {
@@ -136,6 +145,8 @@ const CreateCustomerModal = ({
     }
   }, [formik.errors])
 
+  console.log(formik.errors)
+
   const keys = Object.keys(formik.values)
   return (
     <Dialog
@@ -143,14 +154,17 @@ const CreateCustomerModal = ({
       onClose={() => {
         formik.resetForm()
         setLoading(false)
-        onClose?.()
+        debounce(() => {
+          onClose?.()
+        }, 600)()
       }}
       sx={{
         '.MuiPaper-root': {
           width: 'calc(100% - 24px)',
-          maxHeight: 'calc(100% - 24px)',
+          maxHeight: 'calc(100vh / 1.5)',
           maxWidth: '420px',
-          padding: '12px 18px'
+          padding: '12px 18px',
+          overflow: 'auto'
         },
         '.header': {
           display: 'flex',
@@ -158,33 +172,64 @@ const CreateCustomerModal = ({
           justifyContent: 'space-between'
         }
       }}
+      slotProps={{
+        paper: {
+          className: 'scrollbar'
+        }
+      }}
     >
-      <Backdrop open={loading} sx={{ position: 'fixed', zIndex: 100000000 }} />
+      <Modal open={loading} onClose={() => {}}>
+        <div />
+      </Modal>
       <form onSubmit={formik.handleSubmit}>
         <div className="header">
           <CustomTypography variant={'h6'}>Add New Customer</CustomTypography>
           <CustomIcon name={'LUCIDE_ICONS'} onClick={onClose} icon={'LuX'} color={grey['700']} />
         </div>
         {keys.map((k, idx) =>
-          k.includes('gender') || k.includes('assigned_staff') ? (
+          k.includes('gender') ? (
             <>
               <CustomTypography marginTop={'12px'} color={grey['500']}>
-                {k !== 'gender' ? 'Assign Staff' : 'gender'}
+                {k !== 'gender' ? 'Assign Staff' : k}
+              </CustomTypography>
+              <RadioGroup
+                aria-labelledby="demo-radio-buttons-group-label"
+                defaultValue="female"
+                name="radio-buttons-group"
+                onChange={(e) => formik.setFieldValue(k, e.target.value)}
+              >
+                <FormControlLabel value="female" control={<Radio />} label="Female" />
+                <FormControlLabel value="male" control={<Radio />} label="Male" />
+                <FormControlLabel value="others" control={<Radio />} label="Other" />
+              </RadioGroup>
+            </>
+          ) : k.includes('assigned_staff') ? (
+            <>
+              <CustomTypography marginTop={'12px'} color={grey['500']}>
+                Assign Staff
               </CustomTypography>
               <Select
-                value={k === 'gender' ? formik.values.gender : formik.values.assigned_staff}
-                onChange={(e) => formik.setFieldValue(k, e.target.value)}
-                sx={{ marginTop: '12px', width: '100%' }}
+                value={formik.values.assigned_staff?.sid ?? ''}
+                onChange={(e) => {
+                  const staff = staffs.filter((s) => s.data?.sid === e.target.value)[0]
+                  if (!staff) {
+                    alert('Refresh and Try Again')
+                    return
+                  }
+                  console.log(staff)
+                  formik.setFieldValue('assigned_staff', {
+                    name: staff.data.name,
+                    sid: staff.data.sid
+                  })
+                }}
+                sx={{
+                  marginTop: '12px',
+                  width: '100%'
+                }}
               >
-                {k === 'gender' ? (
-                  <>
-                    <MenuItem value={'male'}>Male</MenuItem>
-                    <MenuItem value={'female'}>Female</MenuItem>
-                    <MenuItem value={'others'}>Others</MenuItem>
-                  </>
-                ) : (
-                  staffs.map((e) => <MenuItem value={e.data.sid}>{e.data?.name}</MenuItem>)
-                )}
+                {staffs.map((e) => (
+                  <MenuItem value={e.data.sid}>{e.data?.name}</MenuItem>
+                ))}
               </Select>
             </>
           ) : k.includes('date') ? (
@@ -258,11 +303,7 @@ const CreateCustomerModal = ({
             />
           )
         )}
-        <Button
-          type={'submit'}
-          variant={'contained'}
-          sx={{ width: '100%', maxWidth: '280px', margin: '12px auto' }}
-        >
+        <Button type={'submit'} variant={'contained'} sx={{ width: '100%', margin: 'auto' }}>
           Submit
         </Button>
       </form>
