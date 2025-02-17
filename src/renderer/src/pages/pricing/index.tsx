@@ -11,6 +11,7 @@ import { encryptData } from '@renderer/utils/crypto'
 import moment from 'moment'
 import { useNavigate } from 'react-router-dom'
 import { addTransaction, setAdminSubscription } from '@renderer/firebase'
+import { SERVER_URL } from '@renderer/constants/value'
 
 const Pricing = () => {
   const { Razorpay } = useRazorpay()
@@ -24,10 +25,7 @@ const Pricing = () => {
       const string = String(JSON.stringify(price))
       const enc = encryptData(string)
 
-      const order = await axios.post(
-        'http://localhost:3000/api/payments/create',
-        JSON.stringify({ data: enc })
-      )
+      const order = await axios.post(`${SERVER_URL}/payments/create`, JSON.stringify({ data: enc }))
 
       if (order.status >= 200 && order.status <= 300) {
         const options: RazorpayOrderOptions = {

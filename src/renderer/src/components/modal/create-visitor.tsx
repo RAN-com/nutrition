@@ -1,4 +1,13 @@
-import { Backdrop, Button, Dialog, MenuItem, Select } from '@mui/material'
+import {
+  Button,
+  Dialog,
+  FormControlLabel,
+  MenuItem,
+  Modal,
+  Radio,
+  RadioGroup,
+  Select
+} from '@mui/material'
 import CustomTypography from '../typography'
 import { useFormik } from 'formik'
 import CustomTextInput from '../text-input'
@@ -28,7 +37,10 @@ const validationSchema = Yup.object({
   phone: Yup.string()
     .required('Phone number is required')
     .matches(/^[0-9]{10}$/, 'Phone number must be exactly 10 digits'),
-  assigned_staff: Yup.string().required('Assign a staff'),
+  assigned_staff: Yup.object({
+    sid: Yup.string().required(),
+    name: Yup.string().required()
+  }).required('Assign a staff'),
   address: Yup.string()
     .required('Address is required')
     .min(10, 'Address must be at least 10 characters long'),
@@ -65,7 +77,7 @@ const AddVisitorModal = ({
       email: edit?.data?.email ?? '',
       gender: edit?.data?.gender ?? '',
       phone: edit?.data?.phone ?? '',
-      assigned_staff: edit?.data?.assigned_staff?.sid ?? '',
+      assigned_staff: edit?.data?.assigned_staff ?? undefined,
       address: edit?.data?.address ?? '',
       date_of_birth: edit?.data?.date_of_birth ?? '',
       medical_issues: edit?.data?.medical_issues ?? '',
@@ -85,9 +97,8 @@ const AddVisitorModal = ({
             ...edit?.data,
             ...formik.values,
             assigned_staff: {
-              sid: formik.values.assigned_staff,
-              name: staffs.filter((e) => e.data.sid === formik.values.assigned_staff)[0]?.data
-                ?.name as string
+              name: formik.values.assigned_staff?.name as string,
+              sid: formik.values.assigned_staff?.sid as string
             }
           })
             .then(() => {
@@ -107,8 +118,8 @@ const AddVisitorModal = ({
             created_on: new Date().toISOString(),
             ...formik.values,
             assigned_staff: {
-              name: formik.values.assigned_staff,
-              sid: formik.values.assigned_staff
+              name: formik.values.assigned_staff?.name as string,
+              sid: formik.values.assigned_staff?.sid as string
             }
           })
             .then(() => {
@@ -171,32 +182,58 @@ const AddVisitorModal = ({
         }
       }}
     >
-      <Backdrop open={loading} sx={{ position: 'fixed', zIndex: 100000000 }} />
+      <Modal open={loading} onClose={() => {}}>
+        <div />
+      </Modal>
       <form onSubmit={formik.handleSubmit}>
         <div className="header">
           <CustomTypography variant={'h6'}>Add New Visitor</CustomTypography>
           <CustomIcon name={'LUCIDE_ICONS'} onClick={onClose} icon={'LuX'} color={grey['700']} />
         </div>
         {keys.map((k, idx) =>
-          k.includes('gender') || k.includes('assigned_staff') ? (
+          k.includes('gender') ? (
             <>
               <CustomTypography marginTop={'12px'} color={grey['500']}>
-                {k !== 'gender' ? 'Assign Staff' : 'gender'}
+                {k !== 'gender' ? 'Assign Staff' : k}
+              </CustomTypography>
+              <RadioGroup
+                aria-labelledby="demo-radio-buttons-group-label"
+                defaultValue="female"
+                name="radio-buttons-group"
+                onChange={(e) => formik.setFieldValue(k, e.target.value)}
+              >
+                <FormControlLabel value="female" control={<Radio />} label="Female" />
+                <FormControlLabel value="male" control={<Radio />} label="Male" />
+                <FormControlLabel value="others" control={<Radio />} label="Other" />
+              </RadioGroup>
+            </>
+          ) : k.includes('assigned_staff') ? (
+            <>
+              <CustomTypography marginTop={'12px'} color={grey['500']}>
+                Assign Staff
               </CustomTypography>
               <Select
-                value={k === 'gender' ? formik.values.gender : formik.values.assigned_staff}
-                onChange={(e) => formik.setFieldValue(k, e.target.value)}
-                sx={{ marginTop: '12px', width: '100%' }}
+                value={formik.values.assigned_staff?.sid ?? ''}
+                onChange={(e) => {
+                  const staff = staffs.filter((s) => s.data?.sid === e.target.value)[0]
+                  if (!staff) {
+                    alert('Refresh and Try Again')
+                    return
+                  }
+                  console.log(staff)
+                  formik.setFieldValue('assigned_staff', {
+                    name: staff.data.name,
+                    sid: staff.data.sid
+                  })
+                }}
+                sx={{
+                  marginTop: '12px',
+                  width: '100%'
+                }}
               >
-                {k === 'gender' ? (
-                  <>
-                    <MenuItem value={'male'}>Male</MenuItem>
-                    <MenuItem value={'female'}>Female</MenuItem>
-                    <MenuItem value={'others'}>Others</MenuItem>
-                  </>
-                ) : (
-                  staffs.map((e) => <MenuItem value={e.data.sid}>{e.data?.name}</MenuItem>)
-                )}
+                {staffs.map((e) => (
+                  <MenuItem value={e.data.sid}>{e.data?.name}</MenuItem>
+                ))}
               </Select>
             </>
           ) : k.includes('date') ? (
