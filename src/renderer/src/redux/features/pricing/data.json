@@ -1,0 +1,72 @@
+[
+  {
+    "title": "Basic Appointment Package",
+    "price": 50,
+    "type": "appointments",
+    "priceId": "basic_appointment_01",
+    "features": [
+      "Includes 1 consultation session",
+      "Priority scheduling",
+      "Access to digital health records"
+    ]
+  },
+  {
+    "title": "Standard Appointment Package",
+    "price": 120,
+    "type": "appointments",
+    "priceId": "standard_appointment_02",
+    "features": [
+      "Includes 3 consultation sessions",
+      "Flexible scheduling options",
+      "Access to health reports"
+    ]
+  },
+  {
+    "title": "Premium Appointment Package",
+    "price": 200,
+    "type": "appointments",
+    "priceId": "premium_appointment_03",
+    "features": [
+      "Includes 5 consultation sessions",
+      "Dedicated health advisor",
+      "Extended support for follow-ups"
+    ]
+  },
+  {
+    "title": "Basic Subscription Plan",
+    "price": 300,
+    "type": "subscription",
+    "validity": "3_month",
+    "priceId": "basic_subscription_03",
+    "features": [
+      "Unlimited appointments for 3 months",
+      "Basic health tracking",
+      "Standard customer support"
+    ]
+  },
+  {
+    "title": "Standard Subscription Plan",
+    "price": 600,
+    "type": "subscription",
+    "validity": "6_months",
+    "priceId": "standard_subscription_06",
+    "features": [
+      "Unlimited appointments for 6 months",
+      "Advanced health analytics",
+      "Priority customer support"
+    ]
+  },
+  {
+    "title": "Premium Subscription Plan",
+    "price": 1200,
+    "type": "subscription",
+    "validity": "1_year",
+    "priceId": "premium_subscription_12",
+    "features": [
+      "Unlimited appointments for 1 year",
+      "Comprehensive health analytics",
+      "Dedicated support and personalized guidance",
+      "Access to exclusive workshops and resources"
+    ]
+  }
+]

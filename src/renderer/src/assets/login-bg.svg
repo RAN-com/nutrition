@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1920px" height="1010px" viewBox="0 0 1920 1010" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 54.1 (76490) - https://sketchapp.com -->
+    <defs>
+        <linearGradient x1="61.9711326%" y1="71.7347649%" x2="33.6185375%" y2="35.1063083%" id="linearGradient-1">
+            <stop stop-color="#0F1018" offset="0%"></stop>
+            <stop stop-color="#0F1018" offset="49.1985921%"></stop>
+            <stop stop-color="#15182F" offset="100%"></stop>
+        </linearGradient>
+        <rect id="path-2" x="0" y="0" width="1920" height="1010"></rect>
+        <linearGradient x1="61.9711326%" y1="90.8012844%" x2="33.6185375%" y2="22.0410248%" id="linearGradient-4">
+            <stop stop-color="#0F1018" stop-opacity="0" offset="0%"></stop>
+            <stop stop-color="#282B40" offset="100%"></stop>
+        </linearGradient>
+        <linearGradient x1="61.9711326%" y1="94.7228787%" x2="33.6185375%" y2="19.3537624%" id="linearGradient-5">
+            <stop stop-color="#0F1018" stop-opacity="0" offset="0%"></stop>
+            <stop stop-color="#282B40" offset="100%"></stop>
+        </linearGradient>
+    </defs>
+    <g id="layout" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="about-aurum" transform="translate(0.000000, -2652.000000)">
+            <g id="bg-02" transform="translate(-73.000000, 2652.000000)">
+                <g id="Group-4" transform="translate(73.000000, 0.000000)">
+                    <mask id="mask-3" fill="white">
+                        <use xlink:href="#path-2"></use>
+                    </mask>
+                    <use id="Mask" fill="url(#linearGradient-1)" fill-rule="nonzero" xlink:href="#path-2"></use>
+                </g>
+                <rect id="bg_form_right" fill="url(#linearGradient-4)" fill-rule="nonzero" opacity="0.750516189" x="1208" y="90" width="863" height="622" rx="39"></rect>
+                <rect id="bg_form_left" fill="url(#linearGradient-5)" fill-rule="nonzero" opacity="0.547419097" x="0" y="410" width="709" height="535" rx="39"></rect>
+            </g>
+        </g>
+    </g>
+</svg>
