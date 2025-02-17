@@ -1,4 +1,4 @@
-import { Backdrop, Button, Dialog, MenuItem, Select } from '@mui/material'
+import { Backdrop, Button, Dialog, FormControlLabel, Radio, RadioGroup } from '@mui/material'
 import CustomTypography from '../typography'
 import { useFormik } from 'formik'
 import CustomTextInput from '../text-input'
@@ -10,13 +10,13 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { grey } from '@mui/material/colors'
 import { DatePicker } from '@mui/x-date-pickers'
 import * as Yup from 'yup'
-import React from 'react'
 import CustomIcon from '../icons'
 import { deleteFile, uploadFiles } from '@renderer/lib/upload-img'
 import { useAppSelector, useAppDispatch } from '@renderer/redux/store/hook'
 import { StaffData } from '@renderer/types/staff'
 import { addStaff, updateStaff } from '@renderer/firebase/staffs'
 import { asyncGetStaffs } from '@renderer/redux/features/user/staff'
+import React from 'react'
 
 const validationSchema = Yup.object({
   name: Yup.string().required('Name is required'),
@@ -148,15 +148,16 @@ const CreateStaffModal = ({
               <CustomTypography marginTop={'12px'} color={grey['500']}>
                 Gender
               </CustomTypography>
-              <Select
-                value={formik.values.gender}
-                onChange={(e) => formik.setFieldValue('gender', e.target.value)}
-                sx={{ marginTop: '12px', width: '100%' }}
+              <RadioGroup
+                aria-labelledby="demo-radio-buttons-group-label"
+                defaultValue="female"
+                name="radio-buttons-group"
+                onChange={(e) => formik.setFieldValue(k, e.target.value)}
               >
-                <MenuItem value={'male'}>Male</MenuItem>
-                <MenuItem value={'female'}>Female</MenuItem>
-                <MenuItem value={'others'}>Others</MenuItem>
-              </Select>
+                <FormControlLabel value="female" control={<Radio />} label="Female" />
+                <FormControlLabel value="male" control={<Radio />} label="Male" />
+                <FormControlLabel value="others" control={<Radio />} label="Other" />
+              </RadioGroup>
             </>
           ) : k.includes('date') ? (
             <LocalizationProvider key={'date'} dateAdapter={AdapterMoment}>
