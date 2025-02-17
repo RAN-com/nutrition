@@ -6,20 +6,29 @@ import icon from '../../resources/icon.png?asset'
 
 function createWindow({ width, height }: { width: number; height: number }): void {
   const mainWindow = new BrowserWindow({
-    width: width - 120,
-    height: height - 40,
-    show: true,
+    width,
+    height,
     resizable: false,
-    minimizable: true,
     maximizable: true,
-    minWidth: width - 120,
-    minHeight: height - 40,
-    backgroundMaterial: 'auto',
+    minimizable: true,
+    minHeight: height,
+    minWidth: width,
     autoHideMenuBar: true,
+    backgroundMaterial: 'mica',
+    darkTheme: false,
+    focusable: true,
+    fullscreen: false,
+    fullscreenable: true,
+    simpleFullscreen: true,
+    movable: true,
+    roundedCorners: true,
+    title: 'Herbal Life',
+    show: true,
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
-      sandbox: false
+      sandbox: false,
+      devTools: is.dev
     }
   })
 
@@ -89,7 +98,7 @@ function createWindow({ width, height }: { width: number; height: number }): voi
 
 app.whenReady().then(() => {
   const display = screen.getPrimaryDisplay()
-  const { height, width } = display.workArea
+  const { height, width } = display.workAreaSize
   electronApp.setAppUserModelId('com.electron')
 
   app.on('browser-window-created', (_, window) => {

@@ -1,4 +1,4 @@
-import { Paper, styled } from '@mui/material'
+import { Modal, Paper, styled } from '@mui/material'
 import Logo from '@renderer/assets/logo.png'
 import * as yup from 'yup'
 import { useFormik } from 'formik'
@@ -22,9 +22,8 @@ const validationSchema = yup.object({
 })
 
 const AuthLogin = () => {
-  const user = useAppSelector((s) => s.auth.user)
+  const { user, login_loading } = useAppSelector((s) => s.auth)
   const navigate = useNavigate()
-
   const dispatch = useAppDispatch()
 
   const formik = useFormik({
@@ -48,6 +47,9 @@ const AuthLogin = () => {
 
   return (
     <Container>
+      <Modal open={login_loading} onClose={() => {}}>
+        <div></div>
+      </Modal>
       <Paper elevation={2}>
         <LogoContainer>
           <img src={Logo} />
