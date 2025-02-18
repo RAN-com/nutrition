@@ -14,34 +14,37 @@ const commonOptions: ToastOptions = {
 }
 
 // Success Toast
-export const successToast = (message: string, id?: string): string => {
+export const successToast = (message: string, id?: string, options?: ToastOptions): string => {
   if (id) {
     toast.dismiss(id) // Dismiss specific toast by id
   }
   return toast.success(message, {
     ...commonOptions,
+    ...options,
     icon: '✅' // Optional: add custom icons for different types
   })
 }
 
 // Error Toast
-export const errorToast = (message: string, id?: string): string => {
+export const errorToast = (message: string, id?: string, options?: ToastOptions): string => {
   if (id) {
     toast.dismiss(id)
   }
   return toast.error(message, {
     ...commonOptions,
+    ...options,
     icon: '❌'
   })
 }
 
 // Warning Toast
-export const warningToast = (message: string, id?: string): string => {
+export const warningToast = (message: string, id?: string, options?: ToastOptions): string => {
   if (id) {
     toast.dismiss(id)
   }
   return toast(message, {
     ...commonOptions,
+    ...options,
     icon: '⚠️',
     style: {
       ...commonOptions.style,
@@ -51,12 +54,13 @@ export const warningToast = (message: string, id?: string): string => {
 }
 
 // Info Toast
-export const infoToast = (message: string, id?: string): string => {
+export const infoToast = (message: string, id?: string, options?: ToastOptions): string => {
   if (id) {
     toast.dismiss(id)
   }
   return toast(message, {
     ...commonOptions,
+    ...options,
     icon: 'ℹ️',
     style: {
       ...commonOptions.style,
@@ -66,9 +70,9 @@ export const infoToast = (message: string, id?: string): string => {
 }
 
 // Default Toast
-export const defaultToast = (message: string, id?: string): string => {
+export const defaultToast = (message: string, id?: string, options?: ToastOptions): string => {
   if (id) {
     toast.dismiss(id)
   }
-  return toast(message, commonOptions) // Basic toast with common options
+  return toast(message, { ...commonOptions, ...options }) // Basic toast with common options
 }

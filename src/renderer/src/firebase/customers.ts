@@ -335,9 +335,13 @@ export const addAttendance = async ({
       subscription: AttendanceSubscription[]
     }
 
-    const updatedRecords = data.records ? [...data.records, attendanceData] : [attendanceData]
+    const updatedRecords = data?.records ? [...data.records, attendanceData] : [attendanceData]
 
-    await updateDoc(docRef, { records: updatedRecords })
+    if (!data?.records) {
+      await setDoc(docRef, { records: updatedRecords })
+    } else {
+      await updateDoc(docRef, { records: updatedRecords })
+    }
 
     successToast('Attendance record added successfully for the user')
   } catch (error) {

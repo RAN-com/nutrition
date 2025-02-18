@@ -47,6 +47,15 @@ function createWindow({ width, height }: { width: number; height: number }): voi
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
   }
 
+  ipcMain.on('updateResponse', (_event, message) => {
+    console.log('Response from Renderer:', message)
+    // You can take some action based on the response from the renderer
+    // For example, trigger the update installation process
+    if (message === 'install_now') {
+      autoUpdater.quitAndInstall()
+      return
+    }
+  })
   // Auto-updater events
   autoUpdater.on('checking-for-update', () => {
     console.log('Checking for updates...')
@@ -55,35 +64,12 @@ function createWindow({ width, height }: { width: number; height: number }): voi
 
   autoUpdater.on('update-available', () => {
     console.log('Update available')
-    dialog.showMessageBox(mainWindow, {
-      type: 'info',
-      title: 'Update Available',
-      message: 'A new version is available. Downloading now...'
-    })
-  })
-
-  autoUpdater.on('update-not-available', () => {
-    console.log('No update available')
-    dialog.showMessageBox(mainWindow, {
-      type: 'info',
-      title: 'No Update Available',
-      message: 'Your application is up-to-date.'
-    })
+    mainWindow.webContents.send('updateAvailable', true)
   })
 
   autoUpdater.on('update-downloaded', () => {
     console.log('Update downloaded')
-    const result = dialog.showMessageBoxSync(mainWindow, {
-      type: 'question',
-      buttons: ['Install and Restart', 'Later'],
-      defaultId: 0,
-      title: 'Update Ready',
-      message: 'An update has been downloaded. Would you like to install it now?'
-    })
-
-    if (result === 0) {
-      autoUpdater.quitAndInstall()
-    }
+    mainWindow.webContents.send('updateDownloaded', true)
   })
 
   autoUpdater.on('error', (error) => {

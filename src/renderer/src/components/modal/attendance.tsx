@@ -1,4 +1,4 @@
-import { Backdrop, Button, ButtonGroup, Dialog } from '@mui/material'
+import { Backdrop, Button, Dialog, FormControlLabel, Radio, RadioGroup } from '@mui/material'
 import { CustomerAttendance } from '@renderer/types/customers'
 import { useFormik } from 'formik'
 import React from 'react'
@@ -212,32 +212,19 @@ const MarkAttendance = ({ open, onClose, edit }: Props) => {
             }
           }}
         />
-        <ButtonGroup
+        <RadioGroup
           sx={{
-            width: '100%',
-            padding: '18px 0px',
-            boxShadow: 'none',
-            '.MuiButton-root': {
-              width: '100%'
-            }
+            paddingBottom: '12px'
           }}
-          variant="contained"
+          row={true}
+          aria-labelledby="demo-radio-buttons-group-label"
+          name="radio-buttons-group"
+          onChange={(e) => formik.setFieldValue('mark_status', e.target.value === 'present')}
         >
-          <Button
-            color="error"
-            disabled={!formik.values.mark_status}
-            onClick={() => formik.setFieldValue('mark_status', false)}
-          >
-            Absent
-          </Button>
-          <Button
-            color="primary"
-            disabled={formik.values.mark_status}
-            onClick={() => formik.setFieldValue('mark_status', true)}
-          >
-            Present
-          </Button>
-        </ButtonGroup>
+          <FormControlLabel value="absent" control={<Radio />} label="Absent" />
+          <FormControlLabel value="present" control={<Radio />} label="Present" />
+        </RadioGroup>
+
         <Button
           type={'submit'}
           sx={{ width: '100%', maxWidth: '240px', margin: 'auto' }}

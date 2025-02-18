@@ -1,4 +1,4 @@
-import { Backdrop, Button, Dialog, FormControlLabel, Radio, RadioGroup } from '@mui/material'
+import { Button, Dialog, FormControlLabel, Modal, Radio, RadioGroup } from '@mui/material'
 import CustomTypography from '../typography'
 import { useFormik } from 'formik'
 import CustomTextInput from '../text-input'
@@ -125,7 +125,7 @@ const CreateStaffModal = ({
       sx={{
         '.MuiPaper-root': {
           width: 'calc(100% - 24px)',
-          maxHeight: 'calc(100% - 24px)',
+          maxHeight: 'calc(100vh / 1.5)',
           maxWidth: '420px',
           padding: '12px 18px'
         },
@@ -136,7 +136,9 @@ const CreateStaffModal = ({
         }
       }}
     >
-      <Backdrop open={loading} sx={{ position: 'fixed', zIndex: 100000000 }} />
+      <Modal open={loading}>
+        <div></div>
+      </Modal>
       <form onSubmit={formik.handleSubmit}>
         <div className="header">
           <CustomTypography variant={'h6'}>Add New Staff</CustomTypography>
