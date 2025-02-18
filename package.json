@@ -1,6 +1,6 @@
 {
   "name": "herbal-life",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "The Herbalife Dashboard is a powerful and intuitive platform designed to provide Herbalife members with easy access to vital business and health data",
   "main": "./out/main/index.js",
   "author": "example.com",
