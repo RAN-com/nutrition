@@ -4,7 +4,6 @@ import CustomIcon from '@renderer/components/icons'
 import CustomTypography from '@renderer/components/typography'
 
 import { useNavigate } from 'react-router-dom'
-// import { SERVER_DOMAIN } from '../../../constants/value';
 
 // const validationSchema = Yup.object({
 //   domain: Yup.string()
@@ -93,7 +92,7 @@ const AboutHeader = () => {
       // end={
       //   staff?.data.assigned_subdomain ? (
       //     <Link
-      //       to={`http://${staff?.data?.assigned_subdomain}.${SERVER_DOMAIN}`}
+      //       to={`http://${staff?.data?.assigned_subdomain}.localhost:3000`}
       //       target="_blank"
       //       rel={'noreferrer'}
       //     >
@@ -105,7 +104,7 @@ const AboutHeader = () => {
       //         disableRipple
       //         disableTouchRipple
       //         // onClick={() => {
-      //         //   const link = `${staff?.data?.assigned_subdomain}.${SERVER_DOMAIN}`
+      //         //   const link = `${staff?.data?.assigned_subdomain}.localhost:3000`
       //         //   window.open(link, '_about')
       //         // }}
       //       >

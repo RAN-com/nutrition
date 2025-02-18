@@ -1,6 +1,5 @@
 import { Button } from '@mui/material'
 import CustomTypography from '@renderer/components/typography'
-import { SERVER_DOMAIN } from '@renderer/constants/value'
 import { addTransaction } from '@renderer/firebase'
 import { updateCardValidity } from '@renderer/firebase/card'
 import { useAppSelector } from '@renderer/redux/store/hook'
@@ -24,7 +23,7 @@ const PurchaseSubscription = ({ handleFunc }: Props) => {
     }
     try {
       const order = await axios.post(
-        `${SERVER_DOMAIN}/payment`,
+        'http://localhost:3000/api/payment',
         JSON.stringify({
           data: 'encrypted-data',
           type: 'APPOINTMENT_CARD'
