@@ -11,7 +11,6 @@ if (process.contextIsolated) {
   try {
     contextBridge.exposeInMainWorld('electron', electronAPI)
     contextBridge.exposeInMainWorld('api', api)
-    contextBridge.exposeInMainWorld('process', process)
   } catch (error) {
     console.error(error)
   }
@@ -21,5 +20,4 @@ if (process.contextIsolated) {
   // @ts-ignore (define in dts)
   window.api = api
   // @ts-ignore (define in dts)
-  window.process = process
 }
