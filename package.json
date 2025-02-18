@@ -21,7 +21,7 @@
     "build:linux": "electron-vite build && electron-builder --linux --publish always"
   },
   "build": {
-    "appId": "com.herballife.electronapp",
+    "appId": "com.ran.herballife",
     "productName": "Herbal Life",
     "files": [
       "./out/**/*",
@@ -61,7 +61,7 @@
     "@editorjs/nested-list": "^1.4.3",
     "@editorjs/paragraph": "^2.11.7",
     "@electron-toolkit/preload": "^3.0.1",
-    "@electron-toolkit/utils": "^3.0.0",
+    "@electron-toolkit/utils": "^4.0.0",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
     "@mui/material": "^6.4.4",

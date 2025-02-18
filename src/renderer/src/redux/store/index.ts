@@ -46,7 +46,7 @@ const persistedReducer = persistReducer(persistConfig, appReducer)
 // Configure the store with proper typing
 export const store = configureStore({
   reducer: persistedReducer,
-  devTools: process.env.NODE_ENV !== 'production',
+  devTools: import.meta.env.NODE_ENV !== 'production',
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {

@@ -41,7 +41,6 @@ function createWindow({ width, height }: { width: number; height: number }): voi
     return { action: 'deny' }
   })
 
-  console.log(is.dev, process.env['ELECTRON_RENDERER_URL'])
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
     mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
   } else {
@@ -99,7 +98,7 @@ function createWindow({ width, height }: { width: number; height: number }): voi
 app.whenReady().then(() => {
   const display = screen.getPrimaryDisplay()
   const { height, width } = display.workAreaSize
-  electronApp.setAppUserModelId('com.electron')
+  electronApp.setAppUserModelId('com.ran.herballife')
 
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)
