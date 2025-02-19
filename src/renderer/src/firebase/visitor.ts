@@ -15,6 +15,7 @@ import { VisitorData, VisitorCreate } from '../types/visitor'
 import { errorToast, successToast } from '@renderer/utils/toast'
 import { encryptData } from '@renderer/utils/crypto'
 import { updateStaffCount } from './staffs'
+import { getCustomer } from './customers'
 
 export const getVisitor = async (uid: string, vid: string) => {
   try {
@@ -255,6 +256,13 @@ export const convertVisitorToCustomer = async (uid: string, vid: string) => {
     const visitorData = visitorDocSnap.data() as VisitorData
 
     const { data } = visitorData
+
+    const checkExistingCid = encryptData(data.email) as string
+    const check = await getCustomer(uid, checkExistingCid)
+    if (check) {
+      errorToast(`Customer with the visitor email exists...`)
+      return
+    }
 
     // Add the visitor data to the customers collection
     const customersRef = collection(firestore, `users/${uid}/customers`)

@@ -11,6 +11,7 @@ import { encryptData } from '@renderer/utils/crypto'
 import moment from 'moment'
 import { useNavigate } from 'react-router-dom'
 import { addTransaction, setAdminSubscription } from '@renderer/firebase'
+import { SERVER_DOMAIN } from '@renderer/constants/value'
 
 const Pricing = () => {
   const { Razorpay } = useRazorpay()
@@ -25,7 +26,7 @@ const Pricing = () => {
       const enc = encryptData(string)
 
       const order = await axios.post(
-        'http://localhost:3000/api/payments/create',
+        `${SERVER_DOMAIN}/api/payments/create`,
         JSON.stringify({ data: enc })
       )
 

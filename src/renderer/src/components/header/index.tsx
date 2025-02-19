@@ -134,15 +134,27 @@ const Header = ({ toggleSidebar, showToggle }: Props) => {
             }
           />
         </Tooltip>
-        <CustomIcon name="MATERIAL_DESIGN" icon={'MdNotificationsNone'} color={grey['600']} />
-        <CustomIcon
-          name="BOX_ICONS"
-          icon={'BiUser'}
-          color={grey['600']}
-          onClick={(e) => {
-            setAnchorEl(e.currentTarget)
-          }}
-        />
+        {!user?.photo_url ? (
+          <img
+            src={'https://picsum.photos/200/200'}
+            alt={user?.name}
+            style={{
+              width: '32px',
+              height: '32px',
+              borderRadius: '100px',
+              cursor: 'pointer'
+            }}
+          />
+        ) : (
+          <CustomIcon
+            name="BOX_ICONS"
+            icon={'BiUser'}
+            color={grey['600']}
+            onClick={(e) => {
+              setAnchorEl(e.currentTarget)
+            }}
+          />
+        )}
         <Menu
           open={!!anchorEl}
           anchorEl={anchorEl}

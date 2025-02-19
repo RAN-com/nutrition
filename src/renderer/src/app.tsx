@@ -2,6 +2,7 @@ import Navigation from './navigation'
 import React from 'react'
 import { infoToast } from './utils/toast'
 import RestartModal from './components/modal/restart'
+import { encryptData } from './utils/crypto'
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const App = () => {
@@ -16,6 +17,7 @@ const App = () => {
     window.electron?.ipcRenderer.on('updateDownloaded', () => {
       setUpdateDownloaded(true)
     })
+    console.log(encryptData('eben@gmail.com'))
   }, [])
 
   return (
