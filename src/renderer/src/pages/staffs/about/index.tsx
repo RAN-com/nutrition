@@ -1,4 +1,12 @@
-import { Avatar, Button, debounce, Divider, keyframes, styled } from '@mui/material'
+import {
+  Avatar,
+  Button,
+  CircularProgress,
+  debounce,
+  Divider,
+  keyframes,
+  styled
+} from '@mui/material'
 import AboutHeader from './header'
 import { grey } from '@mui/material/colors'
 import { useAppSelector, useAppDispatch } from '@renderer/redux/store/hook'
@@ -16,6 +24,7 @@ import { AllIcons, Icons } from '@renderer/types/icon'
 import AppointmentsCard from './appointment-card'
 import { asyncGetCurrentStaffDomainData } from '@renderer/redux/features/user/staff'
 import AvailableSoon from '@renderer/components/modal/available-soon'
+import PurchaseSubscription from './purchase-subscription'
 
 // Define the keyframe for the rotating animation
 const rotate = keyframes`
@@ -35,17 +44,19 @@ const AboutStaff = () => {
   const user = useAppSelector((s) => s.auth.user)
   // const current_staff_domain = useAppSelector((s) => s.staffs.current_staff_domain)
   const staff = useAppSelector((s) => s.staffs.current_staff)
+  const domain_loading = useAppSelector((s) => s.staffs.staffs_loading)
+
   const dispatch = useAppDispatch()
   const [loading, setLoading] = React.useState(false)
   const [refresh, setRefresh] = React.useState(false)
 
   const pullData = () => {
     if (user && staff) {
+      dispatch(
+        asyncGetCurrentStaffDomainData({ domain: staff?.data?.assigned_subdomain as string })
+      )
       setLoading(true)
       debounce(() => {
-        dispatch(
-          asyncGetCurrentStaffDomainData({ domain: staff?.data?.assigned_subdomain as string })
-        )
         Promise.all([
           getAllAppointments(user?.uid, (staff?.data.assigned_subdomain as string) ?? ''),
           staffAssignedCustomers(user?.uid, staff.data?.sid),
@@ -98,6 +109,7 @@ const AboutStaff = () => {
 
   const [open, setOpen] = React.useState(false)
   const [showAvailable, setShowAvailable] = React.useState(false)
+  const current_staff_domain = useAppSelector((s) => s.staffs.current_staff_domain)
 
   return (
     <>
@@ -126,59 +138,53 @@ const AboutStaff = () => {
               +91-{data?.data?.phone}
             </CustomTypography>
             <AvailableSoon open={showAvailable} onClose={() => setShowAvailable(false)} />
-
-            <Button
-              // disabled={true}
-              disableElevation={true}
-              disableRipple={true}
-              variant={'contained'}
-              onClick={() => setShowAvailable(true)}
-              sx={{
-                marginTop: 12
-              }}
-            >
-              Create Appointment Card
-            </Button>
-            {/* {!current_staff_domain?.subscription ? (
-              <PurchaseSubscription handleFunc={() => setRefresh(true)} />
+            {domain_loading ? (
+              <CircularProgress variant="indeterminate" size={24} />
             ) : (
-              <Button
-                focusRipple={false}
-                variant={'contained'}
-                sx={{ margin: '8px 0px 4px 0px' }}
-                disableTouchRipple={true}
-                disableElevation={true}
-                onClick={() => {
-                  if (!current_staff_domain?.subscription) {
-                    alert('Buy Subscription')
-                  } else {
-                    setOpen(true)
-                  }
-                }}
-                size={'large'}
-                disabled={!staff?.data?.assigned_subdomain}
-                startIcon={
-                  <CustomIcon name={'LUCIDE_ICONS'} icon="LuExternalLink" color="white" size={18} />
-                }
-              >
-                <CustomTypography variant="body2" lineHeight={'1'}>
-                  {!current_staff_domain?.subscription ? 'Buy Subscription' : 'User Card'}
-                </CustomTypography>
-              </Button>
-            )} */}
-            {/* {!current_staff_domain?.subscription && (
               <>
-                <CustomTypography
-                  fontSize={'0.7rem'}
-                  marginBottom={'12px'}
-                  textAlign={'center'}
-                  maxWidth={'250px'}
-                  color={grey['400']}
-                >
-                  Assign domain so that you can able to create card for {staff?.data?.name}
-                </CustomTypography>
+                {!current_staff_domain?.subscription ? (
+                  <PurchaseSubscription handleFunc={() => setRefresh(true)} />
+                ) : (
+                  <Button
+                    focusRipple={false}
+                    variant={'contained'}
+                    sx={{ margin: '8px 0px 4px 0px' }}
+                    disableTouchRipple={true}
+                    disableElevation={true}
+                    onClick={() => {
+                      setOpen(true)
+                    }}
+                    size={'large'}
+                    // disabled={!staff?.data?.assigned_subdomain}
+                    startIcon={
+                      <CustomIcon
+                        name={'LUCIDE_ICONS'}
+                        icon="LuExternalLink"
+                        color="white"
+                        size={18}
+                      />
+                    }
+                  >
+                    <CustomTypography variant="body2" lineHeight={'1'}>
+                      {!current_staff_domain?.subscription ? 'Buy Subscription' : 'Customize Card'}
+                    </CustomTypography>
+                  </Button>
+                )}
+                {!current_staff_domain?.subscription && (
+                  <>
+                    <CustomTypography
+                      fontSize={'0.7rem'}
+                      marginBottom={'12px'}
+                      textAlign={'center'}
+                      maxWidth={'250px'}
+                      color={grey['400']}
+                    >
+                      Buy subscription to create visiting card for {staff?.data?.name}
+                    </CustomTypography>
+                  </>
+                )}
               </>
-            )} */}
+            )}
             <Divider sx={{ color: 'black', width: '100%', paddingTop: '12px' }} />
             <div
               style={{

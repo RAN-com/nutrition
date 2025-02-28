@@ -113,6 +113,7 @@ const CreateStaffModal = ({
   //   }
   // }, [formik.errors])
 
+  console.log(formik.errors)
   const keys = Object.keys(formik.values)
   return (
     <Dialog
@@ -152,7 +153,6 @@ const CreateStaffModal = ({
               </CustomTypography>
               <RadioGroup
                 aria-labelledby="demo-radio-buttons-group-label"
-                defaultValue="female"
                 name="radio-buttons-group"
                 onChange={(e) => formik.setFieldValue(k, e.target.value)}
               >

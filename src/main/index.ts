@@ -1,4 +1,13 @@
-import { app, shell, BrowserWindow, ipcMain, dialog, screen } from 'electron'
+import {
+  app,
+  shell,
+  BrowserWindow,
+  ipcMain,
+  dialog,
+  screen,
+  clipboard,
+  Notification
+} from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { autoUpdater } from 'electron-updater'
@@ -20,6 +29,7 @@ function createWindow({ width, height }: { width: number; height: number }): voi
     fullscreen: false,
     fullscreenable: true,
     simpleFullscreen: true,
+    frame: false,
     movable: true,
     roundedCorners: true,
     title: 'Herbal Life',
@@ -54,6 +64,16 @@ function createWindow({ width, height }: { width: number; height: number }): voi
     if (message === 'install_now') {
       autoUpdater.quitAndInstall()
       return
+    }
+
+    if (message.includes('copy_text#')) {
+      const txt = message?.split('copy_text#')[1]
+      if (txt && txt.length >= 1) {
+        clipboard.writeText(txt as string)
+        new Notification({
+          title: 'Copied to clipboard'
+        })
+      }
     }
   })
   // Auto-updater events

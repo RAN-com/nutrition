@@ -6,6 +6,7 @@ import { setCurrentNavigation, validateCardDetails } from '@renderer/redux/featu
 import { useAppSelector, useAppDispatch } from '@renderer/redux/store/hook'
 import { CardCreateData } from '@renderer/types/card'
 import { capitalizeSentence } from '@renderer/utils/functions'
+import * as yup from 'yup'
 
 const sections = [
   'personal_details',
@@ -19,6 +20,7 @@ const sections = [
 const AppointmentSidebar = () => {
   const { errors } = useAppSelector((s) => s.card.editor)
   const dispatch = useAppDispatch()
+
   return (
     <Container>
       <CustomTypography variant={'body1'} fontWeight={'bold'} color={'#3d3d3d'}>

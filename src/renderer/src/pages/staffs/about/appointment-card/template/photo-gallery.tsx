@@ -34,10 +34,12 @@ const PhotoGallery = () => {
           value: [...images, ...values.image]
         })
       )
+      formik.setFieldValue('image', [])
       resetForm()
     }
   })
 
+  console.log(formik.values)
   const handleRemoveVideo = (index: number) => {
     const updatedImages = formik.values.image.filter((_, i) => i !== index)
     formik.setFieldValue('image', updatedImages)
@@ -92,8 +94,15 @@ const PhotoGallery = () => {
                 url: file,
                 description: ''
               }))
+
               formik.setFieldValue('image', [...formik.values.image, ...newImages])
-              formik.submitForm()
+              dispatch(
+                setCardDetails({
+                  id: 'photo_gallery',
+                  value: [...images, ...newImages]
+                })
+              )
+              // formik.submitForm()
             }}
             multiple={true}
           />

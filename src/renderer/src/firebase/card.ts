@@ -3,6 +3,7 @@ import { firestore } from '.'
 import { CardCreateData, CardData } from '@renderer/types/card'
 import { errorToast, successToast } from '@renderer/utils/toast'
 import moment from 'moment'
+import { uploadFiles } from '@renderer/lib/upload-img'
 
 export const getCardDetail = async (sid: string) => {
   const cardQuery = doc(firestore, `cards/${sid}`)
@@ -22,13 +23,71 @@ export const getCardDetail = async (sid: string) => {
   }
 }
 
+const uploadMedia = async (sid: string, data: CardCreateData) => {
+  let { photo_gallery, video_gallery, services, ...others } = data
+
+  // Generic function to process and upload media
+  const processGallery = async (gallery?: { url: string | File; description?: string }[]) => {
+    if (!gallery || gallery.length < 1) return gallery ?? []
+
+    const filesToUpload = gallery
+      ?.map((e, idx) => (typeof e.url !== 'string' ? { ...e, idx } : null))
+      ?.filter(Boolean) as { url: File; idx: number }[]
+
+    if (filesToUpload.length > 0) {
+      console.log('Uploading media...')
+      const uploadResponses = await uploadFiles(
+        sid,
+        filesToUpload.map((e) => e.url)
+      )
+
+      uploadResponses.forEach(({ Location }, i) => {
+        const { idx } = filesToUpload[i]
+        gallery[idx] = { url: Location } // Replace with uploaded URL
+      })
+
+      console.log('Upload complete:', uploadResponses)
+    }
+
+    return gallery
+  }
+
+  // Process photo_gallery and video_gallery
+  photo_gallery = (await processGallery(photo_gallery)) ?? []
+  video_gallery = (await processGallery(video_gallery)) ?? []
+
+  // Process services safely
+  services = services ?? [] // Ensure it's an array
+  const servicesToUpload = services
+    ?.map((s, idx) => (typeof s.photo_url !== 'string' ? { ...s, idx } : null))
+    ?.filter(Boolean) as { photo_url: File; idx: number }[]
+
+  if (servicesToUpload.length > 0) {
+    console.log('Uploading service photos...')
+    const uploadResponses = await uploadFiles(
+      sid,
+      servicesToUpload.map((s) => s.photo_url)
+    )
+
+    uploadResponses.forEach(({ Location }, i) => {
+      const { idx } = servicesToUpload[i]
+      services[idx].photo_url = Location // Replace with uploaded URL
+    })
+
+    console.log('Service uploads complete:', uploadResponses)
+  }
+
+  return { ...others, photo_gallery, video_gallery, services }
+}
+
 export const addOrUpdateCardDetails = async (sid: string, data: CardCreateData) => {
   const cardQuery = doc(firestore, `cards/${sid}`)
   const cardRef = await getDoc(cardQuery)
   if (cardRef.exists()) {
     errorToast('Card Already Exists. Updating the card now')
+    const upload = await uploadMedia(sid, data)
     await updateDoc(cardQuery, {
-      ...data,
+      ...upload,
       aid: sid,
       updatedOn: moment().format('DD-MM-YYYY'),
       createdFor: sid
@@ -39,8 +98,8 @@ export const addOrUpdateCardDetails = async (sid: string, data: CardCreateData) 
       data: cardRef.data()
     }
   } else {
+    const upload = await uploadMedia(sid, data)
     await setDoc(cardQuery, {
-      ...data,
       aid: sid,
       createdFor: sid,
       createdOn: moment().format('DD-MM-YYYY')
@@ -84,22 +143,20 @@ export const updateCardValidity = async (sid: string, valid_till: string) => {
   const cardRef = await getDoc(cardQuery)
 
   if (!cardRef?.exists()) {
-    return {
-      message: 'Create Card First and try again',
-      status: false,
-      data: null
-    }
+    await setDoc(
+      cardQuery,
+      {
+        subscription: {
+          valid_till
+        }
+      },
+      { merge: true }
+    )
+  } else {
+    await updateDoc(cardQuery, {
+      'subscription.valid_till': valid_till
+    })
   }
-
-  await setDoc(
-    cardQuery,
-    {
-      subscription: {
-        valid_till
-      }
-    },
-    { merge: true }
-  )
 
   return {
     data: cardRef?.data(),

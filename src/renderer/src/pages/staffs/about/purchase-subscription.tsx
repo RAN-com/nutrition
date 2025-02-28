@@ -18,10 +18,6 @@ const PurchaseSubscription = ({ handleFunc }: Props) => {
   const current_staff = useAppSelector((s) => s.staffs.current_staff)
 
   const handlePayment = async () => {
-    if (!current_staff?.data?.assigned_subdomain) {
-      errorToast('Assign subdomain first and try again')
-      return
-    }
     try {
       const order = await axios.post(
         `${SERVER_DOMAIN}/api/payment`,
@@ -57,7 +53,7 @@ const PurchaseSubscription = ({ handleFunc }: Props) => {
             try {
               const sub = await updateCardValidity(
                 current_staff?.data?.assigned_subdomain as string,
-                moment().add(3, 'months').format('YYYY-MM-DD')
+                moment().add(12, 'months').format('YYYY-MM-DD')
               )
 
               if (sub?.status) {

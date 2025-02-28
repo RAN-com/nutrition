@@ -4,6 +4,7 @@ import AboutPreview from './about'
 import ServicesPreview from './services'
 import PhotoGalleryPreview from './photo-gallery'
 import VideoGalleryPreview from './video-gallery'
+import ContactPreview from './contact'
 
 const PreviewScreen = () => {
   const current_edit = useAppSelector((s) => s.card.editor.current_navigation)
@@ -14,6 +15,7 @@ const PreviewScreen = () => {
       {current_edit === 'services' && <ServicesPreview />}
       {current_edit === 'photo_gallery' && <PhotoGalleryPreview />}
       {current_edit === 'video_gallery' && <VideoGalleryPreview />}
+      {current_edit === 'contact' && <ContactPreview />}
     </>
   )
 }

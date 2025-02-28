@@ -175,6 +175,7 @@ const HomeTemplate = () => {
           label: 'Center Name',
           size: 'small',
           type: 'text',
+          value: data?.center_name,
           onChange: (e) => {
             dispatch(
               setCardDetails({
@@ -323,7 +324,7 @@ const HomeTemplate = () => {
           )
         }}
       >
-        {data?.displayName?.length !== 0 ? 'Add More Coach' : 'Add Coach Details'}
+        {data?.displayName?.length !== 0 ? 'Add Coach Details' : 'Add Coach Details'}
       </Button>
     </Container>
   )

@@ -19,7 +19,13 @@ const ServiceCard = ({ title, subtitle, photo_url, description, onClick, onDelet
       </CustomTypography>
       <div className="img_container">
         <img
-          src={typeof photo_url === 'string' ? photo_url : URL.createObjectURL(photo_url)}
+          src={
+            photo_url
+              ? typeof photo_url === 'string'
+                ? photo_url
+                : URL.createObjectURL(photo_url)
+              : ''
+          }
           alt={title}
         />{' '}
       </div>

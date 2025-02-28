@@ -12,6 +12,7 @@ type INITIAL_STATE = {
   staffs_loading: boolean
   current_staff: StaffData | null
   current_staff_domain: DomainData | null
+  domain_loading: boolean
 }
 
 const initialState: INITIAL_STATE = {
@@ -20,7 +21,8 @@ const initialState: INITIAL_STATE = {
   staffs_loading: false,
   total_staff_count: 0,
   total_pages: 1,
-  current_staff_domain: null
+  current_staff_domain: null,
+  domain_loading: false
 }
 
 const name = 'staffs'
@@ -35,6 +37,7 @@ export const asyncGetStaffs = createAsyncThunk(
 export const asyncGetCurrentStaffDomainData = createAsyncThunk(
   `${name}/asyncGetCurrentStaffDomainData`,
   async ({ domain }: { domain: string }) => {
+    if (!domain) return null
     return await getDomainData(domain)
   }
 )
@@ -100,6 +103,8 @@ const staffSlice = createSlice({
     builders.addCase(asyncGetCurrentStaffDomainData.fulfilled, (state, action) => {
       if (action.payload) {
         state.current_staff_domain = action.payload
+      } else {
+        state.current_staff_domain = null
       }
       state.staffs_loading = false
     })
