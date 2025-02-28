@@ -1,6 +1,6 @@
 import { Button } from '@mui/material'
 import CustomTypography from '@renderer/components/typography'
-import { SERVER_DOMAIN } from '@renderer/constants/value'
+import { SERVER_URL } from '@renderer/constants/value'
 import { addTransaction } from '@renderer/firebase'
 import { updateCardValidity } from '@renderer/firebase/card'
 import { useAppSelector } from '@renderer/redux/store/hook'
@@ -19,26 +19,30 @@ const PurchaseSubscription = ({ handleFunc }: Props) => {
 
   const handlePayment = async () => {
     try {
-      const order = await axios.post(
-        `${SERVER_DOMAIN}/api/payment`,
-        JSON.stringify({
-          data: 'encrypted-data',
-          type: 'APPOINTMENT_CARD'
-        }),
-        {
-          headers: {
-            'Content-Type': 'application/json'
+      const order = (
+        await axios.post(
+          `${SERVER_URL}/api/payment`,
+          JSON.stringify({
+            data: 'encrypted-data',
+            type: 'APPOINTMENT_CARD'
+          }),
+          {
+            headers: {
+              'Content-Type': 'application/json'
+            }
           }
-        }
-      )
+        )
+      )?.data
 
-      console.log(order)
-
+      const key = import.meta.env.DEV
+        ? import.meta.env.VITE_VERCEL_RAZORPAY_KEY
+        : import.meta.env.VITE_VERCEL_RAZORPAY_LIVE_KEY
+      console.log(order, key)
       if (order.status >= 200 && order.status <= 300) {
         const options: RazorpayOrderOptions = {
           amount: order.data?.amount,
           currency: order?.data?.currency,
-          key: import.meta.env.VITE_VERCEL_RAZORPAY_KEY as string,
+          key: key as string,
           name: 'RAN',
           order_id: order?.data?.id,
           retry: {
@@ -78,7 +82,7 @@ const PurchaseSubscription = ({ handleFunc }: Props) => {
         const razorpayInstance = new Razorpay(options)
         razorpayInstance.open()
       } else {
-        errorToast(order.data as string)
+        errorToast(order?.data as string)
       }
     } catch (err: any) {
       console.log(err)

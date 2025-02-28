@@ -6,7 +6,6 @@ import { setCurrentNavigation, validateCardDetails } from '@renderer/redux/featu
 import { useAppSelector, useAppDispatch } from '@renderer/redux/store/hook'
 import { CardCreateData } from '@renderer/types/card'
 import { capitalizeSentence } from '@renderer/utils/functions'
-import * as yup from 'yup'
 
 const sections = [
   'personal_details',

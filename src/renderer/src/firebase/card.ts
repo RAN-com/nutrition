@@ -24,7 +24,7 @@ export const getCardDetail = async (sid: string) => {
 }
 
 const uploadMedia = async (sid: string, data: CardCreateData) => {
-  let { photo_gallery, video_gallery, services, ...others } = data
+  let { photo_gallery = [], video_gallery = [], services = [], ...others } = data
 
   // Generic function to process and upload media
   const processGallery = async (gallery?: { url: string | File; description?: string }[]) => {
@@ -43,7 +43,9 @@ const uploadMedia = async (sid: string, data: CardCreateData) => {
 
       uploadResponses.forEach(({ Location }, i) => {
         const { idx } = filesToUpload[i]
-        gallery[idx] = { url: Location } // Replace with uploaded URL
+        let g = [...(gallery ?? [])]
+        g[idx] = { url: Location } // Replace with uploaded URL
+        gallery = g
       })
 
       console.log('Upload complete:', uploadResponses)
@@ -53,8 +55,8 @@ const uploadMedia = async (sid: string, data: CardCreateData) => {
   }
 
   // Process photo_gallery and video_gallery
-  photo_gallery = (await processGallery(photo_gallery)) ?? []
-  video_gallery = (await processGallery(video_gallery)) ?? []
+  photo_gallery = (await processGallery(photo_gallery)) || []
+  video_gallery = (await processGallery(video_gallery)) || []
 
   // Process services safely
   services = services ?? [] // Ensure it's an array
@@ -71,7 +73,18 @@ const uploadMedia = async (sid: string, data: CardCreateData) => {
 
     uploadResponses.forEach(({ Location }, i) => {
       const { idx } = servicesToUpload[i]
-      services[idx].photo_url = Location // Replace with uploaded URL
+
+      // Create a shallow copy of services to avoid mutating the original array
+      let g = [...(services ?? [])]
+
+      // Create a new object for the service to avoid mutating a readonly object
+      g[idx] = {
+        ...g[idx], // Spread the existing properties
+        photo_url: Location // Update the photo_url
+      }
+
+      // Update the services array with the modified object
+      services = g
     })
 
     console.log('Service uploads complete:', uploadResponses)
@@ -100,6 +113,7 @@ export const addOrUpdateCardDetails = async (sid: string, data: CardCreateData) 
   } else {
     const upload = await uploadMedia(sid, data)
     await setDoc(cardQuery, {
+      ...upload,
       aid: sid,
       createdFor: sid,
       createdOn: moment().format('DD-MM-YYYY')

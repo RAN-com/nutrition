@@ -25,6 +25,7 @@ import AppointmentsCard from './appointment-card'
 import { asyncGetCurrentStaffDomainData } from '@renderer/redux/features/user/staff'
 import AvailableSoon from '@renderer/components/modal/available-soon'
 import PurchaseSubscription from './purchase-subscription'
+import { asyncInitCardUpdate } from '@renderer/redux/features/user/card'
 
 // Define the keyframe for the rotating animation
 const rotate = keyframes`
@@ -153,6 +154,11 @@ const AboutStaff = () => {
                     disableElevation={true}
                     onClick={() => {
                       setOpen(true)
+                      if (current_staff_domain) {
+                        dispatch(
+                          asyncInitCardUpdate({ sid: current_staff_domain?.staff_id as string })
+                        )
+                      }
                     }}
                     size={'large'}
                     // disabled={!staff?.data?.assigned_subdomain}

@@ -18,8 +18,8 @@ import {
   doc,
   getDoc,
   getDocs,
-  getFirestore,
   setDoc,
+  initializeFirestore,
   updateDoc
 } from 'firebase/firestore'
 import { encryptData } from '@renderer/utils/crypto'
@@ -38,8 +38,9 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig)
 export const auth = getAuth(app)
-export const firestore = getFirestore(app)
-
+export const firestore = initializeFirestore(app, {
+  ignoreUndefinedProperties: true
+})
 export const createUser = async ({
   email,
   password

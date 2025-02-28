@@ -3,8 +3,10 @@ import { grey, red } from '@mui/material/colors'
 import CustomIcon from '@renderer/components/icons'
 import CustomTextInput from '@renderer/components/text-input'
 import CustomTypography from '@renderer/components/typography'
+import { deleteFile } from '@renderer/lib/upload-img'
 import { setCardDetails } from '@renderer/redux/features/user/card'
 import { useAppSelector, useAppDispatch } from '@renderer/redux/store/hook'
+import { infoToast } from '@renderer/utils/toast'
 import { useFormik } from 'formik'
 import * as yup from 'yup'
 
@@ -42,8 +44,13 @@ const VideoGallery = () => {
     }
   })
 
-  const handleRemoveVideo = (index: number) => {
+  const handleRemoveVideo = async (index: number) => {
     const updatedVideos = videos.filter((_, i) => i !== index)
+    const url = videos[index]
+    if (typeof url.url === 'string') {
+      infoToast('Deleting Video')
+      await deleteFile(url.url)
+    }
     dispatch(
       setCardDetails({
         id: 'video_gallery',

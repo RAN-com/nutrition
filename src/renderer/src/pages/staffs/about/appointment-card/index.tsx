@@ -26,7 +26,7 @@ import { blue } from '@mui/material/colors'
 import CustomTextInput from '@renderer/components/text-input'
 import { SERVER_DOMAIN } from '@renderer/constants/value'
 import { addOrUpdateCardDetails } from '@renderer/firebase/card'
-import { successToast } from '@renderer/utils/toast'
+import { errorToast, successToast } from '@renderer/utils/toast'
 
 type Props = {
   open: boolean
@@ -93,7 +93,7 @@ const AppointmentsCard = ({ onClose, open }: Props) => {
   }
 
   const [loading, setLoading] = React.useState(false)
-  const [isAvailable, setIsAvailable] = React.useState(false)
+  const [, setIsAvailable] = React.useState(false)
 
   React.useEffect(() => {
     if (staff?.data && open) {
@@ -312,6 +312,7 @@ const AppointmentsCard = ({ onClose, open }: Props) => {
                     disableFocusRipple
                     disableRipple
                     disableTouchRipple
+                    loading={loading}
                     onClick={async () => {
                       setLoading(true)
                       if (!staff?.data) {
@@ -322,10 +323,12 @@ const AppointmentsCard = ({ onClose, open }: Props) => {
                         staff?.data?.sid,
                         createCard?.data
                       )
-                      console.log(loading, upload)
                       if (upload?.status) {
-                        successToast(upload.message)
+                        successToast('Updated Successfully')
+                      } else {
+                        errorToast('Something went wrong. Try Again later')
                       }
+                      onClose()
                       setLoading(false)
                     }}
                   >
@@ -333,7 +336,7 @@ const AppointmentsCard = ({ onClose, open }: Props) => {
                       color={!assigned_domain ? 'grey' : 'primary'}
                       textTransform={'none'}
                     >
-                      {createCard?.data_type === 'UPDATE' ? 'update' : 'Create asdfasdf'}
+                      {createCard?.data_type === 'UPDATE' ? 'update' : 'Create'}
                     </CustomTypography>
                   </Button>
                 )}

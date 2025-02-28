@@ -228,10 +228,11 @@ const cardSlice = createSlice({
             services,
             video_gallery
           }
-          state.editor.data_type = 'NEW'
+          state.editor.data_type = 'UPDATE'
         }
         errorToast(action.payload.message)
       } else {
+        state.editor.data_type = 'NEW'
         state.editor.data = {
           about: undefined,
           contact: {

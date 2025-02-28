@@ -11,7 +11,7 @@ import { encryptData } from '@renderer/utils/crypto'
 import moment from 'moment'
 import { useNavigate } from 'react-router-dom'
 import { addTransaction, setAdminSubscription } from '@renderer/firebase'
-import { SERVER_DOMAIN } from '@renderer/constants/value'
+import { SERVER_URL } from '@renderer/constants/value'
 
 const Pricing = () => {
   const { Razorpay } = useRazorpay()
@@ -25,16 +25,18 @@ const Pricing = () => {
       const string = String(JSON.stringify(price))
       const enc = encryptData(string)
 
-      const order = await axios.post(
-        `${SERVER_DOMAIN}/api/payments/create`,
-        JSON.stringify({ data: enc })
-      )
+      const order = await axios.post(`${SERVER_URL}/api/payment`, JSON.stringify({ data: enc }))
+
+      const key =
+        import.meta.env.NODE_ENV === 'development'
+          ? import.meta.env.VITE_VERCEL_RAZORPAY_KEY
+          : import.meta.env.VITE_VERCEL_RAZORPAY_LIVE_KEY
 
       if (order.status >= 200 && order.status <= 300) {
         const options: RazorpayOrderOptions = {
           amount: order.data?.amount,
           currency: order?.data?.currency,
-          key: import.meta.env.VITE_VERCEL_RAZORPAY_KEY as string,
+          key: key as string,
           name: 'RAN',
           order_id: order?.data?.id,
           retry: {

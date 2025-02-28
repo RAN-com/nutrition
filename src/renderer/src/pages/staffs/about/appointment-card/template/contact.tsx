@@ -6,7 +6,6 @@ import CustomTypography from '@renderer/components/typography'
 import { setCardDetails } from '@renderer/redux/features/user/card'
 import { useAppDispatch, useAppSelector } from '@renderer/redux/store/hook'
 import { useFormik } from 'formik'
-import React from 'react'
 import * as yup from 'yup'
 
 const validationSchema = yup.object({

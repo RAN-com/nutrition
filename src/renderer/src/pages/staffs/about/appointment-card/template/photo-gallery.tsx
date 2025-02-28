@@ -2,8 +2,10 @@ import { styled } from '@mui/material'
 import { grey, red } from '@mui/material/colors'
 import CustomIcon from '@renderer/components/icons'
 import CustomTypography from '@renderer/components/typography'
+import { deleteFile } from '@renderer/lib/upload-img'
 import { setCardDetails } from '@renderer/redux/features/user/card'
 import { useAppSelector, useAppDispatch } from '@renderer/redux/store/hook'
+import { infoToast } from '@renderer/utils/toast'
 import { useFormik } from 'formik'
 import * as yup from 'yup'
 
@@ -40,8 +42,13 @@ const PhotoGallery = () => {
   })
 
   console.log(formik.values)
-  const handleRemoveVideo = (index: number) => {
+  const handleRemoveVideo = async (index: number) => {
+    const url = formik.values.image[index]?.url
     const updatedImages = formik.values.image.filter((_, i) => i !== index)
+    if (typeof url === 'string') {
+      infoToast('Delete Photo')
+      await deleteFile(url)
+    }
     formik.setFieldValue('image', updatedImages)
     dispatch(
       setCardDetails({

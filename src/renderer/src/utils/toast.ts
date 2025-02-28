@@ -9,7 +9,8 @@ const commonOptions: ToastOptions = {
     borderRadius: '8px',
     background: '#333',
     color: '#fff',
-    zIndex: zIndex.modal * 100
+    position: 'fixed',
+    zIndex: zIndex.modal * zIndex.modal
   }
 }
 

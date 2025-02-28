@@ -4,9 +4,12 @@ import ServiceCard from '@renderer/components/card/services'
 import CustomIcon from '@renderer/components/icons'
 import CustomTextInput from '@renderer/components/text-input'
 import CustomTypography from '@renderer/components/typography'
+import { deleteFile } from '@renderer/lib/upload-img'
 import { setCardDetails } from '@renderer/redux/features/user/card'
 import { useAppSelector, useAppDispatch } from '@renderer/redux/store/hook'
+import { infoToast } from '@renderer/utils/toast'
 import { useFormik } from 'formik'
+import React from 'react'
 import * as yup from 'yup'
 
 const validationSchema = yup.object({
@@ -46,6 +49,9 @@ const ServiceTemplate = () => {
       resetForm()
     }
   })
+
+  const [, setLoading] = React.useState(false)
+
   return (
     <Container>
       <CustomTypography
@@ -185,15 +191,20 @@ const ServiceTemplate = () => {
             <ServiceCard
               {...e}
               key={e.title}
-              onDelete={() => {
+              onDelete={async () => {
+                setLoading(true)
+                if (typeof e.photo_url === 'string') {
+                  infoToast('Deleting Service')
+                  await deleteFile(e.photo_url)
+                }
                 const filter = services.filter((s) => s.title.match(e.title)?.length === 0)
-                console.log(filter)
                 dispatch(
                   setCardDetails({
                     id: 'services',
                     value: filter
                   })
                 )
+                setLoading(false)
               }}
             />
           ))}
