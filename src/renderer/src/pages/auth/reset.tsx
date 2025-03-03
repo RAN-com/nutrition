@@ -60,7 +60,7 @@ export default AuthReset
 
 const Container = styled('div')(({ theme }) => ({
   width: '100%',
-  height: 'calc(var(--vh, 1vh) * 100)',
+  height: 'calc(var(--vh, 1vh) * 100 - 164px)',
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',

@@ -95,7 +95,7 @@ const Pricing = () => {
   }
 
   const isSubscriptionActive = user?.subscription
-    ? moment(user?.subscription?.valid_till).isAfter(moment())
+    ? moment(user?.subscription?.valid_till).isBefore(moment())
     : false
 
   return user?.subscription && !isSubscriptionActive ? (
@@ -185,21 +185,22 @@ export default Pricing
 
 const Container = styled('div')(({ theme }) => ({
   width: '100%',
-  height: 'calc(var(--vh, 1vh) * 100)',
+  height: '100%',
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
   justifyContent: 'center',
   backgroundPosition: 'start',
-  backgroundSize: 'contain',
+  backgroundSize: 'cover',
   position: 'relative',
+  backgroundRepeat: 'no-repeat',
   backgroundImage: `url(${BGImg})`,
   top: 0,
   '&::after': {
     content: '""',
     width: '100%',
     height: '100%',
-    backgroundColor: '#00bd48c6',
+    backgroundColor: '#24242450',
     position: 'absolute',
     top: 0,
     left: 0
@@ -208,14 +209,14 @@ const Container = styled('div')(({ theme }) => ({
     width: 'calc(100% - 24px)',
     zIndex: 100,
     padding: '24px 32px',
-    maxWidth: '1110px',
+    maxWidth: 'max-content',
     height: 'max-content',
     maxHeight: 'calc(100% - 24px)',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#b9ffd2fc',
+    backgroundColor: '#bebebe9d',
     '& form': {
       width: '100%',
       padding: '24px 0px 8px 0px'

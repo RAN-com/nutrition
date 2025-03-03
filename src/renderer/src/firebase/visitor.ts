@@ -99,13 +99,13 @@ export const addVisitor = async ({
 }: VisitorCreate) => {
   try {
     // Validate email and phone
-    if (!email || !phone) {
-      errorToast('Email and phone are required.')
+    if (!phone) {
+      errorToast(' phone are required.')
       return { status: 'error', message: 'Missing email or phone' }
     }
 
     // Generate unique visitor ID
-    const vid = (encryptData(`${email}${phone}`) ?? '')?.split('/').join('')
+    const vid = (encryptData(`${phone}`) ?? '')?.split('/').join('')
     const docRef = doc(firestore, `users/${created_by}/visitors/${vid}`)
 
     // Check if the visitor already exists
@@ -257,7 +257,7 @@ export const convertVisitorToCustomer = async (uid: string, vid: string) => {
 
     const { data } = visitorData
 
-    const checkExistingCid = encryptData(data.email) as string
+    const checkExistingCid = encryptData(data.phone) as string
     const check = await getCustomer(uid, checkExistingCid)
     if (check) {
       errorToast(`Customer with the visitor email exists...`)
@@ -267,10 +267,10 @@ export const convertVisitorToCustomer = async (uid: string, vid: string) => {
     // Add the visitor data to the customers collection
     const customersRef = collection(firestore, `users/${uid}/customers`)
     const docs = await getDocs(customersRef)
-    const cid = encryptData(data.email) as string
+    const cid = encryptData(data.phone) as string
     const docRef = doc(firestore, `users/${uid}/customers/${cid}`)
 
-    const exists = docs.docs.filter((doc) => encryptData(doc.data().email) === data.email)
+    const exists = docs.docs.filter((doc) => encryptData(doc.data().phone) === data.phone)
 
     if (exists.length >= 1) {
       errorToast('Customer with this email or phone already exists.')

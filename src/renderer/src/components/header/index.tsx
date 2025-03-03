@@ -1,4 +1,4 @@
-import { Chip, Menu, MenuItem, styled, Tooltip } from '@mui/material'
+import { Chip, Menu, MenuItem, Modal, styled, Tooltip } from '@mui/material'
 import { useAppSelector, useAppDispatch } from '@renderer/redux/store/hook'
 import CustomTypography from '../typography'
 import { grey } from '@mui/material/colors'
@@ -42,8 +42,10 @@ const Header = ({ toggleSidebar, showToggle }: Props) => {
   const user = useAppSelector((s) => s.auth.user)
   const dispatch = useAppDispatch()
   const [anchorEl, setAnchorEl] = React.useState<Element | null>(null)
-
+  const [loading, setLoading] = React.useState(false)
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    setLoading(true)
+    setAnchorEl(null)
     try {
       const files = e.target.files?.[0]
       if (!user?.uid) return errorToast('Login Expired. Try Again')
@@ -54,14 +56,20 @@ const Header = ({ toggleSidebar, showToggle }: Props) => {
       const upload = await uploadFiles(user?.uid, [files], ['profile'])
       if (upload?.[0]) {
         dispatch(asyncUpdateUser({ ...user, photo_url: upload?.[0]?.Location }))
+        setLoading(false)
         return null
       }
       setAnchorEl(null)
+      setLoading(false)
     } catch (err) {
       console.log(err)
+      setLoading(false)
+
       setAnchorEl(null)
       return null
     }
+    setLoading(false)
+
     setAnchorEl(null)
     return
   }
@@ -134,10 +142,16 @@ const Header = ({ toggleSidebar, showToggle }: Props) => {
             }
           />
         </Tooltip>
-        {!user?.photo_url ? (
+        <Modal open={loading}>
+          <div></div>
+        </Modal>
+        {user?.photo_url ? (
           <img
-            src={'https://picsum.photos/200/200'}
+            src={user?.photo_url}
             alt={user?.name}
+            onClick={(e) => {
+              setAnchorEl(e.currentTarget)
+            }}
             style={{
               width: '32px',
               height: '32px',

@@ -91,7 +91,7 @@ export const addStaff = async (
   }
 ) => {
   try {
-    const uid = encryptData(data.email as string)
+    const uid = encryptData(data.phone as string)
     const totalStaffs = await getTotalStaffs(data.createdBy as string)
     if (totalStaffs >= data.available_limit) {
       errorToast('You have reached the limit of staffs')

@@ -63,7 +63,7 @@ export const uploadFiles = async (
       await upload.done()
 
       return {
-        Location: `https://${params.Bucket}.s3.amazonaws.com/${params.Bucket}/${params.Key}`,
+        Location: `https://${params.Bucket}.s3.amazonaws.com/${params.Key}`,
         Key: params.Key,
         Bucket: params.Bucket,
         ETag: '' // You can get ETag from response if needed

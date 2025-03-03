@@ -25,7 +25,7 @@ const LayoutV2: React.FC<Props> = ({ children }: Props) => {
   const navigate = useNavigate()
 
   const isSubscribed = user?.subscription
-    ? moment(user?.subscription?.valid_till).isAfter(moment())
+    ? moment(user?.subscription?.valid_till).isBefore(moment())
     : false
 
   React.useEffect(() => {
@@ -110,7 +110,7 @@ export default LayoutV2
 const LayoutContainer = styled('div')(({ theme }) => ({
   width: '100%',
   maxWidth: '100vw',
-  height: 'calc(var(--vh, 1vh) * 100)',
+  height: '100%',
   position: 'relative',
   top: 0,
   left: 0,

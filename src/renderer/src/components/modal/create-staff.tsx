@@ -20,7 +20,7 @@ import React from 'react'
 
 const validationSchema = Yup.object({
   name: Yup.string().required('Name is required'),
-  email: Yup.string().email('Invalid email').required('Email is required'),
+  email: Yup.string().email('Invalid email').optional(),
   photo_url: Yup.string().url('Invalid URL').optional(),
   gender: Yup.string()
     .oneOf(['male', 'female', 'other'], 'Invalid gender')

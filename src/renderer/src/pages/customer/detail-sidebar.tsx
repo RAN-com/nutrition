@@ -233,6 +233,8 @@ const Profile = styled('div')({
   justifyContent: 'center'
 })
 
+const PAYMENT_PRICE = 6800
+
 const HandlePayment = ({ onClose, open }: { open: boolean; onClose(): void }) => {
   const admin = useAppSelector((s) => s.auth.user?.uid)
   const customer = useAppSelector((s) => s.customer.current_customer?.data?.cid)
@@ -247,14 +249,14 @@ const HandlePayment = ({ onClose, open }: { open: boolean; onClose(): void }) =>
       setLoading(true)
       try {
         const sub = await setSubscriptionToUser({
-          price: values.totalDays * 2700,
+          price: values.totalDays * PAYMENT_PRICE,
           uid: admin as string,
           cid: customer as string,
           totalDays: values.totalDays * 26
         })
         if (sub) {
           addTransaction(admin as string, {
-            amount: values.totalDays * 2700,
+            amount: values.totalDays * PAYMENT_PRICE,
             currency: 'inr',
             data: sub
           })
@@ -331,7 +333,8 @@ const HandlePayment = ({ onClose, open }: { open: boolean; onClose(): void }) =>
         <FormHelperText>
           <CustomTypography variant="body2">
             {/* Give title */}
-            Total amount: ₹{formik.values.totalDays * 2700} - {formik.values.totalDays * 26} days
+            Total amount: ₹{formik.values.totalDays * PAYMENT_PRICE} -{' '}
+            {formik.values.totalDays * 26} days
           </CustomTypography>
         </FormHelperText>
       </FormControl>
@@ -359,7 +362,9 @@ const HandlePayment = ({ onClose, open }: { open: boolean; onClose(): void }) =>
           marginTop: '12px'
         }}
       >
-        <CustomTypography variant="body2">Pay {formik.values.totalDays * 2700}</CustomTypography>
+        <CustomTypography variant="body2">
+          Pay {formik.values.totalDays * PAYMENT_PRICE}
+        </CustomTypography>
       </Button>
     </Dialog>
   )

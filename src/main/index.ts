@@ -32,8 +32,9 @@ function createWindow({ width, height }: { width: number; height: number }): voi
     frame: false,
     movable: true,
     roundedCorners: true,
-    title: 'Herbal Life',
+    title: 'Nutrition',
     show: true,
+    icon: '../../resources/icon.png',
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
@@ -66,13 +67,41 @@ function createWindow({ width, height }: { width: number; height: number }): voi
       return
     }
 
+    if (message === 'quit_app') {
+      mainWindow.close()
+      return
+    }
+
+    if (message === 'minimize_app') {
+      if (mainWindow.minimizable) {
+        mainWindow.minimize()
+      } else {
+        new Notification({
+          title: '',
+          body: 'Cannot able to execute the action. Try again',
+          closeButtonText: 'Close',
+          timeoutType: 'default',
+          urgency: 'low',
+          icon: '../../resources/icon.png'
+        }).show()
+      }
+    }
+
+    if (message === 'no_internet') {
+      new Notification({
+        title: 'No Internet',
+        body: 'Reopen when internet is connected'
+      }).show()
+      return
+    }
+
     if (message.includes('copy_text#')) {
       const txt = message?.split('copy_text#')[1]
       if (txt && txt.length >= 1) {
         clipboard.writeText(txt as string)
         new Notification({
           title: 'Copied to clipboard'
-        })
+        }).show()
       }
     }
   })
@@ -104,7 +133,7 @@ function createWindow({ width, height }: { width: number; height: number }): voi
 app.whenReady().then(() => {
   const display = screen.getPrimaryDisplay()
   const { height, width } = display.workAreaSize
-  electronApp.setAppUserModelId('com.ran.herballife')
+  electronApp.setAppUserModelId('com.ran.nutrition')
 
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)

@@ -11,6 +11,7 @@ import { theme } from './theme/index'
 import { CssBaseline, GlobalStyles } from '@mui/material'
 import { Toaster } from 'react-hot-toast'
 import zIndex from '@mui/material/styles/zIndex'
+import Layout from './layout'
 
 const resizeOps = (): void => {
   const vh = window.innerHeight * 0.01
@@ -55,7 +56,9 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
             }}
           />
           <CssBaseline />
-          <App />
+          <Layout>
+            <App />
+          </Layout>
         </ThemeProvider>
       </PersistGate>
     </Provider>

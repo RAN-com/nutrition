@@ -79,20 +79,23 @@ const AuthLogin = () => {
           <CustomTextInput
             input={{
               slotProps: {
+                htmlInput: {
+                  type: !showPassword ? 'password' : 'text'
+                },
                 input: {
                   endAdornment: (
                     <CustomIcon
                       name={'LUCIDE_ICONS'}
                       icon={showPassword ? 'LuEyeOff' : 'LuEye'}
                       size={24}
-                      color={grey['800']}
+                      color={grey['100']}
                       onClick={() => setShowPassword((prev) => !prev)}
                     />
                   )
                 }
               },
               placeholder: 'Enter your password',
-              type: showPassword ? 'password' : 'text',
+              type: !showPassword ? 'password' : 'text',
               name: 'password',
               value: formik.values.password,
               onChange: formik.handleChange,
@@ -133,7 +136,7 @@ export default AuthLogin
 
 const Container = styled('div')(({ theme }) => ({
   width: '100%',
-  height: 'calc(var(--vh, 1vh) * 100)',
+  height: '100%',
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',

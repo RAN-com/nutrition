@@ -91,7 +91,7 @@ export const addCustomer = async ({
 }) => {
   try {
     // Use the email as the unique ID
-    const cid = encryptData(email)
+    const cid = encryptData(others.phone)
     const totalCustomers = await getTotalCustomer(created_by.uid)
     if (totalCustomers >= others.available_limit) {
       errorToast('You have reached the limit of customers')
@@ -102,7 +102,7 @@ export const addCustomer = async ({
     // Check if the customer already exists
     const customerDoc = await getDoc(docRef)
     if (customerDoc.exists()) {
-      errorToast(`Customer with email ${email} already exists.`)
+      errorToast(`Customer with phone ${others.phone} already exists.`)
       return { status: 'exists', data: others }
     }
 
@@ -149,12 +149,12 @@ export const updateCustomer = async (
     const customerDocSnap = await getDoc(docRef)
 
     if (!customerDocSnap.exists()) {
-      throw new Error(`Customer with email ${uid} not found.`)
+      throw new Error(`Customer::${uid} not found.`)
     }
 
     // Update the customer data
     await updateDoc(docRef, updates)
-    successToast(`Customer with uid ${uid} updated successfully`)
+    successToast(`Customer  ${uid} updated successfully`)
     return { status: 'success', message: `Customer ${uid} updated successfully` }
   } catch (error) {
     console.error('Error updating customer:', error)
@@ -461,6 +461,7 @@ export const addCustomerRecord = async ({
     throw new Error('Failed to add customer record')
   }
 }
+
 export const getPersonalRecords = async (uid: string, cid: string) => {
   try {
     // Firestore document reference for the customer's record

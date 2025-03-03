@@ -3,10 +3,10 @@ import { getCardDetail } from '@renderer/firebase/card'
 import { CardCreateData, CardData } from '@renderer/types/card'
 import { errorToast } from '@renderer/utils/toast'
 
-import BGImage1 from '@renderer/assets/card-bg/image-1.png'
-import BGImage2 from '@renderer/assets/card-bg/image-2.png'
-import BGImage3 from '@renderer/assets/card-bg/image-3.png'
-import BGImage4 from '@renderer/assets/card-bg/image-4.png'
+const BGImage1 = 'https://herballife-ran.s3.ap-south-1.amazonaws.com/themes/image-1.png'
+const BGImage2 = 'https://herballife-ran.s3.ap-south-1.amazonaws.com/themes/image-2.png'
+const BGImage3 = 'https://herballife-ran.s3.ap-south-1.amazonaws.com/themes/image-3.png'
+const BGImage4 = 'https://herballife-ran.s3.ap-south-1.amazonaws.com/themes/image-4.png'
 
 export const bgImages = [
   { bg: BGImage1, color: '#ae5240', backgroundColor: '#F4E8DB' },

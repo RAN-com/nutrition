@@ -119,7 +119,7 @@ export default Home
 
 const Container = styled('div')(({}) => ({
   width: '100%',
-  height: '100%',
+  height: 'calc(var(--vh, 1vh) * 100 - 164px)',
   overflowY: 'auto',
   display: 'grid',
   gridTemplateColumns: '1fr 1fr',

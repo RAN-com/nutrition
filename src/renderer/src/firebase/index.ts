@@ -135,12 +135,12 @@ export const createUserDocument = async ({
     subscription: {
       type: 'FREE_TRAIL',
       subscribedOn: moment().format('YYYY-MM-DD'),
-      valid_till: moment().add(1, 'month').format('YYYY-MM-DD'),
+      valid_till: moment().add(1, 'week').format('YYYY-MM-DD'),
       // for free trail of 1 motth
-      total_customers: 5,
+      total_customers: 10,
       total_products: 10,
       total_staffs: 5,
-      total_visitors: 5
+      total_visitors: 10
     },
     ...others
   } as CenterUser)
@@ -159,7 +159,7 @@ export const updateUserDocument = async ({ uid, ...data }: CenterUser) => {
   await updateDoc(docRef, {
     ...data
   })
-  return { error: false, message: 'User Created', data: await getUserDocument(uid) }
+  return { error: false, message: 'User Exists', data: await getUserDocument(uid) }
 }
 
 export const getTotalRevenue = async (uid: string) => {

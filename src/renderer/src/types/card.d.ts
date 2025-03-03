@@ -9,7 +9,11 @@ export type CardData = {
     valid_till: string
   }
   personal_details: {
+    whatsapp?: string
+    email?: string
+    map_embed?: string
     center_name?: string
+    center_logo?: string
     displayName: {
       value: string
       designation: string
@@ -44,7 +48,11 @@ export type CardData = {
 
 export type CardCreateData = {
   personal_details?: {
+    whatsapp?: string
+    email?: string
+    map_embed?: string
     center_name?: string
+    center_logo?: string
     displayName?: { value: string; designation: string }[]
     card_theme?: {
       accent_color: string

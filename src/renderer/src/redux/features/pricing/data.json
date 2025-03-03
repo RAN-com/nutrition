@@ -33,40 +33,35 @@
     ]
   },
   {
-    "title": "Basic Subscription Plan",
-    "price": 300,
-    "type": "subscription",
-    "validity": "3_month",
-    "priceId": "basic_subscription_03",
-    "features": [
-      "Unlimited appointments for 3 months",
-      "Basic health tracking",
-      "Standard customer support"
-    ]
-  },
-  {
-    "title": "Standard Subscription Plan",
-    "price": 600,
-    "type": "subscription",
-    "validity": "6_months",
-    "priceId": "standard_subscription_06",
-    "features": [
-      "Unlimited appointments for 6 months",
-      "Advanced health analytics",
-      "Priority customer support"
-    ]
-  },
-  {
-    "title": "Premium Subscription Plan",
-    "price": 1200,
+    "title": "Prestige",
+    "price": 3650,
     "type": "subscription",
     "validity": "1_year",
-    "priceId": "premium_subscription_12",
-    "features": [
-      "Unlimited appointments for 1 year",
-      "Comprehensive health analytics",
-      "Dedicated support and personalized guidance",
-      "Access to exclusive workshops and resources"
-    ]
+    "priceId": "prestige_1_year",
+    "features": ["15 Customers", "15 Visitors"]
+  },
+  {
+    "title": "Premium Pack",
+    "price": 6800,
+    "type": "subscription",
+    "validity": "1_year",
+    "priceId": "premium_pack_1_year",
+    "features": ["30 Customers", "30 Staffs", "30 Visitors"]
+  },
+  {
+    "title": "Premium+",
+    "price": 8500,
+    "type": "subscription",
+    "validity": "1_year",
+    "priceId": "premium_plus_1_year",
+    "features": ["50 Customers", "50 Staffs", "50 Visitors"]
+  },
+  {
+    "title": "Premium++",
+    "price": 15000,
+    "type": "subscription",
+    "validity": "1_year",
+    "priceId": "premium_plus_plus_1_year",
+    "features": ["Unlimited Customers", "Unlimited Staffs", "Unlimited Visitors"]
   }
 ]

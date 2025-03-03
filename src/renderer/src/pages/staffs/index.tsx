@@ -176,8 +176,8 @@ const StaffPage = () => {
     <>
       <Container
         sx={{
-          height: 'calc(var(--vh, 1vh) * 100 - 124px)',
-          maxHeight: 'calc(var(--vh, 1vh) * 100 - 124px)',
+          height: 'calc(var(--vh, 1vh) * 100 - 164px)',
+          maxHeight: 'calc(var(--vh, 1vh) * 100 - 164px)',
           overflow: 'hidden',
           position: 'relative',
           top: 0,

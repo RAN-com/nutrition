@@ -16,94 +16,100 @@ import StaffPage from '@renderer/pages/staffs'
 import AboutStaff from '@renderer/pages/staffs/about'
 import BillingPage from '@renderer/pages/billing'
 import BillingModal from '@renderer/pages/billing/billing-modal'
+import NoInternet from '@renderer/components/modal/no-internet'
 
 const Navigation = () => {
   const user = useAppSelector((s) => s.auth.user)
   console.log(window.location.href)
   const router = createBrowserRouter([
     {
-      element: <CheckAuth user={user || null} />,
+      element: <NoInternet />,
       children: [
         {
-          element: <LayoutV2 />,
+          element: <CheckAuth user={user || null} />,
           children: [
             {
-              path: '/home',
-              element: <Home />
-            },
-            {
-              path: '/customers',
-              element: <CustomerPage />
-            },
-            {
-              path: '/products',
-              element: <ProductsPage />
-            },
-            {
-              path: '/visitors',
-              element: <VisitorPage />
-            },
-            {
-              path: '/staffs',
+              element: <LayoutV2 />,
               children: [
                 {
-                  index: true,
-                  element: <StaffPage />
+                  path: '/home',
+                  element: <Home />
                 },
                 {
-                  path: ':staff_id',
-                  element: <AboutStaff />
-                }
-              ]
-            },
-            {
-              path: '/appointments',
-              element: <h1>Appointments</h1>
-            },
-            {
-              path: '/billing',
-              element: <BillingPage />,
-              children: [
+                  path: '/customers',
+                  element: <CustomerPage />
+                },
                 {
-                  path: ':orderId',
-                  element: <BillingModal />
+                  path: '/products',
+                  element: <ProductsPage />
+                },
+                {
+                  path: '/visitors',
+                  element: <VisitorPage />
+                },
+                {
+                  path: '/staffs',
+                  children: [
+                    {
+                      index: true,
+                      element: <StaffPage />
+                    },
+                    {
+                      path: ':staff_id',
+                      element: <AboutStaff />
+                    }
+                  ]
+                },
+                {
+                  path: '/appointments',
+                  element: <h1>Appointments</h1>
+                },
+                {
+                  path: '/billing',
+                  element: <BillingPage />,
+                  children: [
+                    {
+                      path: ':orderId',
+                      element: <BillingModal />
+                    }
+                  ]
                 }
               ]
+            },
+            {
+              path: '/pricing',
+              element: <Pricing />
             }
           ]
         },
         {
-          path: '/pricing',
-          element: <Pricing />
-        }
-      ]
-    },
-    {
-      path: '/auth',
-      element: <Auth />,
-      children: [
-        {
-          index: true,
-          path: 'login',
-          element: <AuthLogin />
+          path: '/auth',
+          element: <Auth />,
+          children: [
+            {
+              index: true,
+              path: 'login',
+              element: <AuthLogin />
+            },
+            {
+              path: 'create',
+              element: <AuthCreate />
+            },
+            {
+              path: 'reset',
+              element: <AuthReset />
+            }
+          ]
         },
         {
-          path: 'create',
-          element: <AuthCreate />
+          path: '/',
+          element: <Navigate to={'/home'} replace={true} />
         },
         {
-          path: 'reset',
-          element: <AuthReset />
+          path: '*',
+          element: <NotFound />
         }
       ]
-    },
-    {
-      path: '/',
-      element: <Navigate to={'/home'} replace={true} />
-    },
-    {
-      path: '*',
-      element: <NotFound />
     }
   ])
   return <RouterProvider router={router} />

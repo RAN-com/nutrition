@@ -94,6 +94,6 @@ body {
 
 :root {
   --vh: 9.5px;
-  --calc-height: calc(var(--vh, 1vh) * 100);
+  --calc-height: calc(var(--vh, 1vh) * 100 - 164px);
   --selected-border: 1px solid currentColor;
 }

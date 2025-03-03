@@ -232,7 +232,7 @@ export default AuthCreate
 
 const Container = styled('div')(({ theme }) => ({
   width: '100%',
-  height: 'calc(var(--vh, 1vh) * 100)',
+  height: '100%',
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',

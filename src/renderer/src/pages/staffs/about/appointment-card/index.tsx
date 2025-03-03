@@ -305,6 +305,9 @@ const AppointmentsCard = ({ onClose, open }: Props) => {
                     <CustomTypography textTransform={'none'}>Assign Domain</CustomTypography>
                   </Button>
                 )}
+                <Modal open={loading}>
+                  <div></div>
+                </Modal>
                 {!assign && (
                   <Button
                     disabled={!Boolean(assigned_domain)}
@@ -325,10 +328,11 @@ const AppointmentsCard = ({ onClose, open }: Props) => {
                       )
                       if (upload?.status) {
                         successToast('Updated Successfully')
+                        console.log('Updated')
                       } else {
+                        console.log('Error')
                         errorToast('Something went wrong. Try Again later')
                       }
-                      onClose()
                       setLoading(false)
                     }}
                   >

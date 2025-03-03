@@ -19,6 +19,7 @@ const PurchaseSubscription = ({ handleFunc }: Props) => {
 
   const handlePayment = async () => {
     try {
+      // Fetch order details from the backend API
       const order = (
         await axios.post(
           `${SERVER_URL}/api/payment`,
@@ -34,17 +35,27 @@ const PurchaseSubscription = ({ handleFunc }: Props) => {
         )
       )?.data
 
+      // Get the Razorpay API key
       const key = import.meta.env.DEV
         ? import.meta.env.VITE_VERCEL_RAZORPAY_KEY
         : import.meta.env.VITE_VERCEL_RAZORPAY_LIVE_KEY
       console.log(order, key)
-      if (order.status >= 200 && order.status <= 300) {
+
+      if (!key) {
+        errorToast('Not available at the moment. Contact developer')
+        return
+      } else {
+        successToast('Details Retrieved')
+      }
+
+      if (order?.status >= 200 && order?.status <= 300) {
+        // Set up Razorpay payment options
         const options: RazorpayOrderOptions = {
-          amount: order.data?.amount,
-          currency: order?.data?.currency,
-          key: key as string,
-          name: 'RAN',
-          order_id: order?.data?.id,
+          amount: order?.amount, // Amount in paise (100 paisa = 1 INR)
+          currency: order?.currency, // Currency (INR)
+          key: key as string, // Razorpay API key
+          name: 'RAN', // Your company or app name
+          order_id: order?.id, // Razorpay order ID
           retry: {
             enabled: true
           },
@@ -53,18 +64,20 @@ const PurchaseSubscription = ({ handleFunc }: Props) => {
               infoToast('Payment failed. Please try again')
             }
           },
-          async handler(response) {
+          handler: async (response) => {
             try {
+              // Handle payment success, update subscription status
               const sub = await updateCardValidity(
                 current_staff?.data?.assigned_subdomain as string,
                 moment().add(12, 'months').format('YYYY-MM-DD')
               )
 
               if (sub?.status) {
+                // Log the transaction
                 addTransaction(admin?.uid as string, {
-                  amount: order.data?.amount,
-                  currency: order?.data?.currency,
-                  order_id: order?.data?.id,
+                  amount: order?.amount,
+                  currency: order?.currency,
+                  order_id: order?.id,
                   payment_id: response.razorpay_payment_id,
                   data: sub?.data
                 })
@@ -79,8 +92,17 @@ const PurchaseSubscription = ({ handleFunc }: Props) => {
           }
         }
 
-        const razorpayInstance = new Razorpay(options)
-        razorpayInstance.open()
+        // Ensure Razorpay instance is initialized and open the payment modal
+        if (typeof Razorpay !== 'undefined') {
+          const razorpayInstance = new Razorpay(options)
+          if (!razorpayInstance) {
+            console.log('Razorpay Not Found')
+            return
+          }
+          razorpayInstance.open()
+        } else {
+          errorToast('Razorpay script not loaded. Please contact support.')
+        }
       } else {
         errorToast(order?.data as string)
       }
@@ -89,6 +111,7 @@ const PurchaseSubscription = ({ handleFunc }: Props) => {
       errorToast(err?.message)
     }
   }
+
   return (
     <Button
       focusRipple={false}

@@ -7,14 +7,51 @@ import { useAppDispatch, useAppSelector } from '@renderer/redux/store/hook'
 import { bgImages, setCardDetails } from '@renderer/redux/features/user/card'
 import CustomTextInput from '@renderer/components/text-input'
 import { errorToast } from '@renderer/utils/toast'
+import * as Yup from 'yup'
+import { useFormik } from 'formik'
+
+const validationSchema = Yup.object({
+  whatsapp: Yup.string()
+    .matches(/^\d{10}$/, 'Please enter a valid 10-digit WhatsApp number')
+    .optional(),
+  email: Yup.string().email('Please enter a valid email address').optional(), // optional but validated if provided
+  url: Yup.string().url('Please enter a valid URL').optional() // optional but validated if provided
+})
 
 const HomeTemplate = () => {
   const dispatch = useAppDispatch()
   const data = useAppSelector((s) => s.card.editor.data?.['personal_details'])
   const [showBG, setShowBG] = React.useState(false)
+  const admin = useAppSelector((s) => s.auth.user)
+
+  const formik = useFormik({
+    enableReinitialize: true,
+    initialValues: {
+      whatsapp: data?.whatsapp ?? undefined,
+      email: data?.email ?? undefined,
+      url: data?.map_embed ?? undefined
+    },
+    validationSchema: validationSchema,
+    onSubmit: (values) => {
+      dispatch(
+        setCardDetails({
+          id: 'personal_details',
+          value: {
+            ...data,
+            whatsapp: values.whatsapp,
+            email: values.email,
+            map_embed: values.url
+          }
+        })
+      )
+      console.log('Form Data:', values)
+    }
+  })
+
+  console.log(formik.errors)
 
   return (
-    <Container className="template_personal_details">
+    <Container className="template_personal_details scrollbar">
       <Dialog
         open={showBG}
         onClose={() => setShowBG(false)}
@@ -54,6 +91,7 @@ const HomeTemplate = () => {
                     id: 'personal_details',
                     value: {
                       ...data,
+                      center_logo: admin?.photo_url,
                       card_theme: {
                         ...data?.card_theme,
                         accent_color: e.color,
@@ -152,11 +190,6 @@ const HomeTemplate = () => {
           variant="outlined"
           onClick={() => {
             setShowBG(true)
-            // dispatch(
-            //   validateCardDetails({
-            //     id: 'contact'
-            //   })
-            // </Container>
           }}
           startIcon={<CustomIcon name={'LUCIDE_ICONS'} icon={'LuPlus'} />}
         >
@@ -209,7 +242,7 @@ const HomeTemplate = () => {
           <CustomTextInput
             input={{
               value: d.value,
-              label: 'Name of the couch',
+              label: 'Name of the coach',
               size: 'small',
               type: 'text',
               onChange: (e) => {
@@ -326,6 +359,173 @@ const HomeTemplate = () => {
       >
         {data?.displayName?.length !== 0 ? 'Add Coach Details' : 'Add Coach Details'}
       </Button>
+      <Divider />
+      <CustomTextInput
+        formProps={{
+          sx: {
+            padding: '12px 0px',
+            paddingBottom: '0px'
+          }
+        }}
+        input={{
+          label: 'Whatsapp Number',
+          size: 'small',
+          type: 'text',
+          value: formik.values.whatsapp,
+          error: Boolean(formik.touched.whatsapp && formik.errors.whatsapp),
+          helperText: formik.touched.whatsapp && formik.errors.whatsapp,
+          onChange: (e) => {
+            formik.setFieldValue('whatsapp', e.target.value)
+          },
+          slotProps: {
+            input: {
+              endAdornment: !formik.errors.whatsapp &&
+                (formik.values.whatsapp ?? '').length >= 1 &&
+                !(formik.values.whatsapp === (data?.whatsapp as string)) && (
+                  <CustomIcon
+                    onClick={() => {
+                      console.log(Boolean(formik.touched.whatsapp && formik.errors.whatsapp))
+                      console.log('WhatsApp Value:', formik.values.whatsapp)
+                      formik.submitForm()
+                    }}
+                    name="LUCIDE_ICONS"
+                    icon={'LuCheck'}
+                  />
+                )
+            }
+          }
+        }}
+      />
+      {data?.whatsapp && (
+        <CustomTypography
+          fontSize={'12px'}
+          sx={{
+            cursor: 'pointer'
+          }}
+          onClick={() => {
+            formik.setFieldValue('whatsapp', '')
+            dispatch(
+              setCardDetails({
+                id: 'personal_details',
+                value: {
+                  ...data,
+                  whatsapp: undefined
+                }
+              })
+            )
+          }}
+        >
+          Clear x
+        </CustomTypography>
+      )}
+      <CustomTextInput
+        formProps={{
+          sx: {
+            padding: '12px 0px',
+            paddingBottom: '0px'
+          }
+        }}
+        input={{
+          label: 'Email Address',
+          size: 'small',
+          type: 'text',
+          slotProps: {
+            input: {
+              endAdornment: !Boolean(formik.touched.email && formik.errors.email) &&
+                formik.values.email?.length !== 0 &&
+                formik.values.email !== (data?.email as string) && (
+                  <CustomIcon
+                    onClick={() => formik.submitForm()}
+                    name="LUCIDE_ICONS"
+                    icon={'LuCheck'}
+                  />
+                )
+            }
+          },
+          value: formik.values.email,
+          error: Boolean(formik.touched.email && formik.errors.email),
+          helperText: formik.touched.email && formik.errors.email,
+          onChange: (e) => {
+            formik.setFieldValue('email', e.target.value)
+          }
+        }}
+      />
+      {data?.email && (
+        <CustomTypography
+          fontSize={'12px'}
+          sx={{
+            cursor: 'pointer'
+          }}
+          onClick={() => {
+            formik.setFieldValue('whatsapp', '')
+            dispatch(
+              setCardDetails({
+                id: 'personal_details',
+                value: {
+                  ...data,
+                  email: undefined
+                }
+              })
+            )
+          }}
+        >
+          Clear x
+        </CustomTypography>
+      )}
+      <CustomTextInput
+        formProps={{
+          sx: {
+            padding: '12px 0px',
+            paddingBottom: '0px'
+          }
+        }}
+        input={{
+          label: 'Map Embed Url',
+          size: 'small',
+          type: 'text',
+          slotProps: {
+            input: {
+              endAdornment: !Boolean(formik.touched.url && formik.errors.url) &&
+                formik.values.url?.length !== 0 &&
+                formik.values.url !== (data?.map_embed as string) && (
+                  <CustomIcon
+                    onClick={() => formik.submitForm()}
+                    name="LUCIDE_ICONS"
+                    icon={'LuCheck'}
+                  />
+                )
+            }
+          },
+          value: formik.values.url,
+          error: Boolean(formik.touched.url && formik.errors.url),
+          helperText: formik.touched.url && formik.errors.url,
+          onChange: (e) => {
+            formik.setFieldValue('url', e.target.value)
+          }
+        }}
+      />
+      {data?.map_embed && (
+        <CustomTypography
+          fontSize={'12px'}
+          sx={{
+            cursor: 'pointer'
+          }}
+          onClick={() => {
+            formik.setFieldValue('whatsapp', '')
+            dispatch(
+              setCardDetails({
+                id: 'personal_details',
+                value: {
+                  ...data,
+                  map_embed: undefined
+                }
+              })
+            )
+          }}
+        >
+          Clear x
+        </CustomTypography>
+      )}
     </Container>
   )
 }
@@ -338,8 +538,10 @@ const Container = styled('div')({
   display: 'flex',
   flexDirection: 'column',
   padding: '12px 24px',
+  paddingTop: 0,
   position: 'relative',
-  top: 0
+  top: 0,
+  overflow: 'auto'
 })
 
 const FabButton = styled(Button)(({ theme }) => ({

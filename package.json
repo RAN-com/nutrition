@@ -1,7 +1,7 @@
 {
-  "name": "herbal-life",
+  "name": "nutrition",
   "version": "0.8.0",
-  "description": "The Herbalife Dashboard is a powerful and intuitive platform designed to provide Herbalife members with easy access to vital business and health data",
+  "description": "The Nutrition Dashboard is a powerful and intuitive platform designed to provide Nutrition members with easy access to vital business and health data",
   "main": "./out/main/index.js",
   "author": "example.com",
   "homepage": "https://raninfo.in",
@@ -21,8 +21,8 @@
     "build:linux": "electron-vite build && electron-builder --linux --publish always"
   },
   "build": {
-    "appId": "com.ran.herballife",
-    "productName": "Herbal Life",
+    "appId": "com.ran.nutrition",
+    "productName": "Nutrition",
     "files": [
       "./out/**/*",
       "dist/**/*",
@@ -35,7 +35,7 @@
     "publish": {
       "provider": "github",
       "owner": "RAN-com",
-      "repo": "herbal-life",
+      "repo": "nutrition",
       "releaseType": "release"
     },
     "win": {
@@ -84,6 +84,7 @@
     "editorjs-text-color-plugin": "^2.0.4",
     "electron-updater": "^6.3.9",
     "express": "^4.21.2",
+    "file-loader": "^6.2.0",
     "firebase": "^11.3.1",
     "formik": "^2.4.6",
     "jspdf": "^2.5.2",

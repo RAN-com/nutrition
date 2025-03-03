@@ -1,5 +1,6 @@
-import { Avatar, Button, Divider, styled } from '@mui/material'
+import { Avatar, Divider, styled } from '@mui/material'
 import { grey } from '@mui/material/colors'
+import CustomIcon from '@renderer/components/icons'
 import CustomTypography from '@renderer/components/typography'
 import useFluidTypography from '@renderer/hooks/fluid-typo'
 import { useAppSelector } from '@renderer/redux/store/hook'
@@ -28,7 +29,7 @@ const HomePreview = () => {
       }}
     >
       <Avatar
-        src={data?.personal_details?.card_theme?.hero_bg_image}
+        src={data?.personal_details?.center_logo}
         sx={{
           width: '200px',
           height: '200px',
@@ -75,23 +76,44 @@ const HomePreview = () => {
           {e.designation && <i>{`(${capitalizeSentence(e.designation)})`}</i>}
         </CustomTypography>
       ))}
-      <Button
-        variant={'outlined'}
-        sx={{
-          margin: 'auto 0px',
-          borderColor: 'white',
-          color: 'white'
-        }}
-      >
-        <CustomTypography
-          textTransform={'none'}
-          onClick={() => {
-            document.querySelector('.preview_contact')?.scrollIntoView({ behavior: 'smooth' })
-          }}
-        >
-          Contact Us
-        </CustomTypography>
-      </Button>
+      <SocialContainer>
+        {data?.personal_details?.whatsapp && (
+          <CustomIcon
+            name={'IONICONS5'}
+            icon="IoLogoWhatsapp"
+            color={'white'}
+            sx={{
+              backgroundColor: data?.personal_details?.card_theme?.accent_color,
+              padding: '8px',
+              borderRadius: '12px'
+            }}
+          />
+        )}
+        {data?.personal_details?.email && (
+          <CustomIcon
+            name={'MATERIAL_DESIGN'}
+            icon="MdEmail"
+            color={'white'}
+            sx={{
+              backgroundColor: data?.personal_details?.card_theme?.accent_color,
+              padding: '8px',
+              borderRadius: '12px'
+            }}
+          />
+        )}
+        {data?.personal_details?.map_embed && (
+          <CustomIcon
+            name={'FONT_AWESOME'}
+            icon="FaDirections"
+            color={'white'}
+            sx={{
+              backgroundColor: data?.personal_details?.card_theme?.accent_color,
+              padding: '8px',
+              borderRadius: '12px'
+            }}
+          />
+        )}
+      </SocialContainer>
     </Container>
   )
 }
@@ -107,4 +129,14 @@ const Container = styled('div')({
   position: 'relative',
   top: 0,
   alignItems: 'center'
+})
+
+const SocialContainer = styled('div')({
+  width: 'max-content',
+  display: 'flex',
+  flexDirection: 'row',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  margin: 'auto auto',
+  gap: 16
 })

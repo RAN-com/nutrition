@@ -76,6 +76,12 @@ const options: (Options & { children: Options[] | null })[] = [
 
 const logoutOption: Options[] = [
   {
+    label: 'Pricing',
+    value: '/pricing',
+    name: 'MATERIAL_DESIGN',
+    icon: 'MdPriceChange'
+  },
+  {
     label: 'Profile',
     value: '/profile',
     name: 'BOX_ICONS',

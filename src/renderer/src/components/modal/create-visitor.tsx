@@ -33,7 +33,7 @@ const validationSchema = Yup.object({
     .required('Name is required')
     .min(3, 'Name must be at least 3 characters long')
     .max(50, 'Name must not exceed 50 characters'),
-  email: Yup.string().required('Email is required').email('Invalid email address'),
+  email: Yup.string().email('Invalid email address').optional(),
   phone: Yup.string()
     .required('Phone number is required')
     .matches(/^[0-9]{10}$/, 'Phone number must be exactly 10 digits'),
@@ -84,7 +84,7 @@ const AddVisitorModal = ({
       photo_url: edit?.data?.photo_url ?? ''
     },
     validationSchema,
-    onSubmit: () => {
+    onSubmit: async () => {
       setLoading(true)
       if (!user) {
         setLoading(false)
@@ -93,6 +93,7 @@ const AddVisitorModal = ({
       }
       try {
         if (edit?.data) {
+          console.log('Updating')
           updateVisitor(edit?.data?.created_by, edit?.data?.vid, {
             ...edit?.data,
             ...formik.values
@@ -100,15 +101,16 @@ const AddVisitorModal = ({
             .then(() => {
               setLoading(false)
               dispatch(asyncGetVisitors({ uid: user?.uid }))
-              formik.resetForm()
+              // formik.resetForm()
               onClose?.()
             })
             .catch(() => {
               setLoading(false)
-              formik.resetForm()
+              // formik.resetForm()
               onClose?.()
             })
         } else {
+          console.log('Adding')
           addVisitor({
             created_by: user?.uid as string,
             created_on: new Date().toISOString(),
@@ -121,12 +123,12 @@ const AddVisitorModal = ({
             .then(() => {
               setLoading(false)
               dispatch(asyncGetVisitors({ uid: user?.uid }))
-              formik.resetForm()
+              // formik.resetForm()
               onClose?.()
             })
             .catch(() => {
               setLoading(false)
-              formik.resetForm()
+              // formik.resetForm()
               onClose?.()
             })
         }
@@ -143,7 +145,12 @@ const AddVisitorModal = ({
     }
   }, [formik.errors])
 
+  React.useEffect(() => {
+    if (!edit) formik.resetForm()
+  }, [])
+
   const keys = Object.keys(formik.values)
+  console.log(formik.errors)
   return (
     <Dialog
       open={open}
