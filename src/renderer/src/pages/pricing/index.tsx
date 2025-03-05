@@ -1,9 +1,9 @@
-import { Button, Divider, Paper, styled } from '@mui/material'
+import { Button, Dialog, Divider, styled } from '@mui/material'
 import BGImg from '@renderer/assets/login-bg.png'
 import CustomTypography from '@renderer/components/typography'
 import { useAppSelector } from '@renderer/redux/store/hook'
 import { CenterUserPricing } from '@renderer/types/user'
-import { capitalizeSentence } from '@renderer/utils/functions'
+import { capitalizeSentence, extractNumFromString } from '@renderer/utils/functions'
 import { errorToast, infoToast, successToast } from '@renderer/utils/toast'
 import { useRazorpay, RazorpayOrderOptions } from 'react-razorpay'
 import axios from 'axios'
@@ -25,20 +25,29 @@ const Pricing = () => {
       const string = String(JSON.stringify(price))
       const enc = encryptData(string)
 
-      const order = await axios.post(`${SERVER_URL}/api/payment`, JSON.stringify({ data: enc }))
+      const order = (
+        await axios.post(
+          `${SERVER_URL}/api/payment`,
+          JSON.stringify({ data: enc, type: 'SUBSCRIPTION' }),
+          {
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          }
+        )
+      )?.data
 
-      const key =
-        import.meta.env.NODE_ENV === 'development'
-          ? import.meta.env.VITE_VERCEL_RAZORPAY_KEY
-          : import.meta.env.VITE_VERCEL_RAZORPAY_LIVE_KEY
+      const key = import.meta.env.DEV
+        ? import.meta.env.VITE_VERCEL_RAZORPAY_KEY
+        : import.meta.env.VITE_VERCEL_RAZORPAY_LIVE_KEY
 
       if (order.status >= 200 && order.status <= 300) {
         const options: RazorpayOrderOptions = {
-          amount: order.data?.amount,
-          currency: order?.data?.currency,
+          amount: order?.order?.amount,
+          currency: order?.order?.currency,
           key: key as string,
           name: 'RAN',
-          order_id: order?.data?.id,
+          order_id: order?.order?.id,
           retry: {
             enabled: true
           },
@@ -49,26 +58,29 @@ const Pricing = () => {
           },
           async handler(response) {
             try {
+              const [_customer, _staff, _visitors] = price.features as string[]
+
+              const total_customer = extractNumFromString(_customer) || 500
+              const total_staffs = extractNumFromString(_staff) || 500
+              const total_visitors = extractNumFromString(_visitors) || 500
+
               const sub = await setAdminSubscription({
                 price: price.price,
-                validity: moment()
-                  .add(
-                    price.validity === '3_month'
-                      ? 3 - 1
-                      : price.validity === '6_months'
-                        ? 6 - 1
-                        : 12 - 1,
-                    'months'
-                  )
-                  .format('YYYY-MM-DD'),
+                validity: moment().add(1, 'year').format('YYYY-MM-DD'),
                 type: 'subscription',
-                uid: admin?.uid as string
+                uid: admin?.uid as string,
+                limit: {
+                  customers: total_customer,
+                  products: 1000,
+                  staffs: total_staffs,
+                  visitors: total_visitors
+                }
               })
               if (sub) {
-                addTransaction(admin?.uid as string, {
+                await addTransaction(admin?.uid as string, {
                   amount: order.data?.amount,
-                  currency: order?.data?.currency,
-                  order_id: order?.data?.id,
+                  currency: order?.order?.currency,
+                  order_id: order?.order?.id,
                   payment_id: response.razorpay_payment_id,
                   data: sub?.data
                 })
@@ -100,7 +112,38 @@ const Pricing = () => {
 
   return user?.subscription && !isSubscriptionActive ? (
     <Container>
-      <Paper style={{ maxWidth: '320px' }}>
+      <Dialog
+        open={true}
+        style={{ flexDirection: 'column', flexWrap: 'wrap' }}
+        slotProps={{
+          paper: {
+            className: 'scrollbar'
+          }
+        }}
+        sx={(theme) => ({
+          '.MuiPaper-root': {
+            width: '100%',
+            zIndex: 100,
+            padding: '24px 32px',
+            maxWidth: 'max-content',
+            height: 'max-content',
+            maxHeight: 'calc(100% - 24px)',
+            display: 'flex',
+            flexWrap: 'wrap',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: '#ffffffdc',
+            '& form': {
+              width: '100%',
+              padding: '24px 0px 8px 0px'
+            },
+            [theme.breakpoints.down('sm')]: {
+              padding: '16px 24px'
+            }
+          }
+        })}
+      >
         <CustomTypography variant="h5" fontFamily={'Syne'} fontWeight={'700'} textAlign={'center'}>
           Subscription Status
         </CustomTypography>
@@ -117,15 +160,46 @@ const Pricing = () => {
           }}
           variant={'contained'}
           fullWidth={true}
-          onClick={() => navigate('/home')}
+          onClick={() => navigate('/')}
         >
           Go To Home
         </Button>
-      </Paper>
+      </Dialog>
     </Container>
   ) : (
     <Container>
-      <Paper>
+      <Dialog
+        open={true}
+        style={{ flexDirection: 'column', flexWrap: 'wrap' }}
+        slotProps={{
+          paper: {
+            className: 'scrollbar'
+          }
+        }}
+        sx={(theme) => ({
+          '.MuiPaper-root': {
+            width: '100%',
+            zIndex: 100,
+            padding: '24px 32px',
+            maxWidth: 'max-content',
+            height: 'max-content',
+            maxHeight: 'calc(100% - 24px)',
+            display: 'flex',
+            flexWrap: 'wrap',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: '#bebebe9d',
+            '& form': {
+              width: '100%',
+              padding: '24px 0px 8px 0px'
+            },
+            [theme.breakpoints.down('sm')]: {
+              padding: '16px 24px'
+            }
+          }
+        })}
+      >
         <CustomTypography variant="h3" fontFamily={'Syne'} fontWeight={'700'}>
           Choose a Plan
         </CustomTypography>
@@ -176,14 +250,28 @@ const Pricing = () => {
             </PricingContainer>
           ))}
         </InnerContainer>
-      </Paper>
+        {isSubscriptionActive && (
+          <Button
+            sx={{
+              zIndex: 100,
+              padding: '12px 24px',
+              marginTop: '12px'
+            }}
+            variant={'contained'}
+            // fullWidth={true}
+            onClick={() => navigate('/home')}
+          >
+            Back to Home
+          </Button>
+        )}
+      </Dialog>
     </Container>
   )
 }
 
 export default Pricing
 
-const Container = styled('div')(({ theme }) => ({
+const Container = styled('div')(({}) => ({
   width: '100%',
   height: '100%',
   display: 'flex',
@@ -204,26 +292,6 @@ const Container = styled('div')(({ theme }) => ({
     position: 'absolute',
     top: 0,
     left: 0
-  },
-  '& .MuiPaper-root': {
-    width: 'calc(100% - 24px)',
-    zIndex: 100,
-    padding: '24px 32px',
-    maxWidth: 'max-content',
-    height: 'max-content',
-    maxHeight: 'calc(100% - 24px)',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#bebebe9d',
-    '& form': {
-      width: '100%',
-      padding: '24px 0px 8px 0px'
-    },
-    [theme.breakpoints.down('sm')]: {
-      padding: '16px 24px'
-    }
   }
 }))
 
@@ -236,6 +304,7 @@ const InnerContainer = styled('div')({
   justifyContent: 'space-between',
   overflowX: 'auto',
   gap: '12px',
+  paddingBottom: '12px',
   paddingTop: '12px'
 })
 

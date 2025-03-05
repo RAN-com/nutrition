@@ -11,7 +11,7 @@ import { useFormik } from 'formik'
 import * as yup from 'yup'
 
 const validationSchema = yup.object({
-  url: yup.object().required(),
+  url: yup.string().required(),
   description: yup.string().optional().notRequired()
 })
 
@@ -58,6 +58,8 @@ const VideoGallery = () => {
       })
     )
   }
+
+  console.log(formik.errors)
 
   return (
     <Container>

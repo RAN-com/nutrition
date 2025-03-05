@@ -20,7 +20,6 @@ import NoInternet from '@renderer/components/modal/no-internet'
 
 const Navigation = () => {
   const user = useAppSelector((s) => s.auth.user)
-  console.log(window.location.href)
   const router = createBrowserRouter([
     {
       element: <NoInternet />,

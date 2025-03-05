@@ -22,7 +22,7 @@ const AboutHeader = () => {
             disableFocusRipple
             disableTouchRipple
             onClick={() => {
-              navigate(-1)
+              navigate('/staffs', { replace: true })
             }}
             startIcon={
               <CustomIcon

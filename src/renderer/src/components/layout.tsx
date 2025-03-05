@@ -39,14 +39,16 @@ const LayoutV2: React.FC<Props> = ({ children }: Props) => {
           dispatch(setUser(data.data))
         }
       })
+      console.log('Jeuy')
       if (!isSubscribed) {
         console.log(
           'Your subscription has expired. Please renew your subscription to continue using the service'
         )
+
         navigate('/pricing')
         return
       } else {
-        console.log('VALID SUBSCRIPTION')
+        console.log('SUBSCRIPTION', isSubscribed)
       }
     } else {
       navigate('/auth/login')

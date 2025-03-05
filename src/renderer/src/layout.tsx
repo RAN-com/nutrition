@@ -22,6 +22,7 @@ const getTitle = () => {
   }
   return title
 }
+
 const Layout: React.FC<Props> = ({ children }) => {
   const title = getTitle()
   const handleQuit = () => {
@@ -32,12 +33,6 @@ const Layout: React.FC<Props> = ({ children }) => {
     window.electron?.updateResponse('minimize_app')
   }
 
-  const isAuth = window.location.pathname
-  console.log(isAuth)
-
-  React.useEffect(() => {
-    console.log(isAuth)
-  }, [isAuth])
   return (
     <Container>
       <TabBar>
@@ -80,7 +75,7 @@ const Layout: React.FC<Props> = ({ children }) => {
 export default Layout
 
 const Container = styled('div')({
-  width: '100vw',
+  width: '100%',
   height: '100vh',
   display: 'grid',
   gridTemplateColumns: '1fr',

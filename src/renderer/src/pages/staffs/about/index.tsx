@@ -16,16 +16,19 @@ import { CustomerResponse } from '@renderer/types/customers'
 import { AppointmentData } from '@renderer/types/staff'
 import { VisitorData } from '@renderer/types/visitor'
 import React from 'react'
-import { getAllAppointments } from '@renderer/firebase/appointments'
 import { staffAssignedCustomers } from '@renderer/firebase/customers'
 import { staffAssignedVisitors } from '@renderer/firebase/visitor'
 import CustomIcon from '@renderer/components/icons'
 import { AllIcons, Icons } from '@renderer/types/icon'
 import AppointmentsCard from './appointment-card'
-import { asyncGetCurrentStaffDomainData } from '@renderer/redux/features/user/staff'
+import {
+  asyncGetCurrentStaffDomainData,
+  asyncSetCurrentStaff
+} from '@renderer/redux/features/user/staff'
 import AvailableSoon from '@renderer/components/modal/available-soon'
 import PurchaseSubscription from './purchase-subscription'
 import { asyncInitCardUpdate } from '@renderer/redux/features/user/card'
+import { getAppointmentsBySid } from '@renderer/firebase/appointments'
 
 // Define the keyframe for the rotating animation
 const rotate = keyframes`
@@ -59,7 +62,7 @@ const AboutStaff = () => {
       setLoading(true)
       debounce(() => {
         Promise.all([
-          getAllAppointments(user?.uid, (staff?.data.assigned_subdomain as string) ?? ''),
+          getAppointmentsBySid(staff?.data.assigned_subdomain as string),
           staffAssignedCustomers(user?.uid, staff.data?.sid),
           staffAssignedVisitors(user?.uid, staff.data?.sid)
         ])
@@ -80,9 +83,19 @@ const AboutStaff = () => {
 
   React.useEffect(() => {
     if (refresh) {
+      dispatch(
+        asyncSetCurrentStaff({
+          uid: user?.uid as string,
+          vid: staff?.data?.sid as string
+        })
+      )
+      dispatch(
+        asyncGetCurrentStaffDomainData({ domain: staff?.data?.assigned_subdomain as string })
+      )
       pullData()
     }
   }, [refresh])
+
   React.useEffect(() => {
     pullData()
   }, [])

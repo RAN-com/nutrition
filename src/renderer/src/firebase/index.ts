@@ -208,6 +208,12 @@ export const setAdminSubscription = async ({
   validity: string
   price: number
   type: string
+  limit: {
+    customers: number
+    products: number
+    staffs: number
+    visitors: number
+  }
 }) => {
   const docRef = doc(firestore, `users/${uid}`)
   const docSnap = await getDoc(docRef)
@@ -227,7 +233,7 @@ export const setAdminSubscription = async ({
           price,
           subscribedOn: moment().format('YYYY-MM-DD HH:mm:ss'),
           total_customers: 30,
-          total_products: 100,
+          total_products: 200,
           total_staffs: 20,
           total_visitors: 30
         }

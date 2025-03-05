@@ -15,6 +15,9 @@ export default defineConfig({
         '@renderer': resolve('src/renderer/src')
       }
     },
+    define: {
+      'util.inspect': 'undefined' // or 'console.log' or a replacement function.
+    },
     plugins: [react()]
   }
 })

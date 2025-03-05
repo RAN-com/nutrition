@@ -1,6 +1,6 @@
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore'
 import { firestore } from '.'
-import { CardCreateData, CardData } from '@renderer/types/card'
+import { CardCreateData, CardData, DomainData } from '@renderer/types/card'
 import { errorToast, successToast } from '@renderer/utils/toast'
 import moment from 'moment'
 import { uploadFiles } from '@renderer/lib/upload-img'
@@ -152,18 +152,22 @@ export const updateCardStatus = async (sid: string, canShow: boolean) => {
   }
 }
 
-export const updateCardValidity = async (sid: string, valid_till: string) => {
-  const cardQuery = doc(firestore, `domains/${sid}`)
-  const cardRef = await getDoc(cardQuery)
+export const updateCardValidity = async (domain: string, sid: string, valid_till: string) => {
+  let cardQuery = doc(firestore, `domains/${domain}`)
+  let cardRef = await getDoc(cardQuery)
 
   if (!cardRef?.exists()) {
     await setDoc(
       cardQuery,
       {
+        created_by: sid,
+        created_on: new Date().toISOString(),
+        is_active: true,
+        staff_id: sid,
         subscription: {
           valid_till
         }
-      },
+      } as DomainData,
       { merge: true }
     )
   } else {

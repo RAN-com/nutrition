@@ -12,6 +12,7 @@ type Props = {
   visitors: VisitorData[]
 }
 const StaffContent = ({ appointments, customers, visitors }: Props) => {
+  console.log(appointments, customers, visitors)
   return (
     <div
       className="scrollbar"
@@ -26,15 +27,17 @@ const StaffContent = ({ appointments, customers, visitors }: Props) => {
         <CustomTypography variant={'h4'}>Recent Appointments</CustomTypography>
         <PaginatedTable
           sx={{
-            height: '100%'
+            height: '100%',
+            maxHeight: '100%',
+            overflowY: 'scroll'
           }}
           data={{
-            header: ['Name', 'Email', 'Phone', 'Gender', 'Created On'],
+            header: ['Name', 'Email', 'Phone', 'Appointment Date', 'Created On'],
             row: appointments.map((cst) => [
               <>{cst.name}</>,
               <>{cst.email}</>,
               <>{cst.phone}</>,
-              <>{cst.gender}</>,
+              <>{moment(cst.appointment_date).format('DD-MM-YYYY HH:MM')}</>,
               <>{moment(cst.createdOn).format('DD-MM-YYYY HH:MM')}</>
             ])
           }}
@@ -49,7 +52,9 @@ const StaffContent = ({ appointments, customers, visitors }: Props) => {
           <CustomTypography variant={'h4'}>Assigned Customers</CustomTypography>
           <PaginatedTable
             sx={{
-              height: '100%'
+              height: '100%',
+              maxHeight: '100%',
+              overflowY: 'scroll'
             }}
             data={{
               header: ['Name', 'Email', 'Phone', 'Gender'],
@@ -70,7 +75,9 @@ const StaffContent = ({ appointments, customers, visitors }: Props) => {
           <CustomTypography variant={'h4'}>Assigned Visitors</CustomTypography>
           <PaginatedTable
             sx={{
-              height: '100%'
+              height: '100%',
+              maxHeight: '100%',
+              overflowY: 'scroll'
             }}
             data={{
               header: ['Name', 'Email', 'Phone', 'Gender'],
@@ -103,6 +110,7 @@ const RowContainer = styled('div')({
 
 const Container = styled('div')({
   width: '100%',
+  height: '100%',
   display: 'flex',
   flexDirection: 'column',
   gap: '12px',

@@ -38,7 +38,7 @@
     "type": "subscription",
     "validity": "1_year",
     "priceId": "prestige_1_year",
-    "features": ["15 Customers", "15 Visitors"]
+    "features": ["15 Customers", "15 Staffs", "15 Visitors"]
   },
   {
     "title": "Premium Pack",

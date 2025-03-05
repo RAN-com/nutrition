@@ -24,21 +24,21 @@ const CheckAuth = ({ user }: Props) => {
       navigate('/auth/login')
     }
   }, [user])
-
+  console.log(user)
   return <Outlet />
   // return user ? (
-  // //   user?.subscription ? (
-  // //     moment(user?.subscription?.valid_till).isSameOrAfter(moment()) ? (
-  // //       <Outlet />
-  // //     ) : (
-  // //       <Navigate to={'/pricing'} replace={true} />
-  // //     )
-  // //   ) : (
-  // //     <Navigate to={'/pricing'} replace={true} />
-  // //   )
-  // // ) : (
-  // //   <Navigate to={'/auth/login'} replace={true} />
-  // // )
+  //   !!user?.subscription ? (
+  //     moment(user?.subscription?.valid_till).isSameOrAfter(moment()) ? (
+  //       <Outlet />
+  //     ) : (
+  //       <Navigate to={'/pricing'} replace={true} />
+  //     )
+  //   ) : (
+  //     <Navigate to={'/pricing'} replace={true} />
+  //   )
+  // ) : (
+  //   <Navigate to={'/auth/login'} replace={true} />
+  // )
 }
 
 export default CheckAuth

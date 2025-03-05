@@ -48,7 +48,7 @@ export const uploadFiles = async (
     const params = {
       Bucket: import.meta.env.VITE_VERCEL_AWS_BUCKET_ID,
       Key: folderPath,
-      Body: file,
+      Body: file.stream(),
       ContentType: file.type
     }
 

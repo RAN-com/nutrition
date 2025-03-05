@@ -34,7 +34,7 @@ function createWindow({ width, height }: { width: number; height: number }): voi
     roundedCorners: true,
     title: 'Nutrition',
     show: true,
-    icon: '../../resources/icon.png',
+    icon: join(__dirname, '../../resources/icon.png'),
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),

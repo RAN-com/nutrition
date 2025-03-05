@@ -72,3 +72,7 @@ export function priceToLetters(price: number) {
   }
   return price.toString() // Return the number as is if less than 1000
 }
+
+export const extractNumFromString = (str: string) => {
+  return parseInt(str.match(/\d/g)?.join('') ?? '0')
+}

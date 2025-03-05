@@ -31,9 +31,8 @@ export type AppointmentData = {
   name: string
   phone: string
   email?: string
+  appointment_date: string
   assigned_to: {
     sid: string
-    name: string
   }
-  gender: string
 }
