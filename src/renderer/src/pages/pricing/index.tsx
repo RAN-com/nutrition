@@ -1,20 +1,20 @@
 import { Button, Dialog, Divider, styled } from '@mui/material'
 import BGImg from '@renderer/assets/login-bg.png'
 import CustomTypography from '@renderer/components/typography'
-import { useAppSelector } from '@renderer/redux/store/hook'
+import { useAppSelector, useAppDispatch } from '@renderer/redux/store/hook'
 import { CenterUserPricing } from '@renderer/types/user'
-import { capitalizeSentence, extractNumFromString } from '@renderer/utils/functions'
-import { errorToast, infoToast, successToast } from '@renderer/utils/toast'
-import { useRazorpay, RazorpayOrderOptions } from 'react-razorpay'
+import { capitalizeSentence } from '@renderer/utils/functions'
+import { errorToast, successToast } from '@renderer/utils/toast'
 import axios from 'axios'
 import { encryptData } from '@renderer/utils/crypto'
 import moment from 'moment'
 import { useNavigate } from 'react-router-dom'
-import { addTransaction, setAdminSubscription } from '@renderer/firebase'
 import { SERVER_URL } from '@renderer/constants/value'
+import { createAdminPayment } from '@renderer/firebase/pricing'
+import { setOrderPendingData } from '@renderer/redux/features/pricing/slice'
 
 const Pricing = () => {
-  const { Razorpay } = useRazorpay()
+  const dispatch = useAppDispatch()
   const pricing = useAppSelector((s) => s.pricing.center_user)
   const user = useAppSelector((s) => s.auth.user)
   const navigate = useNavigate()
@@ -37,68 +37,28 @@ const Pricing = () => {
         )
       )?.data
 
-      const key = import.meta.env.DEV
-        ? import.meta.env.VITE_VERCEL_RAZORPAY_KEY
-        : import.meta.env.VITE_VERCEL_RAZORPAY_LIVE_KEY
+      if (order.status >= 200 && order.status <= 300 && order.key) {
+        const store = await createAdminPayment({
+          uid: admin?.uid as string,
+          createdOn: moment().toString(),
+          order: order?.order,
+          type: 'SUBSCRIPTION',
+          sid: undefined,
+          status: 'pending'
+        })
 
-      if (order.status >= 200 && order.status <= 300) {
-        const options: RazorpayOrderOptions = {
-          amount: order?.order?.amount,
-          currency: order?.order?.currency,
-          key: key as string,
-          name: 'RAN',
-          order_id: order?.order?.id,
-          retry: {
-            enabled: true
-          },
-          modal: {
-            ondismiss: () => {
-              infoToast('Payment failed. Please try again')
-            }
-          },
-          async handler(response) {
-            try {
-              const [_customer, _staff, _visitors] = price.features as string[]
-
-              const total_customer = extractNumFromString(_customer) || 500
-              const total_staffs = extractNumFromString(_staff) || 500
-              const total_visitors = extractNumFromString(_visitors) || 500
-
-              const sub = await setAdminSubscription({
-                price: price.price,
-                validity: moment().add(1, 'year').format('YYYY-MM-DD'),
-                type: 'subscription',
-                uid: admin?.uid as string,
-                limit: {
-                  customers: total_customer,
-                  products: 1000,
-                  staffs: total_staffs,
-                  visitors: total_visitors
-                }
-              })
-              if (sub) {
-                await addTransaction(admin?.uid as string, {
-                  amount: order.data?.amount,
-                  currency: order?.order?.currency,
-                  order_id: order?.order?.id,
-                  payment_id: response.razorpay_payment_id,
-                  data: sub?.data
-                })
-                successToast('Subscription activated successfully')
-                navigate('/home')
-              } else {
-                errorToast('Failed to activate subscription. Please try again')
-              }
-            } catch (err) {
-              console.log(err)
-            }
-          }
+        if (store.status) {
+          successToast("You'll be redirected to payments page...")
+          dispatch(setOrderPendingData(store.data))
+        } else if (store?.data && !store.status) {
+          errorToast('Clear pending payments to continue. Contact support if this error exists')
+          dispatch(setOrderPendingData(store.data))
+        } else {
+          errorToast('Payment Portal is not available for now. Please try again later')
         }
-
-        const razorpayInstance = new Razorpay(options)
-        razorpayInstance.open()
+        return
       } else {
-        errorToast(order.data as string)
+        errorToast(order?.data as string)
       }
     } catch (err: any) {
       console.log(err)

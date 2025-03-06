@@ -4,22 +4,21 @@ import CustomIcon from '@renderer/components/icons'
 import CustomTextInput from '@renderer/components/text-input'
 import CustomTypography from '@renderer/components/typography'
 import { SERVER_URL } from '@renderer/constants/value'
-import { addTransaction } from '@renderer/firebase'
 import { setSubDomainToStaff } from '@renderer/firebase/appointments'
-import { updateCardValidity } from '@renderer/firebase/card'
 import { assignOrUpdateDomain, getDomainData } from '@renderer/firebase/domain'
+import { createCardPayment } from '@renderer/firebase/pricing'
 import { getStaff } from '@renderer/firebase/staffs'
+import { setOrderPendingData } from '@renderer/redux/features/pricing/slice'
 import {
   asyncGetCurrentStaffDomainData,
   setCurrentStaff
 } from '@renderer/redux/features/user/staff'
 import { useAppSelector, useAppDispatch } from '@renderer/redux/store/hook'
-import { errorToast, infoToast, successToast } from '@renderer/utils/toast'
+import { errorToast, successToast } from '@renderer/utils/toast'
 import axios from 'axios'
 import { useFormik } from 'formik'
 import moment from 'moment'
 import React from 'react'
-import { RazorpayOrderOptions, useRazorpay } from 'react-razorpay'
 import * as yup from 'yup'
 
 const validationSchema = yup.object({
@@ -171,12 +170,10 @@ export default PurchaseSubscription
 
 const Payment = () => {
   const admin = useAppSelector((s) => s.auth.user)
-  const { Razorpay } = useRazorpay()
-  const current_staff = useAppSelector((s) => s.staffs.current_staff)
+  const dispatch = useAppDispatch()
 
   const [clicked, setClicked] = React.useState(false)
   const staff = useAppSelector((s) => s.staffs.current_staff)
-  const dispatch = useAppDispatch()
 
   async function handlePayment() {
     try {
@@ -197,79 +194,27 @@ const Payment = () => {
         )
       )?.data
 
-      // Get the Razorpay API key
-      const key = import.meta.env.DEV
-        ? import.meta.env.VITE_VERCEL_RAZORPAY_KEY
-        : import.meta.env.VITE_VERCEL_RAZORPAY_LIVE_KEY
-      console.log(order, key)
-
-      if (!key) {
-        errorToast('Not available at the moment. Contact developer')
-        return
-      } else {
-        successToast('Details Retrieved')
-      }
-
       if (order?.status >= 200 && order?.status <= 300) {
         // Set up Razorpay payment options
-        const options: RazorpayOrderOptions = {
-          amount: order?.order?.amount, // Amount in paise (100 paisa = 1 INR)
-          currency: order?.order?.currency, // Currency (INR)
-          key: key as string, // Razorpay API key
-          name: 'RAN', // Your company or app name
-          order_id: order?.order?.id, // Razorpay order ID
-          retry: {
-            enabled: true
-          },
-          modal: {
-            ondismiss: () => {
-              infoToast('Payment failed. Please try again')
-            }
-          },
-          handler: async (response) => {
-            try {
-              // Handle payment success, update subscription status
-              const sub = await updateCardValidity(
-                current_staff?.data?.assigned_subdomain as string,
-                current_staff?.data?.sid as string,
-                moment().add(1, 'year').format('YYYY-MM-DD')
-              )
+        const store = await createCardPayment({
+          uid: admin?.uid as string,
+          createdOn: moment().toString(),
+          order: order?.order,
+          sid: staff?.data?.sid as string,
+          type: 'VISITING_CARD',
+          status: 'pending'
+        })
 
-              if (sub?.status) {
-                // Log the transaction
-                addTransaction(admin?.uid as string, {
-                  amount: order?.order?.amount,
-                  currency: order?.order?.currency,
-                  order_id: order?.order?.id,
-                  payment_id: response.razorpay_payment_id,
-                  data: sub?.data
-                })
-                dispatch(
-                  asyncGetCurrentStaffDomainData({
-                    domain: staff?.data?.assigned_subdomain as string
-                  })
-                )
-                successToast('Subscription activated successfully')
-              } else {
-                errorToast('Failed to activate subscription. Please try again')
-              }
-            } catch (err) {
-              console.log(err)
-            }
-          }
-        }
-
-        // Ensure Razorpay instance is initialized and open the payment modal
-        if (typeof Razorpay !== 'undefined') {
-          const razorpayInstance = new Razorpay(options)
-          if (!razorpayInstance) {
-            console.log('Razorpay Not Found')
-            return
-          }
-          razorpayInstance.open()
+        if (store.status) {
+          successToast("You'll be redirected to payments page...")
+          dispatch(setOrderPendingData(store.data))
+        } else if (store?.data && !store.status) {
+          errorToast('Clear pending payments to continue. Contact support if this error exists')
+          dispatch(setOrderPendingData(store.data))
         } else {
-          errorToast('Razorpay script not loaded. Please contact support.')
+          errorToast('Payment Portal is not available for now. Please try again later')
         }
+        return
       } else {
         errorToast(order?.data as string)
       }

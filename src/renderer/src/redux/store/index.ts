@@ -37,7 +37,7 @@ const appReducer = combineReducers({
 const persistConfig = {
   key: 'root',
   storage,
-  whitelist: ['auth', 'staffs'] // List of reducers to persist
+  whitelist: ['auth', 'staffs', 'pricing'] // List of reducers to persist
 }
 
 // Create persisted reducer

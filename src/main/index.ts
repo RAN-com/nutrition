@@ -11,7 +11,6 @@ import {
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { autoUpdater } from 'electron-updater'
-
 function createWindow({ width, height }: { width: number; height: number }): void {
   const mainWindow = new BrowserWindow({
     width,
@@ -37,7 +36,8 @@ function createWindow({ width, height }: { width: number; height: number }): voi
     // ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
-      devTools: true
+      nodeIntegration: true,
+      contextIsolation: false
     }
   })
 
@@ -53,7 +53,7 @@ function createWindow({ width, height }: { width: number; height: number }): voi
     process.env.APPIMAGE = join(
       __dirname,
       'out',
-      `Installar_Mapeo_${app.getVersion()}_linux.AppImage`
+      `Nutrition Setup ${app.getVersion()}_linux.AppImage`
     )
   }
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
@@ -109,26 +109,35 @@ function createWindow({ width, height }: { width: number; height: number }): voi
       }
     }
   })
-  // Auto-updater events
+  autoUpdater.autoDownload = false // Disable auto-download
+
+  // Checking for updates
   autoUpdater.on('checking-for-update', () => {
     console.log('Checking for updates...')
     mainWindow.webContents.send('update-check', 'Checking for updates...')
   })
 
+  // When an update is available, notify the renderer
   autoUpdater.on('update-available', () => {
     console.log('Update available')
     mainWindow.webContents.send('updateAvailable', true)
   })
 
+  // When an update is downloaded, wait for user confirmation
   autoUpdater.on('update-downloaded', () => {
-    console.log('Update downloaded')
+    console.log('Update downloaded. Waiting for user confirmation.')
     mainWindow.webContents.send('updateDownloaded', true)
   })
 
+  // Error handling
   autoUpdater.on('error', (error) => {
     console.error('Update error:', error)
     dialog.showErrorBox('Update Error', `Error: ${error.message || error}`)
   })
+
+  // Start checking for updates
+  console.log('App version:', app.getVersion())
+  autoUpdater.checkForUpdates()
 
   console.log('App version:', app.getVersion())
   autoUpdater.checkForUpdatesAndNotify()
