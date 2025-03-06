@@ -50,7 +50,13 @@ function createWindow({ width, height }: { width: number; height: number }): voi
     shell.openExternal(details.url)
     return { action: 'deny' }
   })
-
+  if (is.dev) {
+    process.env.APPIMAGE = join(
+      __dirname,
+      'out',
+      `Installar_Mapeo_${app.getVersion()}_linux.AppImage`
+    )
+  }
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
     mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
   } else {

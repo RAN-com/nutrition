@@ -180,10 +180,11 @@ const Payment = () => {
 
   async function handlePayment() {
     try {
+      const url = `${SERVER_URL}/api/payment`
       // Fetch order details from the backend API
       const order = (
         await axios.post(
-          `${SERVER_URL}/api/payment`,
+          url,
           JSON.stringify({
             data: 'encrypted-data',
             type: 'APPOINTMENT_CARD'

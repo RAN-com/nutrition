@@ -17,7 +17,7 @@ const App = () => {
       setUpdateDownloaded(true)
     })
   }, [])
-
+  console.log(import.meta.env)
   return (
     <>
       <RestartModal
