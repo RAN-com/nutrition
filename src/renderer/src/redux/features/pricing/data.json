@@ -1,0 +1,67 @@
+[
+  {
+    "title": "Basic Appointment Package",
+    "price": 50,
+    "type": "appointments",
+    "priceId": "basic_appointment_01",
+    "features": [
+      "Includes 1 consultation session",
+      "Priority scheduling",
+      "Access to digital health records"
+    ]
+  },
+  {
+    "title": "Standard Appointment Package",
+    "price": 120,
+    "type": "appointments",
+    "priceId": "standard_appointment_02",
+    "features": [
+      "Includes 3 consultation sessions",
+      "Flexible scheduling options",
+      "Access to health reports"
+    ]
+  },
+  {
+    "title": "Premium Appointment Package",
+    "price": 200,
+    "type": "appointments",
+    "priceId": "premium_appointment_03",
+    "features": [
+      "Includes 5 consultation sessions",
+      "Dedicated health advisor",
+      "Extended support for follow-ups"
+    ]
+  },
+  {
+    "title": "Prestige",
+    "price": 3650,
+    "type": "subscription",
+    "validity": "1_year",
+    "priceId": "prestige_1_year",
+    "features": ["15 Customers", "15 Staffs", "15 Visitors"]
+  },
+  {
+    "title": "Premium Pack",
+    "price": 6800,
+    "type": "subscription",
+    "validity": "1_year",
+    "priceId": "premium_pack_1_year",
+    "features": ["30 Customers", "30 Staffs", "30 Visitors"]
+  },
+  {
+    "title": "Premium+",
+    "price": 8500,
+    "type": "subscription",
+    "validity": "1_year",
+    "priceId": "premium_plus_1_year",
+    "features": ["50 Customers", "50 Staffs", "50 Visitors"]
+  },
+  {
+    "title": "Premium++",
+    "price": 15000,
+    "type": "subscription",
+    "validity": "1_year",
+    "priceId": "premium_plus_plus_1_year",
+    "features": ["Unlimited Customers", "Unlimited Staffs", "Unlimited Visitors"]
+  }
+]

@@ -1,0 +1,75 @@
+# Node modules
+node_modules
+.npm/
+
+# Build directories and output
+dist/
+release/
+out/
+build/
+coverage/
+
+# OS-generated files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs and temporary files
+*.log
+*.tmp
+yarn-debug.log*
+yarn-error.log*
+npm-debug.log*
+package-lock.json
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# IDE and Editor-specific files
+.vscode/
+.idea/
+*.swp
+*.swo
+*.bak
+
+# Electron-specific
+**/app.asar
+**/app.asar.unpacked
+
+# Generated auto-update files
+latest.yml
+*.blockmap
+
+# Environment Variables
+.env
+.env.local
+
+# GitHub-specific artifacts
+.github/workflows/*.yml
+
+# Ignore Electron Vite-specific cache and metadata
+.vite/
+*.tsbuildinfo
+
+# MacOS build artifacts
+*.dmg
+*.plist
+
+# Windows build artifacts
+*.exe
+*.nsis.*
+*.msi
+
+# Linux build artifacts
+*.AppImage
+*.deb
+*.snap
+
+# Icons
+*.ico
+
+# Preload or compiled files
+**/*.cache
+**/*.map
+*.hot-update.*

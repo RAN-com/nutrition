@@ -1,0 +1,84 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "lib": [
+      "ES2020",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "composite": true,
+    "skipLibCheck": false,
+    "noImplicitAny": false,
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "baseUrl": "./src/renderer",
+    "strictFunctionTypes": false,
+    "types": [
+      "electron-vite/node"
+    ],
+    "paths": {
+      "@lottie/*": [
+        "lottie/*"
+      ],
+      "@assets/*": [
+        "assets/*"
+      ],
+      "@navigator/*": [
+        "navigation/*"
+      ],
+      "@redux/*": [
+        "redux/*"
+      ],
+      "@screens/*": [
+        "screen/*"
+      ],
+      "@components/*": [
+        "components/*"
+      ],
+      "@theme/*": [
+        "theme/*"
+      ],
+      "@utils/*": [
+        "utils/*"
+      ],
+      "@constants/*": [
+        "constants/*"
+      ],
+      "@hooks/*": [
+        "hooks/*"
+      ],
+      "@cTypes/*": [
+        "types/*"
+      ],
+      "@env/*": [
+        "env/*"
+      ],
+      "@lib/*": [
+        "lib/*"
+      ],
+      "@pages/*": [
+        "pages/*"
+      ],
+      "@data/*": [
+        "data/*"
+      ]
+    }
+  },
+  "include": [
+    "vite.config.ts",
+    "electron.vite.config.*",
+    "src/main/**/*",
+    "src/preload/**/*"
+  ]
+}

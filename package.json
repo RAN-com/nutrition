@@ -1,0 +1,127 @@
+{
+  "name": "nutrition",
+  "version": "1.4.0",
+  "description": "The Nutrition Dashboard is a powerful and intuitive platform designed to provide Nutrition members with easy access to vital business and health data",
+  "main": "./out/main/index.js",
+  "author": "example.com",
+  "homepage": "https://raninfo.in",
+  "scripts": {
+    "format": "prettier --write .",
+    "lint": "eslint . --ext .js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix",
+    "typecheck:node": "tsc --noEmit -p tsconfig.node.json --composite false",
+    "typecheck:web": "tsc --noEmit -p tsconfig.web.json --composite false",
+    "typecheck": "npm run typecheck:node && npm run typecheck:web",
+    "start": "electron-vite preview",
+    "dev": "electron-vite dev",
+    "build": "npm run typecheck && electron-vite build",
+    "postinstall": "electron-builder install-app-deps",
+    "build:unpack": "npm run build && electron-builder --dir",
+    "build:win": "npm run build && electron-builder --win --publish always",
+    "build:mac": "electron-vite build && electron-builder --mac --publish always",
+    "build:linux": "electron-vite build && electron-builder --linux --publish always"
+  },
+  "build": {
+    "appId": "com.ran.nutrition",
+    "productName": "Nutrition",
+    "files": [
+      "./out/**/*",
+      "dist/**/*",
+      "node_modules/**/*",
+      "package.json"
+    ],
+    "directories": {
+      "output": "release"
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "RAN-com",
+      "repo": "nutrition",
+      "releaseType": "release"
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "mac": {
+      "target": "dmg"
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ]
+    }
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.749.0",
+    "@aws-sdk/lib-storage": "^3.758.0",
+    "@editorjs/delimiter": "^1.4.2",
+    "@editorjs/editorjs": "^2.30.8",
+    "@editorjs/header": "^2.8.8",
+    "@editorjs/image": "^2.10.2",
+    "@editorjs/link": "^2.6.2",
+    "@editorjs/nested-list": "^1.4.3",
+    "@editorjs/paragraph": "^2.11.7",
+    "@electron-toolkit/preload": "^3.0.1",
+    "@electron-toolkit/utils": "^4.0.0",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "@mui/lab": "^6.0.0-beta.29",
+    "@mui/material": "^6.4.4",
+    "@mui/x-charts": "^7.26.0",
+    "@mui/x-data-grid": "^7.26.0",
+    "@mui/x-date-pickers": "^7.26.0",
+    "@react-editor-js/core": "^2.1.0",
+    "@reduxjs/toolkit": "^2.5.1",
+    "@swc/core": "^1.10.16",
+    "axios": "^1.7.9",
+    "concurrently": "^9.1.2",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "crypto-js": "^4.2.0",
+    "deep-diff": "^1.0.2",
+    "editorjs-react-renderer": "^3.5.1",
+    "editorjs-table": "^1.4.10",
+    "editorjs-text-alignment-blocktune": "^1.0.3",
+    "editorjs-text-color-plugin": "^2.0.4",
+    "electron-updater": "^6.3.9",
+    "express": "^4.21.2",
+    "file-loader": "^6.2.0",
+    "firebase": "^11.3.1",
+    "formik": "^2.4.6",
+    "jspdf": "^2.5.2",
+    "moment": "^2.30.1",
+    "morgan": "^1.10.0",
+    "os": "^0.1.2",
+    "path": "^0.12.7",
+    "react-hot-toast": "^2.5.2",
+    "react-icons": "^5.4.0",
+    "react-razorpay": "^3.0.1",
+    "react-redux": "^9.2.0",
+    "react-router-dom": "^7.1.5",
+    "redux-logger": "^3.0.6",
+    "redux-persist": "^6.0.0",
+    "ts-node-dev": "^2.0.0",
+    "uuid": "^11.0.5",
+    "vite-tsconfig-paths": "^5.1.4",
+    "yup": "^1.6.1"
+  },
+  "devDependencies": {
+    "@electron-toolkit/eslint-config-prettier": "^2.0.0",
+    "@electron-toolkit/eslint-config-ts": "^2.0.0",
+    "@electron-toolkit/tsconfig": "^1.0.1",
+    "@types/node": "^20.14.8",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.1",
+    "electron": "^31.0.2",
+    "electron-builder": "^24.13.3",
+    "electron-vite": "^2.3.0",
+    "eslint": "^8.57.0",
+    "eslint-plugin-react": "^7.34.3",
+    "prettier": "^3.3.2",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "typescript": "^5.5.2",
+    "vite": "^5.3.1"
+  }
+}
