@@ -101,6 +101,7 @@
     "redux-logger": "^3.0.6",
     "redux-persist": "^6.0.0",
     "ts-node-dev": "^2.0.0",
+    "update-electron-app": "^3.1.1",
     "uuid": "^11.0.5",
     "vite-tsconfig-paths": "^5.1.4",
     "yup": "^1.6.1"

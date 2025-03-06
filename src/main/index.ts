@@ -37,8 +37,7 @@ function createWindow({ width, height }: { width: number; height: number }): voi
     // ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
-      sandbox: false,
-      devTools: is.dev
+      devTools: true
     }
   })
 
