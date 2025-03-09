@@ -13,7 +13,9 @@ if (process.contextIsolated) {
       ...electronAPI,
       updateAvailable: () => ipcRenderer.send('updateAvailable'),
       updateDownloaded: () => ipcRenderer.send('updateDownloaded'),
-      updateResponse: (message: string) => ipcRenderer.send('updateResponse', message)
+      updateResponse: (message: string) => ipcRenderer.send('updateResponse', message),
+      generatePdf: (message: string, fileName?: string) =>
+        ipcRenderer.send('generatePdf', message, fileName)
     })
     contextBridge.exposeInMainWorld('api', api)
   } catch (error) {

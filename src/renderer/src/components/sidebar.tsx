@@ -6,6 +6,7 @@ import {
   ListItemIcon,
   ListItemText,
   styled,
+  Tooltip,
   useMediaQuery,
   useTheme
 } from '@mui/material'
@@ -17,9 +18,12 @@ import { useAppDispatch } from '@renderer/redux/store/hook'
 import CustomTypography from './typography'
 import React from 'react'
 type SidebarProps = {
+  hideExpand: boolean
   isOpened: boolean
   toggleSidebar(b?: boolean): void
   activeRoute: string | null
+  handleExpand(b: boolean): void
+  expand: boolean
 }
 
 type Options = {
@@ -95,7 +99,13 @@ const logoutOption: Options[] = [
   }
 ]
 
-const Sidebar = ({ isOpened, toggleSidebar }: SidebarProps): JSX.Element => {
+const Sidebar = ({
+  isOpened,
+  toggleSidebar,
+  handleExpand,
+  expand,
+  hideExpand
+}: SidebarProps): JSX.Element => {
   const dispatch = useAppDispatch()
   const path = useLocation().pathname
   const splitPath = path.split('/')?.[1]
@@ -103,7 +113,6 @@ const Sidebar = ({ isOpened, toggleSidebar }: SidebarProps): JSX.Element => {
   const navigate = useNavigate()
   const th = useTheme()
   const isMobile = useMediaQuery(th.breakpoints.down(680))
-
   const handleToggle = (id?: string | undefined): void => {
     if (id) {
       navigate(`${id}`)
@@ -121,6 +130,7 @@ const Sidebar = ({ isOpened, toggleSidebar }: SidebarProps): JSX.Element => {
     })
   }, [])
 
+  console.log(expand)
   return (
     <Fade in={!isMobile ? true : isOpened}>
       <Container
@@ -132,6 +142,9 @@ const Sidebar = ({ isOpened, toggleSidebar }: SidebarProps): JSX.Element => {
           '.sidebar__header': {
             display: 'none'
           },
+          '& *': {
+            transition: 'all .3s'
+          },
           [breakpoints.down(830)]: {
             '.sidebar__header': {
               display: 'flex'
@@ -140,7 +153,7 @@ const Sidebar = ({ isOpened, toggleSidebar }: SidebarProps): JSX.Element => {
             position: 'absolute',
             top: 0,
             left: 0,
-            minWidth: '320px',
+            minWidth: '100%',
             maxWidth: '100%',
             width: '100%',
             zIndex: 9999,
@@ -159,153 +172,212 @@ const Sidebar = ({ isOpened, toggleSidebar }: SidebarProps): JSX.Element => {
         <OptionContainer className="hide-scrollbar">
           {options.map((option) => (
             <>
-              <CustomListButton
-                disableRipple={true}
-                focusRipple={false}
-                disableTouchRipple={true}
-                onClick={() => {
-                  if (option.value === 'logout') {
-                    // return handleToggle();
-                    dispatch(setLogoutFlag(true))
-                    return handleToggle()
-                  }
-                  handleToggle(option.value)
-                }}
-                sx={{
-                  padding: '6px 24px',
-                  width: 'calc(100% - 12px)',
-                  margin: 'auto',
-                  marginTop: '8px',
-                  borderRadius: '12px',
-                  ...(option.value === 'logout'
-                    ? {
-                        '& *': {
-                          color: 'red'
-                        }
+              <Tooltip title={option.label} placement="right" arrow={true} followCursor={true}>
+                <span>
+                  <CustomListButton
+                    disableRipple={true}
+                    focusRipple={false}
+                    disableTouchRipple={true}
+                    onClick={() => {
+                      if (option.value === 'logout') {
+                        // return handleToggle();
+                        dispatch(setLogoutFlag(true))
+                        return handleToggle()
                       }
-                    : {
-                        color: 'inherit'
-                      }),
-                  ...(option.value.includes(currentPath)
-                    ? {
-                        backgroundColor: '#FFFEFE',
-                        boxShadow: '0px 0px 3px 0px #9c9c9c',
+                      handleToggle(option.value)
+                    }}
+                    sx={{
+                      padding: '6px 24px',
+                      width: 'calc(100% - 12px)',
+                      margin: 'auto',
+                      marginTop: '8px',
+                      borderRadius: '12px',
+                      ...(option.value === 'logout'
+                        ? {
+                            '& *': {
+                              color: 'red'
+                            }
+                          }
+                        : {
+                            color: 'inherit'
+                          }),
+                      ...(option.value.includes(currentPath)
+                        ? {
+                            backgroundColor: '#FFFEFE',
+                            boxShadow: '0px 0px 3px 0px #9c9c9c',
 
-                        '&:hover': {
-                          backgroundColor: '#FFFEFE'
-                        }
-                      }
-                    : {
-                        backgroundColor: 'transparent',
-                        '&:hover': {
-                          backgroundColor: 'transparent'
-                        }
-                      })
-                }}
-              >
-                {option?.name && option?.icon && (
-                  <ListItemIcon>
-                    <CustomIcon
-                      name={option.name}
-                      icon={option.icon}
-                      color={option.value.includes(currentPath) ? '#262627' : '#9D9FA1'}
-                    />
-                  </ListItemIcon>
-                )}
-                <ListItemText>
-                  <CustomTypography
-                    variant={'body2'}
-                    fontWeight={'500'}
-                    color={option.value.includes(currentPath) ? '#262627' : '#9D9FA1'}
+                            '&:hover': {
+                              backgroundColor: '#FFFEFE'
+                            }
+                          }
+                        : {
+                            backgroundColor: 'transparent',
+                            '&:hover': {
+                              backgroundColor: 'transparent'
+                            }
+                          })
+                    }}
                   >
-                    {option.label}
-                  </CustomTypography>
-                </ListItemText>
-              </CustomListButton>
+                    {option?.name && option?.icon && (
+                      <ListItemIcon
+                        sx={{
+                          justifyContent: !expand ? 'center' : 'initial'
+                        }}
+                      >
+                        <CustomIcon
+                          stopPropagation={false}
+                          name={option.name}
+                          icon={option.icon}
+                          color={option.value.includes(currentPath) ? '#262627' : '#9D9FA1'}
+                        />
+                      </ListItemIcon>
+                    )}
+                    {expand && (
+                      <ListItemText>
+                        <CustomTypography
+                          variant={'body2'}
+                          fontWeight={'500'}
+                          color={option.value.includes(currentPath) ? '#262627' : '#9D9FA1'}
+                        >
+                          {option.label}
+                        </CustomTypography>
+                      </ListItemText>
+                    )}
+                  </CustomListButton>
+                </span>
+              </Tooltip>
             </>
           ))}
         </OptionContainer>
         <div
           style={{
-            padding: '42px 12px 0px 12px'
+            padding: '42px 12px 0px 12px',
+            position: 'relative',
+            top: 0
           }}
         >
-          {logoutOption.map((option, idx) => (
-            <CustomListButton
-              key={idx}
-              disableRipple={true}
-              focusRipple={false}
-              disableTouchRipple={true}
-              onClick={() => {
-                if (option.value === 'logout') {
-                  // return handleToggle();
-                  dispatch(setLogoutFlag(true))
-                  return handleToggle()
-                }
-                handleToggle(option.value)
-              }}
-              sx={{
-                padding: '6px 24px',
-                width: 'calc(100% - 12px)',
-                margin: 'auto',
-                borderRadius: '12px',
-                ...(option.value === 'logout'
-                  ? {
-                      '& *': {
-                        color: 'red'
-                      }
-                    }
-                  : {
-                      color: 'inherit'
-                    }),
-                ...(option.value.includes(currentPath)
-                  ? {
-                      backgroundColor: '#FFFEFE',
-                      boxShadow: '0px 0px 3px 0px #9c9c9c',
-
-                      '&:hover': {
-                        backgroundColor: '#FFFEFE'
-                      }
-                    }
-                  : {
-                      backgroundColor: 'transparent',
-                      '&:hover': {
-                        backgroundColor: 'transparent'
-                      }
-                    })
-              }}
+          <div
+            onClick={() => handleExpand(!expand)}
+            style={{
+              opacity: hideExpand ? 0 : 1,
+              pointerEvents: hideExpand ? 'none' : 'all',
+              position: 'absolute',
+              top: '-20px',
+              right: '12px',
+              zIndex: 100,
+              padding: '8px',
+              boxShadow: '#00000012 -2px 2px 3px 5px',
+              borderRadius: '100px',
+              cursor: 'pointer'
+            }}
+          >
+            <Tooltip
+              title={'Toggle Sidebar'}
+              placement={expand ? 'left' : 'right'}
+              arrow={true}
+              followCursor={true}
             >
-              {option?.name && option?.icon && (
-                <ListItemIcon>
-                  <CustomIcon
-                    name={option.name}
-                    icon={option.icon}
-                    color={
-                      option.value.includes('logout')
-                        ? 'red'
-                        : option.value.includes(currentPath)
-                          ? '#262627'
-                          : '#9D9FA1'
+              <span>
+                <CustomIcon
+                  name="LUCIDE_ICONS"
+                  icon={'LuChevronLeft'}
+                  color={'grey'}
+                  sx={{
+                    transform: `rotate(${expand ? '0deg' : '-180deg'})`,
+                    transition: 'all .3s'
+                  }}
+                  stopPropagation={false}
+                />
+              </span>
+            </Tooltip>
+          </div>
+          {logoutOption.map((option, idx) => (
+            <Tooltip title={option.label} placement="right" arrow={true} followCursor={true}>
+              <span>
+                <CustomListButton
+                  key={idx}
+                  disableRipple={true}
+                  focusRipple={false}
+                  disableTouchRipple={true}
+                  onClick={() => {
+                    if (option.value === 'logout') {
+                      // return handleToggle();
+                      dispatch(setLogoutFlag(true))
+                      return handleToggle()
                     }
-                  />
-                </ListItemIcon>
-              )}
-              <ListItemText>
-                <CustomTypography
-                  variant={'body2'}
-                  fontWeight={'500'}
-                  color={
-                    option.value.includes('logout')
-                      ? 'red'
-                      : option.value.includes(currentPath)
-                        ? '#262627'
-                        : '#9D9FA1'
-                  }
+                    handleToggle(option.value)
+                  }}
+                  sx={{
+                    padding: '6px 24px',
+                    width: 'calc(100% - 12px)',
+                    margin: 'auto',
+                    borderRadius: '12px',
+                    ...(option.value === 'logout'
+                      ? {
+                          '& *': {
+                            color: 'red'
+                          }
+                        }
+                      : {
+                          color: 'inherit'
+                        }),
+                    ...(option.value.includes(currentPath)
+                      ? {
+                          backgroundColor: '#FFFEFE',
+                          boxShadow: '0px 0px 3px 0px #9c9c9c',
+
+                          '&:hover': {
+                            backgroundColor: '#FFFEFE'
+                          }
+                        }
+                      : {
+                          backgroundColor: 'transparent',
+                          '&:hover': {
+                            backgroundColor: 'transparent'
+                          }
+                        })
+                  }}
                 >
-                  {option.label}
-                </CustomTypography>
-              </ListItemText>
-            </CustomListButton>
+                  {option?.name && option?.icon && (
+                    <ListItemIcon
+                      sx={{
+                        justifyContent: !expand ? 'center' : 'initial'
+                      }}
+                    >
+                      <CustomIcon
+                        stopPropagation={false}
+                        name={option.name}
+                        icon={option.icon}
+                        color={
+                          option.value.includes('logout')
+                            ? 'red'
+                            : option.value.includes(currentPath)
+                              ? '#262627'
+                              : '#9D9FA1'
+                        }
+                      />
+                    </ListItemIcon>
+                  )}
+                  {expand && (
+                    <ListItemText>
+                      <CustomTypography
+                        variant={'body2'}
+                        fontWeight={'500'}
+                        color={
+                          option.value.includes('logout')
+                            ? 'red'
+                            : option.value.includes(currentPath)
+                              ? '#262627'
+                              : '#9D9FA1'
+                        }
+                      >
+                        {option.label}
+                      </CustomTypography>
+                    </ListItemText>
+                  )}
+                </CustomListButton>
+              </span>
+            </Tooltip>
           ))}
         </div>
       </Container>
@@ -344,12 +416,13 @@ const OptionContainer = styled(List)({
 const CustomListButton = styled(ListItemButton)({})
 
 const LogoContainer = styled('div')({
-  width: '100%',
+  width: 'calc(100% - 24px)',
   height: '100%',
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
   justifyContent: 'center',
+  margin: 'auto',
   '& img': {
     width: '100%',
     maxHeight: '72px',

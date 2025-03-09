@@ -20,6 +20,7 @@
     "build:mac": "electron-vite build && electron-builder --mac --publish always",
     "build:linux": "electron-vite build && electron-builder --linux --publish always"
   },
+  "icon": "./resources/icon.png",
   "build": {
     "appId": "com.ran.nutrition",
     "productName": "Nutrition",

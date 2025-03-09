@@ -9,7 +9,7 @@ import {
 import React from 'react'
 import moment from 'moment'
 import CustomTypography from '@renderer/components/typography'
-import { Link, Outlet } from 'react-router-dom'
+import { Link, Outlet, useNavigate } from 'react-router-dom'
 import PageHeader from '@renderer/components/header/pageHeader'
 
 const BillingPage = (): JSX.Element => {
@@ -18,6 +18,7 @@ const BillingPage = (): JSX.Element => {
   const page = useAppSelector((s) => s.orders.page)
   const limit = useAppSelector((s) => s.orders.limit)
   const dispatch = useAppDispatch()
+  const router = useNavigate()
 
   React.useEffect(() => {
     if (!user) return
@@ -50,8 +51,8 @@ const BillingPage = (): JSX.Element => {
             ]) ?? []
         }}
         clickable={true}
-        onClick={(data) => {
-          console.log(orders[data])
+        onClick={(idx) => {
+          router(`/billing/${orders[idx]?.orderId}`)
         }}
         onPageChange={(_, n) => {
           dispatch(setOrderPage(n))

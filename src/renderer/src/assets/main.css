@@ -97,3 +97,9 @@ body {
   --calc-height: calc(var(--vh, 1vh) * 100 - 164px);
   --selected-border: 1px solid currentColor;
 }
+
+#root {
+  display: grid;
+  grid-template-rows: 100%;
+  grid-template-columns: 100%;
+}

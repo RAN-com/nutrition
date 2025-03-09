@@ -166,7 +166,7 @@ const CustomerPage = (): React.ReactNode => {
       <Container
         sx={{
           height: '100%',
-          maxHeight: 'calc(var(--vh, 1vh) * 100 - 164px)',
+          maxHeight: `calc(${window.screen.availHeight}px - 164px)`,
           overflow: 'hidden',
           position: 'relative',
           top: 0,

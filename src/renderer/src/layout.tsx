@@ -1,5 +1,5 @@
 import { styled, Tooltip } from '@mui/material'
-import { green, grey, red } from '@mui/material/colors'
+import { grey } from '@mui/material/colors'
 import React from 'react'
 import CustomIcon from './components/icons'
 import CustomTypography from './components/typography'
@@ -34,7 +34,11 @@ const Layout: React.FC<Props> = ({ children }) => {
   }
 
   return (
-    <Container>
+    <Container
+      style={{
+        height: window.screen.availHeight
+      }}
+    >
       <TabBar>
         <TabBarTitleContainer>
           <img src={Icon} alt={'Nutrition'} />
@@ -43,7 +47,7 @@ const Layout: React.FC<Props> = ({ children }) => {
           </CustomTypography>
         </TabBarTitleContainer>
         <TabBarButtonContainer onClick={handleMinimize}>
-          <Tooltip title={'Minimize'} followCursor={true}>
+          {/* <Tooltip title={'Minimize'} followCursor={true}>
             <TabBarContainer className="minimize">
               <CustomIcon
                 stopPropagation={false}
@@ -53,7 +57,7 @@ const Layout: React.FC<Props> = ({ children }) => {
                 color={'#000000aa'}
               />
             </TabBarContainer>
-          </Tooltip>
+          </Tooltip> */}
           <Tooltip title={'Close'} followCursor={true} onClick={handleQuit}>
             <TabBarContainer className="exit">
               <CustomIcon
@@ -76,10 +80,9 @@ export default Layout
 
 const Container = styled('div')({
   width: '100%',
-  height: '100vh',
   display: 'grid',
   gridTemplateColumns: '1fr',
-  gridTemplateRows: '30px 1fr'
+  gridTemplateRows: '40px 1fr'
 })
 
 const TabBar = styled('div')({
@@ -88,7 +91,9 @@ const TabBar = styled('div')({
   display: 'grid',
   gridTemplateColumns: '1fr 100px',
   gridTemplateRows: '1fr',
-  backgroundColor: green['900']
+  backgroundColor: grey['900'],
+  paddingLeft: '12px',
+  paddingRight: '12px'
 })
 
 const TabBarTitleContainer = styled('div')({
@@ -111,31 +116,39 @@ const TabBarTitleContainer = styled('div')({
 const TabBarButtonContainer = styled('div')({
   width: '100%',
   height: '100%',
-  display: 'grid',
-  gridTemplateColumns: '50px 50px'
+  display: 'flex',
+  flexDirection: 'row',
+  alignItems: 'center',
+  justifyContent: 'flex-end'
 })
 
 const TabBarContainer = styled('span')({
-  width: '100%',
-  height: '100%',
+  width: 'calc(100%)',
+  height: 'calc(100%)',
   display: 'flex',
+  maxHeight: '32px',
+  maxWidth: '32px',
   flexDirection: 'column',
   alignItems: 'center',
   justifyContent: 'center',
   cursor: 'pointer',
   transition: 'all .3s',
-  '&.exit': {
-    backgroundColor: red['900'],
-    '&:hover': {
-      backgroundColor: red['700']
-    }
-  },
-  '&.minimize': {
-    backgroundColor: grey['300'] + 'aa',
-    '&:hover': {
-      backgroundColor: grey['200'] + 'aa'
-    }
+  borderRadius: 100,
+  '&:hover': {
+    backgroundColor: '#b9b9b92b'
   }
+  // '&.exit': {
+  //   backgroundColor: red['900'],
+  //   '&:hover': {
+  //     backgroundColor: red['700']
+  //   }
+  // },
+  // '&.minimize': {
+  //   backgroundColor: grey['300'] + 'aa',
+  //   '&:hover': {
+  //     backgroundColor: grey['200'] + 'aa'
+  //   }
+  // }
 })
 
 const MainContainer = styled('div')({

@@ -161,8 +161,8 @@ const VisitorPage = () => {
     <>
       <Container
         sx={{
-          height: 'calc(var(--vh, 1vh) * 100 - 164px)',
-          maxHeight: 'calc(var(--vh, 1vh) * 100 - 164px)',
+          height: `calc(${window.screen.availHeight}px - 164px)`,
+          maxHeight: `calc(${window.screen.availHeight}px - 164px)`,
           overflow: 'hidden',
           position: 'relative',
           top: 0,

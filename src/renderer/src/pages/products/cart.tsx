@@ -34,7 +34,8 @@ const Cart = () => {
           borderRadius: '24px',
           backgroundColor: '#f5f5f5',
           overflowY: 'auto',
-          gap: '12px'
+          gap: '12px',
+          maxWidth: '420px'
         }}
       >
         <Checkout open={showCheckout} onClose={() => setShowCheckout(false)} />

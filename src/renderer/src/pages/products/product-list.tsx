@@ -56,7 +56,7 @@ const ProductList = () => {
             </div>
           }
           end={
-            <Tooltip title={canAdd ? 'You have reached the limit of customers' : ''} arrow>
+            <Tooltip title={canAdd ? 'You have reached the limit of Products' : ''} arrow>
               <Button
                 startIcon={
                   <CustomIcon
@@ -80,7 +80,7 @@ const ProductList = () => {
                   padding: '6px 12px'
                 }}
               >
-                Add Products
+                Add
               </Button>
             </Tooltip>
           }

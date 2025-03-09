@@ -129,7 +129,12 @@ const AboutStaff = () => {
   return (
     <>
       <AppointmentsCard open={open} onClose={() => setOpen(false)} />
-      <Container>
+      <Container
+        sx={{
+          height: `calc(${window.screen.availHeight}px - 164px)`,
+          maxHeight: `calc(${window.screen.availHeight}px - 164px)`
+        }}
+      >
         <AboutHeader />
         <InnerContainer>
           <Profile>
@@ -270,7 +275,7 @@ const InnerContainer = styled('div')({
   width: '100%',
   height: '100%',
   display: 'grid',
-  gridTemplateColumns: '380px 1fr',
+  gridTemplateColumns: 'minmax(280px, 1fr) 1fr',
   gap: '24px',
   '.main-container': {
     width: '100%',
@@ -285,8 +290,7 @@ const InnerContainer = styled('div')({
 const Container = styled('div')({
   width: '100%',
   transition: 'all .3s',
-  height: 'calc(var(--vh, 1vh) * 100 - 164px)',
-  maxHeight: 'calc(var(--vh, 1vh) * 100 - 164px)',
+
   overflow: 'hidden',
   position: 'relative',
   top: 0,
@@ -301,6 +305,7 @@ const Container = styled('div')({
 const Profile = styled('div')({
   width: '100%',
   height: 'max-content',
+  maxWidth: '100%',
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',

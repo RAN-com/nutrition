@@ -76,6 +76,7 @@ const App = () => {
           window.electron?.updateResponse('install_now')
         }}
       />
+
       <Navigation />
     </>
   )

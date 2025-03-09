@@ -115,7 +115,7 @@ export default Home
 
 const Container = styled('div')(({}) => ({
   width: '100%',
-  height: 'calc(var(--vh, 1vh) * 100 - 164px)',
+  height: `calc(${window.screen.availHeight}px - 164px)`,
   overflowY: 'auto',
   display: 'flex',
   flexDirection: 'column',

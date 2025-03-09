@@ -62,6 +62,15 @@ const LayoutV2: React.FC<Props> = ({ children }: Props) => {
     }
   }, [window.location.pathname])
 
+  const [expand, setExpand] = React.useState(window.screen.availWidth < 1000)
+  const handleExpand = (b: boolean) => {
+    if (window.screen.availWidth < 1000) {
+      setExpand(true)
+    } else {
+      setExpand(b)
+    }
+  }
+
   return (
     <>
       <LogoutWarning />
@@ -74,8 +83,17 @@ const LayoutV2: React.FC<Props> = ({ children }: Props) => {
           }
         }}
       />
-      <LayoutContainer className={`${isOnboarding ? 'layout-onboard' : ''}`}>
+      <LayoutContainer
+        style={{
+          gridTemplateColumns: `${expand ? '240px' : 'auto'} 1fr`,
+          transition: 'all .3s'
+        }}
+        className={`${isOnboarding ? 'layout-onboard' : ''}`}
+      >
         <Sidebar
+          hideExpand={window.screen.width < 1000}
+          expand={expand}
+          handleExpand={handleExpand}
           activeRoute={window.location.href}
           isOpened={showSidebar && isMobile ? showSidebar : isMobile ? true : false}
           toggleSidebar={(e) => {
@@ -117,7 +135,7 @@ const LayoutContainer = styled('div')(({ theme }) => ({
   top: 0,
   left: 0,
   display: 'grid',
-  gridTemplateColumns: '280px 1fr',
+  // gridTemplateColumns: '280px 1fr',
   gridTemplateRows: '1fr',
   overscrollBehavior: 'contain',
   webkitOverflowScrolling: 'touch',
@@ -157,7 +175,7 @@ const InnerContainer = styled('div')({
   top: 0,
   overflowY: 'auto',
   padding: '0px',
-  maxWidth: '1920px',
+  maxWidth: '1280px',
   justifySelf: 'center',
   '.layout': {
     width: '100%',

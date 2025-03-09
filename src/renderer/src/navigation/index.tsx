@@ -60,6 +60,10 @@ const Navigation = () => {
                   ]
                 },
                 {
+                  path: '/profile',
+                  element: <h1>Profile</h1>
+                },
+                {
                   path: '/appointments',
                   element: <h1>Appointments</h1>
                 },

@@ -8,9 +8,22 @@ import {
   clipboard,
   Notification
 } from 'electron'
+import fs from 'fs'
+import os from 'os'
+
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { autoUpdater } from 'electron-updater'
+
+let workerWindow: BrowserWindow | undefined
+function createPdf() {
+  workerWindow = new BrowserWindow({
+    show: false,
+    focusable: false,
+    movable: true
+  })
+}
+
 function createWindow({ width, height }: { width: number; height: number }): void {
   const mainWindow = new BrowserWindow({
     width,
@@ -18,8 +31,10 @@ function createWindow({ width, height }: { width: number; height: number }): voi
     resizable: false,
     maximizable: true,
     minimizable: true,
-    minHeight: height,
     minWidth: width,
+    minHeight: height,
+    maxHeight: height,
+    maxWidth: width,
     autoHideMenuBar: true,
     backgroundMaterial: 'mica',
     darkTheme: false,
@@ -40,7 +55,6 @@ function createWindow({ width, height }: { width: number; height: number }): voi
       contextIsolation: false
     }
   })
-
   mainWindow.on('ready-to-show', () => {
     mainWindow.show()
   })
@@ -61,6 +75,69 @@ function createWindow({ width, height }: { width: number; height: number }): voi
   } else {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
   }
+
+  ipcMain.on('generatePdf', (_event, div, fileName: string) => {
+    createPdf()
+    workerWindow?.loadURL(`data:text/html;charset=UTF-8,${encodeURIComponent(div)}`)
+    console.log('started to generate pdf')
+    workerWindow?.webContents.on('did-finish-load', () => {
+      dialog
+        .showSaveDialog({
+          filters: [{ name: 'PDF Files', extensions: ['pdf'] }],
+          defaultPath: join(app.getPath('documents'), `${fileName || 'nutrition'}.pdf`) // Default save location and filename
+        })
+        .then((result) => {
+          if (!result.canceled && result.filePath) {
+            workerWindow?.webContents
+              .printToPDF({
+                printBackground: true,
+                landscape: false,
+                pageSize: 'A4'
+              })
+              .then((data) => {
+                const fs = require('fs')
+                fs.writeFile(result.filePath, data, (error) => {
+                  if (error) {
+                    mainWindow.webContents.send('pdfGeneratedError', error)
+                    console.error(`PDF save failed: ${error}`)
+                  } else {
+                    mainWindow.webContents.send('pdfGeneratedSucc', result.filePath)
+                    console.log(`PDF saved to ${result.filePath}`)
+                  }
+                  workerWindow?.close()
+                })
+              })
+          } else {
+            workerWindow?.close()
+          }
+        })
+    })
+  })
+
+  // when worker window is ready
+  ipcMain.on('readyToPrintPDF', (event) => {
+    const pdfPath = join(os.tmpdir(), 'print.pdf')
+    // Use default printing options
+    console.log('Hoiii, downloading pdf')
+    workerWindow?.webContents
+      .printToPDF({
+        pageSize: 'A4',
+        printBackground: true,
+        landscape: false
+      })
+      .then((data) => {
+        fs.writeFile(pdfPath, data, function (error) {
+          if (error) {
+            throw error
+          }
+          shell?.openPath(pdfPath)
+          event.sender.send('wrote-pdf', pdfPath)
+        })
+      })
+      .catch((error) => {
+        throw error
+      })
+  })
 
   ipcMain.on('updateResponse', (_event, message) => {
     console.log('Response from Renderer:', message)
@@ -146,6 +223,7 @@ function createWindow({ width, height }: { width: number; height: number }): voi
 app.whenReady().then(() => {
   const display = screen.getPrimaryDisplay()
   const { height, width } = display.workAreaSize
+  console.log(display.size, display.bounds, display.workArea, display.workAreaSize)
   electronApp.setAppUserModelId('com.ran.nutrition')
 
   app.on('browser-window-created', (_, window) => {

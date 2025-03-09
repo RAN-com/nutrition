@@ -7,7 +7,7 @@
 // import moment from 'moment'
 // import { useState } from 'react'
 
-import { Button, ButtonGroup, capitalize, styled } from '@mui/material'
+import { capitalize, styled, Tab, Tabs } from '@mui/material'
 import CustomTypography from '@renderer/components/typography'
 import PaginatedTable from '@renderer/pages/customer/table'
 import { CustomerResponse } from '@renderer/types/customers'
@@ -218,7 +218,20 @@ const StaffContent = ({ appointments, customers, loading, visitors }: Props) => 
           flexDirection: 'row'
         }}
       >
-        <ButtonGroup>
+        <Tabs
+          value={'value'}
+          onChange={({ currentTarget: { nodeValue } }) => {
+            console.log(nodeValue)
+            setCurrent(nodeValue as typeof current)
+          }}
+          variant="scrollable"
+          aria-label="basic tabs example"
+        >
+          <Tab label="Appointments" value={'appointments'} />
+          <Tab label="Visitors" value={'visitors'} />
+          <Tab label="Customers" value={'customers'} />
+        </Tabs>
+        {/* <ButtonGroup>
           <Button
             onClick={() => setCurrent('appointments')}
             variant={current === 'appointments' ? 'contained' : 'outlined'}
@@ -237,7 +250,7 @@ const StaffContent = ({ appointments, customers, loading, visitors }: Props) => 
           >
             Customers
           </Button>
-        </ButtonGroup>
+        </ButtonGroup> */}
       </div>
       <CustomTypography variant="h4">Recent {capitalize(current)}</CustomTypography>
       {/* <div className="table-container"> */}
