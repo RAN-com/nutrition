@@ -1,6 +1,6 @@
 {
   "name": "nutrition",
-  "version": "1.7.0",
+  "version": "1.8.0",
   "description": "The Nutrition Dashboard is a powerful and intuitive platform designed to provide Nutrition members with easy access to vital business and health data",
   "main": "./out/main/index.js",
   "author": "example.com",
