@@ -16,8 +16,9 @@ import { CreateAdminPayment } from './types/payment'
 import CustomTypography from './components/typography'
 import { deleteOrder } from './firebase/pricing'
 import { updateCardValidity } from './firebase/card'
-import { addTransaction } from './firebase'
+import { addTransaction, setAdminSubscription } from './firebase'
 import { asyncGetCurrentStaffDomainData } from './redux/features/user/staff'
+import zIndex from '@mui/material/styles/zIndex'
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const App = () => {
@@ -50,16 +51,6 @@ const App = () => {
       )
     }
   }, [user, staff])
-
-  /* <ul>
-    <li>user clicks payment button :done</li>
-    <li>store data in firestore</li>
-    <li>redirect user to website</li>
-    <li>retrive firestore data there</li>
-    <li>finish the payment</li>
-    <li>store the data</li>
-    <li>and let user to come back to the application</li>
-  </ul> */
 
   const pendingOrder = useAppSelector((s) => s.pricing.pending_order)
 
@@ -153,7 +144,12 @@ const CountdownTimer: React.FC<CountdownTimerProps> = ({ validTill }) => {
   )
 }
 
-const PaymentModel = ({ open }: { open: boolean }) => {
+function extractNumber(input: string): number {
+  const match = input.match(/\d+/) // Find first number in the string
+  return match ? parseInt(match[0], 10) : 1000
+}
+
+export const PaymentModel = ({ open }: { open: boolean }) => {
   const [loading, setLoading] = React.useState(false)
   const pendingOrder = useAppSelector((s) => s.pricing.pending_order)
   const status: CreateAdminPayment['status'] | 'secure' = pendingOrder?.status || 'secure'
@@ -163,6 +159,7 @@ const PaymentModel = ({ open }: { open: boolean }) => {
   const [deleting, setDeleting] = React.useState(false)
   const user = useAppSelector((s) => s.auth.user)
   const staff = useAppSelector((s) => s.staffs.current_staff)
+  const features = useAppSelector((s) => s.pricing.center_user)
 
   React.useEffect(() => {
     if (!!pendingOrder && !timing && !showTimeExceed) {
@@ -197,6 +194,45 @@ const PaymentModel = ({ open }: { open: boolean }) => {
     }
   }
 
+  const handleAdminPayment = async () => {
+    const f = features.filter((e) => e.title === pendingOrder?.pricingType)[0]
+    if (!f) {
+      alert('Pricing Not found. Contact admin to initialize refund process')
+      // refund process here
+      return
+    }
+    const [c, s, v] = f.features
+    const customers = extractNumber(c)
+    const staffs = extractNumber(s)
+    const visitors = extractNumber(v)
+
+    const sub = await setAdminSubscription({
+      price: pendingOrder?.order?.amonut,
+      validity: moment().add(1, 'year').format('YYYY-MM-DD'),
+      type: 'SUBSCRIPTION',
+      uid: user?.uid as string,
+      limit: {
+        customers,
+        products: 100,
+        staffs,
+        visitors
+      }
+    })
+
+    if (sub) {
+      addTransaction(user?.uid as string, {
+        amount: pendingOrder?.order?.amount,
+        currency: pendingOrder?.order?.currency,
+        order_id: pendingOrder?.order?.id,
+        payment_id: pendingOrder?.payment_details?.razorpay_payment_id,
+        data: sub?.data
+      })
+      successToast('Subscription activated successfully')
+    } else {
+      errorToast('Failed to activate subscription. Please try again')
+    }
+  }
+
   const onClose = async () => {
     setDeleting(true)
     await deleteOrder(`${pendingOrder?.uid}${pendingOrder?.sid ? `-${pendingOrder?.sid}` : ''}`)
@@ -223,7 +259,8 @@ const PaymentModel = ({ open }: { open: boolean }) => {
           paddingBottom: '32px',
           position: 'relative',
           top: 0
-        }
+        },
+        zIndex: zIndex.modal * zIndex.modal
       }}
     >
       <Modal open={deleting}>
@@ -343,6 +380,8 @@ const PaymentModel = ({ open }: { open: boolean }) => {
                     setLoading(true)
                     if (pendingOrder?.type === 'VISITING_CARD') {
                       handleSetSubscription()
+                    } else if (pendingOrder?.type === 'SUBSCRIPTION') {
+                      handleAdminPayment()
                     }
                     debounce(() => {
                       onClose()

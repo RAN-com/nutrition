@@ -88,7 +88,7 @@ const PaginatedTable: React.FC<PaginatedTableProps> = ({
                 }
               }}
             >
-              {data.header.map((e, index) => (
+              {data?.header?.map((e, index) => (
                 <TableCell align="center" key={index}>
                   {e}
                 </TableCell>
@@ -106,7 +106,7 @@ const PaginatedTable: React.FC<PaginatedTableProps> = ({
                   }
                 }}
               >
-                <TableCell colSpan={data.header.length} align="center">
+                <TableCell colSpan={data?.header?.length} align="center">
                   No data available
                 </TableCell>
               </TableRow>
@@ -141,7 +141,7 @@ const PaginatedTable: React.FC<PaginatedTableProps> = ({
       {showPagination && (
         <TablePagination
           component="div"
-          count={total ?? data.row.length} // Total number of rows
+          count={total ?? data?.row?.length} // Total number of rows
           page={page}
           onPageChange={onPageChange!}
           rowsPerPage={rowsPerPage}

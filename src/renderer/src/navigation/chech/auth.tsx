@@ -11,20 +11,13 @@ const CheckAuth = ({ user }: Props) => {
 
   React.useEffect(() => {
     if (user) {
-      navigate('/home')
-    } else {
-      navigate('/auth/login')
-    }
-  }, [])
-
-  React.useEffect(() => {
-    if (user) {
-      navigate('/home')
+      return
+      // navigate(window.location.href/)
     } else {
       navigate('/auth/login')
     }
   }, [user])
-  console.log(user)
+
   return <Outlet />
   // return user ? (
   //   !!user?.subscription ? (

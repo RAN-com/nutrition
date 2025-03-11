@@ -275,7 +275,7 @@ const InnerContainer = styled('div')({
   width: '100%',
   height: '100%',
   display: 'grid',
-  gridTemplateColumns: 'minmax(280px, 1fr) 1fr',
+  gridTemplateColumns: 'minmax(320px, 320px) 1fr',
   gap: '24px',
   '.main-container': {
     width: '100%',
@@ -305,7 +305,7 @@ const Container = styled('div')({
 const Profile = styled('div')({
   width: '100%',
   height: 'max-content',
-  maxWidth: '100%',
+  maxWidth: '420px',
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',

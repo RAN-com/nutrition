@@ -13,6 +13,7 @@ export type CreateCardPaymentProps = {
   status?: 'paid' | 'pending' | 'failed' | null
   valid_till?: string
   oid?: string
+  pricingType?: string
   payment_details?: PaymentDetails
 }
 
@@ -24,6 +25,7 @@ export type CreateAdminPayment = {
   createdOn: string
   valid_till?: string
   type: 'SUBSCRIPTION'
+  pricingType?: string
   status?: 'paid' | 'pending' | 'failed' | null
   payment_details?: PaymentDetails
 }

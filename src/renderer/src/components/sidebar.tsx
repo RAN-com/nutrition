@@ -130,7 +130,6 @@ const Sidebar = ({
     })
   }, [])
 
-  console.log(expand)
   return (
     <Fade in={!isMobile ? true : isOpened}>
       <Container

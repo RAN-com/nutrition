@@ -26,11 +26,11 @@ const getTitle = () => {
 const Layout: React.FC<Props> = ({ children }) => {
   const title = getTitle()
   const handleQuit = () => {
-    window.electron?.updateResponse('quit_app')
+    window.electron?.ipcRenderer.send('updateResponse', 'quit_app')
   }
 
   const handleMinimize = () => {
-    window.electron?.updateResponse('minimize_app')
+    window.electron?.ipcRenderer?.send('updateResponse', 'minimize_app')
   }
 
   return (
@@ -47,17 +47,17 @@ const Layout: React.FC<Props> = ({ children }) => {
           </CustomTypography>
         </TabBarTitleContainer>
         <TabBarButtonContainer onClick={handleMinimize}>
-          {/* <Tooltip title={'Minimize'} followCursor={true}>
+          <Tooltip title={'Minimize'} followCursor={true}>
             <TabBarContainer className="minimize">
               <CustomIcon
                 stopPropagation={false}
                 name="LUCIDE_ICONS"
                 icon="LuMinus"
                 size={18}
-                color={'#000000aa'}
+                color={'#ffffffaa'}
               />
             </TabBarContainer>
-          </Tooltip> */}
+          </Tooltip>
           <Tooltip title={'Close'} followCursor={true} onClick={handleQuit}>
             <TabBarContainer className="exit">
               <CustomIcon
@@ -91,9 +91,11 @@ const TabBar = styled('div')({
   display: 'grid',
   gridTemplateColumns: '1fr 100px',
   gridTemplateRows: '1fr',
-  backgroundColor: grey['900'],
+  backgroundColor: '#0a1f04f6',
+  // borderRadius: '20px',
   paddingLeft: '12px',
-  paddingRight: '12px'
+  paddingRight: '12px',
+  boxShadow: 'none'
 })
 
 const TabBarTitleContainer = styled('div')({
@@ -119,7 +121,8 @@ const TabBarButtonContainer = styled('div')({
   display: 'flex',
   flexDirection: 'row',
   alignItems: 'center',
-  justifyContent: 'flex-end'
+  justifyContent: 'flex-end',
+  gap: 12
 })
 
 const TabBarContainer = styled('span')({

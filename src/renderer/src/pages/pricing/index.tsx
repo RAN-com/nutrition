@@ -12,6 +12,8 @@ import { useNavigate } from 'react-router-dom'
 import { SERVER_URL } from '@renderer/constants/value'
 import { createAdminPayment } from '@renderer/firebase/pricing'
 import { setOrderPendingData } from '@renderer/redux/features/pricing/slice'
+import React from 'react'
+import { PaymentModel } from '@renderer/app'
 
 const Pricing = () => {
   const dispatch = useAppDispatch()
@@ -19,32 +21,31 @@ const Pricing = () => {
   const user = useAppSelector((s) => s.auth.user)
   const navigate = useNavigate()
   const admin = useAppSelector((s) => s.auth.user)
+  const pendingOrder = useAppSelector((s) => s.pricing.pending_order)
 
   const handlePayment = async (price: CenterUserPricing) => {
     try {
       const string = String(JSON.stringify(price))
       const enc = encryptData(string)
-
+      const url = `${SERVER_URL}/api/payment`
       const order = (
-        await axios.post(
-          `${SERVER_URL}/api/payment`,
-          JSON.stringify({ data: enc, type: 'SUBSCRIPTION' }),
-          {
-            headers: {
-              'Content-Type': 'application/json'
-            }
+        await axios.post(url, JSON.stringify({ data: enc, type: 'SUBSCRIPTION' }), {
+          headers: {
+            'Content-Type': 'application/json'
           }
-        )
+        })
       )?.data
 
-      if (order.status >= 200 && order.status <= 300 && order.key) {
+      console.log(order)
+      if (order.status >= 200 && order.status <= 300) {
         const store = await createAdminPayment({
           uid: admin?.uid as string,
           createdOn: moment().toString(),
           order: order?.order,
           type: 'SUBSCRIPTION',
           sid: undefined,
-          status: 'pending'
+          status: 'pending',
+          pricingType: price?.title
         })
 
         if (store.status) {
@@ -66,11 +67,13 @@ const Pricing = () => {
     }
   }
 
+  const [showPricing, setShowPricing] = React.useState(false)
+
   const isSubscriptionActive = user?.subscription
     ? moment(user?.subscription?.valid_till).isBefore(moment())
     : false
 
-  return user?.subscription && !isSubscriptionActive ? (
+  return !showPricing && user?.subscription && !isSubscriptionActive ? (
     <Container>
       <Dialog
         open={true}
@@ -124,10 +127,28 @@ const Pricing = () => {
         >
           Go To Home
         </Button>
+        {user?.subscription?.type === 'FREE_TRAIL' && (
+          <Button
+            disableElevation
+            disableFocusRipple
+            disableRipple
+            disableTouchRipple
+            variant={'text'}
+            sx={{
+              zIndex: 100,
+              textTransform: 'none'
+            }}
+            // fullWidth={true}
+            onClick={() => setShowPricing(true)}
+          >
+            Buy Subscription
+          </Button>
+        )}
       </Dialog>
     </Container>
   ) : (
     <Container>
+      <PaymentModel open={!!pendingOrder} />
       <Dialog
         open={true}
         style={{ flexDirection: 'column', flexWrap: 'wrap' }}
@@ -210,20 +231,24 @@ const Pricing = () => {
             </PricingContainer>
           ))}
         </InnerContainer>
-        {isSubscriptionActive && (
-          <Button
-            sx={{
-              zIndex: 100,
-              padding: '12px 24px',
-              marginTop: '12px'
-            }}
-            variant={'contained'}
-            // fullWidth={true}
-            onClick={() => navigate('/home')}
-          >
-            Back to Home
-          </Button>
-        )}
+        {isSubscriptionActive ||
+          (user?.subscription?.type === 'FREE_TRAIL' && (
+            <Button
+              sx={{
+                zIndex: 100,
+                padding: '12px 24px',
+                marginTop: '12px'
+              }}
+              variant={'contained'}
+              // fullWidth={true}
+              onClick={() => {
+                navigate('/home')
+                setShowPricing(false)
+              }}
+            >
+              Back to Home
+            </Button>
+          ))}
       </Dialog>
     </Container>
   )

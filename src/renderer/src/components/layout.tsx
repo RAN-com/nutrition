@@ -9,7 +9,6 @@ import { useAppSelector, useAppDispatch } from '@renderer/redux/store/hook'
 import { auth, refreshData } from '@renderer/firebase'
 import { resetUser, setUser } from '@renderer/redux/features/user/auth'
 import { errorToast } from '@renderer/utils/toast'
-import moment from 'moment'
 
 type Props = {
   children?: React.ReactNode
@@ -24,10 +23,6 @@ const LayoutV2: React.FC<Props> = ({ children }: Props) => {
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
 
-  const isSubscribed = user?.subscription
-    ? moment(user?.subscription?.valid_till).isBefore(moment())
-    : false
-
   React.useEffect(() => {
     if (user) {
       refreshData(user).then((data) => {
@@ -39,17 +34,6 @@ const LayoutV2: React.FC<Props> = ({ children }: Props) => {
           dispatch(setUser(data.data))
         }
       })
-      console.log('Jeuy')
-      if (!isSubscribed) {
-        console.log(
-          'Your subscription has expired. Please renew your subscription to continue using the service'
-        )
-
-        navigate('/pricing')
-        return
-      } else {
-        console.log('SUBSCRIPTION', isSubscribed)
-      }
     } else {
       navigate('/auth/login')
     }

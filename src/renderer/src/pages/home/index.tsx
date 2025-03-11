@@ -83,7 +83,9 @@ const Home = () => {
         {values.map((v, idx) => (
           <Card
             sx={{
+              width: '100%',
               // generate random background
+              maxWidth: '320px',
               backgroundColor: colors[idx % colors.length]
             }}
             onClick={() => handleClick(v.title)}
@@ -128,6 +130,7 @@ const CardContainer = styled('div')({
   gap: '32px',
   padding: '12px 4px',
   display: 'flex',
+  flexWrap: 'wrap',
   flexDirection: 'row'
 })
 
