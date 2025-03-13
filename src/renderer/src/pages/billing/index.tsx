@@ -73,7 +73,8 @@ export default BillingPage
 
 const Container = styled('div')({
   width: '100%',
-  height: 'max-content',
+  height: 'calc(100%)',
+  maxHeight: 'calc(100%)',
   display: 'flex',
   flexDirection: 'column',
   gap: '12px',

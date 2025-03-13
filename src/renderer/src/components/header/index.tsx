@@ -235,9 +235,11 @@ const Header = ({ toggleSidebar, showToggle }: Props) => {
 export default Header
 
 const HeaderContainer = styled('header')({
+  width: '100%',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
+  flexGrow: 1,
   zIndex: 1000,
   boxShadow: '0px 0px 3px 0px #9c9c9c',
   backgroundColor: '#FEFEFE',

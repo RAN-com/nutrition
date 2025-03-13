@@ -62,9 +62,9 @@ const StaffPage = () => {
     <>
       <Container
         sx={{
-          height: `calc(${window.screen.availHeight}px - 164px)`,
-          maxHeight: `calc(${window.screen.availHeight}px - 164px)`,
-          overflow: 'hidden',
+          height: `100%`,
+          maxHeight: 'calc(100%)',
+          // overflow: 'hidden',
           position: 'relative',
           top: 0,
           width: '100%',
@@ -158,7 +158,6 @@ const StaffPage = () => {
               flexDirection: 'row',
               flexWrap: 'wrap',
               gap: '1rem',
-              overflow: 'auto',
               padding: '12px 12px'
             }}
           >

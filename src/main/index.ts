@@ -26,13 +26,9 @@ function createPdf() {
 
 function createWindow({ width, height }: { width: number; height: number }): void {
   const mainWindow = new BrowserWindow({
-    width,
-    height,
-    resizable: false,
-    maximizable: true,
-    minimizable: true,
-    minWidth: width,
-    minHeight: height,
+    resizable: true,
+    minWidth: 860,
+    minHeight: 600,
     maxHeight: height,
     maxWidth: width,
     autoHideMenuBar: true,
@@ -41,8 +37,6 @@ function createWindow({ width, height }: { width: number; height: number }): voi
     focusable: true,
     fullscreen: false,
     fullscreenable: true,
-    simpleFullscreen: true,
-    frame: false,
     movable: true,
     roundedCorners: true,
     title: 'Nutrition',
@@ -57,6 +51,14 @@ function createWindow({ width, height }: { width: number; height: number }): voi
   })
   mainWindow.on('ready-to-show', () => {
     mainWindow.show()
+    const size = mainWindow.getSize()
+    console.log(`Window resized to: ${size[0]} x ${size[1]}`)
+    const data = {
+      width: size[0],
+      height: size[1]
+    }
+
+    mainWindow.webContents.send('sizeChanged', JSON.stringify(data))
   })
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
@@ -75,6 +77,17 @@ function createWindow({ width, height }: { width: number; height: number }): voi
   } else {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
   }
+
+  mainWindow.on('resize', () => {
+    const size = mainWindow.getSize()
+    console.log(`Window resized to: ${size[0]} x ${size[1]}`)
+    const data = {
+      width: size[0],
+      height: size[1]
+    }
+
+    mainWindow.webContents.send('sizeChanged', JSON.stringify(data))
+  })
 
   ipcMain.on('generatePdf', (_event, div, fileName: string) => {
     createPdf()
@@ -101,7 +114,7 @@ function createWindow({ width, height }: { width: number; height: number }): voi
                     mainWindow.webContents.send('pdfGeneratedError', error)
                     console.error(`PDF save failed: ${error}`)
                   } else {
-                    mainWindow.webContents.send('pdfGeneratedSucc', result.filePath)
+                    mainWindow.webContents.send('pdfGeneratedSuccess', result.filePath)
                     console.log(`PDF saved to ${result.filePath}`)
                   }
                   workerWindow?.close()

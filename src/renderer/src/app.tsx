@@ -28,6 +28,17 @@ const App = () => {
   const staff = useAppSelector((s) => s.staffs.current_staff)
 
   React.useEffect(() => {
+    window.electron?.ipcRenderer?.on('sizeChanged', (e, props) => {
+      if (!props) return
+      const parsed = JSON.parse(props) as { width: number; height: number }
+      if (!parsed) return
+      document.documentElement.style.setProperty('--width', `${parsed.width}px`)
+      document.documentElement.style.setProperty('--height', `${parsed.height}px`)
+      const root = document.getElementById('root')
+      if (!root) return
+      root.style.width = `${parsed.width}px`
+      root.style.height = `${parsed.height}px`
+    })
     window.electron?.ipcRenderer.on('updateAvailable', () => {
       const confirmDownload = window.confirm('New update available. Download now?')
       if (confirmDownload) {

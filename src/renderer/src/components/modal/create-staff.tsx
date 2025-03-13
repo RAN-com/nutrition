@@ -28,6 +28,8 @@ const validationSchema = Yup.object({
   phone: Yup.string()
     .matches(/^\d{10}$/, 'Phone number must be 10 digits')
     .required('Phone is required'),
+  before_picture: Yup.string().required(),
+  after_picture: Yup.string().required(),
   address: Yup.string().required('Address is required')
 })
 
@@ -55,7 +57,9 @@ const CreateStaffModal = ({
       address: edit?.data?.address ?? '',
       date_of_birth: edit?.data?.date_of_birth ?? '',
       medical_issues: edit?.data?.medical_issues ?? '',
-      photo_url: edit?.data?.photo_url ?? ''
+      photo_url: edit?.data?.photo_url ?? '',
+      before_picture: edit?.data?.before_picture ?? '',
+      after_picture: edit?.data?.after_picture ?? ''
     },
     validationSchema,
     onSubmit: () => {
@@ -174,10 +178,14 @@ const CreateStaffModal = ({
                 value={moment(formik.values.date_of_birth)}
               />
             </LocalizationProvider>
-          ) : k.includes('photo_url') ? (
+          ) : k.includes('photo_url') ||
+            k.includes('before_picture') ||
+            k.includes('after_picture') ? (
             <>
               <CustomTypography marginTop={'12px'} color={grey['500']}>
-                Upload Image(Optional)
+                {k.includes('photo_url')
+                  ? 'Upload Image(Optional)'
+                  : `Upload ${k.split('_').join(' ')}*`}
               </CustomTypography>
               <ImageUpload
                 onClear={async () => {

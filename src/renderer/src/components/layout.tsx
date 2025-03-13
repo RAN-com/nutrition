@@ -69,29 +69,32 @@ const LayoutV2: React.FC<Props> = ({ children }: Props) => {
       />
       <LayoutContainer
         style={{
-          gridTemplateColumns: `${expand ? '240px' : 'auto'} 1fr`,
           transition: 'all .3s'
         }}
         className={`${isOnboarding ? 'layout-onboard' : ''}`}
       >
-        <Sidebar
-          hideExpand={window.screen.width < 1000}
-          expand={expand}
-          handleExpand={handleExpand}
-          activeRoute={window.location.href}
-          isOpened={showSidebar && isMobile ? showSidebar : isMobile ? true : false}
-          toggleSidebar={(e) => {
-            if (typeof e === 'boolean') {
-              setShowSidebar(e)
-              return
-            } else {
-              setShowSidebar((prev) => {
-                return !prev
-              })
-            }
-          }}
-        />
-        <MainContainer>
+        <div
+          style={{ flex: 1, flexGrow: 100, flexBasis: !expand ? 100 : 280, transition: 'all .3s' }}
+        >
+          <Sidebar
+            hideExpand={window.screen.width < 1000}
+            expand={expand}
+            handleExpand={handleExpand}
+            activeRoute={window.location.href}
+            isOpened={showSidebar && isMobile ? showSidebar : isMobile ? true : false}
+            toggleSidebar={(e) => {
+              if (typeof e === 'boolean') {
+                setShowSidebar(e)
+                return
+              } else {
+                setShowSidebar((prev) => {
+                  return !prev
+                })
+              }
+            }}
+          />
+        </div>
+        <MainContainer className="scrollbar">
           <Header
             showToggle={isMobile}
             toggleSidebar={() => {
@@ -100,9 +103,9 @@ const LayoutV2: React.FC<Props> = ({ children }: Props) => {
               })
             }}
           />
-          <InnerContainer className="scrollbar">
-            <div className="layout scrollbar">{children ? children : <Outlet />}</div>
-          </InnerContainer>
+          {/* <InnerContainer> */}
+          <div className="layout scrollbar">{children ? children : <Outlet />}</div>
+          {/* </InnerContainer> */}
         </MainContainer>
       </LayoutContainer>
     </>
@@ -112,18 +115,22 @@ const LayoutV2: React.FC<Props> = ({ children }: Props) => {
 export default LayoutV2
 
 const LayoutContainer = styled('div')(({ theme }) => ({
-  width: '100%',
+  width: 'var(--width)',
   maxWidth: '100vw',
-  height: '100%',
+  minWidth: '100%',
+  // height: '100%',
+  height: `var(--height)`,
   position: 'relative',
   top: 0,
   left: 0,
-  display: 'grid',
-  // gridTemplateColumns: '280px 1fr',
-  gridTemplateRows: '1fr',
-  overscrollBehavior: 'contain',
-  webkitOverflowScrolling: 'touch',
-  [theme.breakpoints.down(830)]: {
+  flexGrow: 1,
+  display: 'flex',
+  flexDirection: 'row',
+  // display: 'grid',
+  // gridTemplateRows: '1fr',
+  // overscrollBehavior: 'contain',
+  // webkitOverflowScrolling: 'touch',
+  [theme.breakpoints.down(800)]: {
     display: 'grid',
     gridTemplateColumns: '1fr'
     // gridTemplateRows: '80px 1fr'
@@ -132,38 +139,32 @@ const LayoutContainer = styled('div')(({ theme }) => ({
 
 const MainContainer = styled('div')({
   width: '100%',
-  height: '100%',
-  overflowY: 'auto',
+  height: `100%`,
+  overflowY: 'scroll',
   margin: '0 auto',
   position: 'relative',
   top: 0,
   display: 'grid',
   gridTemplateColumns: '1fr',
-  gridTemplateRows: '100px 1fr',
+  gridTemplateRows: '100px calc(100% - 100px)',
   backgroundColor: '#f3f3f3',
   padding: '0px',
+  paddingBottom: '24px',
   '& .header ': {
     width: '100%',
     margin: '0 auto',
-    maxWidth: '1920px',
+    // maxWidth: '1280px',
+    position: 'sticky',
+    top: 0,
+    display: 'flex',
+    flex: 1,
     padding: '18px 24px'
-  }
-})
-
-const InnerContainer = styled('div')({
-  width: '100%',
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '12px',
-  position: 'relative',
-  top: 0,
-  overflowY: 'auto',
-  padding: '0px',
-  maxWidth: '1280px',
-  justifySelf: 'center',
-  '.layout': {
+  },
+  '& .layout': {
     width: '100%',
-    margin: '0 auto',
+    height: '100%',
+    maxWidth: '1280px',
+    margin: 'auto',
     padding: '12px 24px'
   }
 })

@@ -39,7 +39,7 @@ const Layout: React.FC<Props> = ({ children }) => {
         height: window.screen.availHeight
       }}
     >
-      <TabBar>
+      {/* <TabBar>
         <TabBarTitleContainer>
           <img src={Icon} alt={'Nutrition'} />
           <CustomTypography variant="body2" color={grey['200']}>
@@ -70,7 +70,7 @@ const Layout: React.FC<Props> = ({ children }) => {
             </TabBarContainer>
           </Tooltip>
         </TabBarButtonContainer>
-      </TabBar>
+      </TabBar> */}
       <MainContainer>{children}</MainContainer>
     </Container>
   )
@@ -82,7 +82,7 @@ const Container = styled('div')({
   width: '100%',
   display: 'grid',
   gridTemplateColumns: '1fr',
-  gridTemplateRows: '40px 1fr'
+  gridTemplateRows: '1fr'
 })
 
 const TabBar = styled('div')({

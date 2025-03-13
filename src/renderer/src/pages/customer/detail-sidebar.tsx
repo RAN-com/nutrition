@@ -16,6 +16,7 @@ import RecordChart from '@renderer/components/chart'
 import AttendanceDates from '@renderer/components/date/attendance'
 import CustomIcon from '@renderer/components/icons'
 import MarkAttendance from '@renderer/components/modal/attendance'
+import CustomTextInput from '@renderer/components/text-input'
 import CustomTypography from '@renderer/components/typography'
 import { addTransaction } from '@renderer/firebase'
 import { setSubscriptionToUser } from '@renderer/firebase/customers'
@@ -77,7 +78,7 @@ const CustomDetailSidebar = ({ data }: Props) => {
     <CircularProgress variant="indeterminate" />
   ) : (
     data && (
-      <Container className="scrollbar">
+      <>
         <HandlePayment open={showDialog} onClose={() => setShowDialog(false)} />
         <MarkAttendance
           open={showAttendanceForm}
@@ -87,15 +88,6 @@ const CustomDetailSidebar = ({ data }: Props) => {
           }}
           edit={edit}
         />
-        <Header>
-          <div>&nbsp;</div>
-          <CustomIcon
-            name="LUCIDE_ICONS"
-            icon={'LuX'}
-            color={grey['600']}
-            onClick={() => dispatch(resetCurrentUser())}
-          />
-        </Header>
         <Content sx={{}}>
           <Profile>
             <Avatar
@@ -185,10 +177,10 @@ const CustomDetailSidebar = ({ data }: Props) => {
             maxPrevDate={moment(data?.data?.created_on).toString()}
           />
         </Content>
-        <Content>
+        {/* <Content>
           <RecordChart data={records} />
-        </Content>
-      </Container>
+        </Content> */}
+      </>
     )
   )
 }
@@ -202,22 +194,18 @@ const Header = styled('div')({
   flexDirection: 'row',
   alignItems: 'center',
   justifyContent: 'space-between',
-  padding: '12px 18px'
-})
-
-const Container = styled('div')({
-  width: '100%',
-  display: 'flex',
-  flexDirection: 'column',
-  // padding: '0px 18px',
-  borderRadius: '12px 0px 0px 12px',
-  marginBottom: '12px'
+  padding: '12px 18px',
+  position: 'absolute',
+  top: 0,
+  left: 0,
+  zIndex: 10,
+  backgroundColor: 'white'
 })
 
 const Content = styled('div')({
   display: 'flex',
   flexDirection: 'column',
-  width: 'calc(100% - 32px)',
+  width: 'calc(100%)',
   margin: '0 auto',
   padding: '32px 24px',
   borderRadius: '12px',
@@ -233,14 +221,13 @@ const Profile = styled('div')({
   justifyContent: 'center'
 })
 
-const PAYMENT_PRICE = 6800
-
 const HandlePayment = ({ onClose, open }: { open: boolean; onClose(): void }) => {
   const admin = useAppSelector((s) => s.auth.user?.uid)
   const customer = useAppSelector((s) => s.customer.current_customer?.data?.cid)
   const dispatch = useAppDispatch()
   const [loading, setLoading] = React.useState(false)
-
+  const [price, setPrice] = React.useState(6800)
+  const PAYMENT_PRICE = price
   const formik = useFormik({
     initialValues: {
       totalDays: 1
@@ -293,12 +280,14 @@ const HandlePayment = ({ onClose, open }: { open: boolean; onClose(): void }) =>
           padding: '24px',
           paddingTop: '12px',
           display: 'flex',
-          flexDirection: 'column'
+          flexDirection: 'column',
+          alignItems: 'center'
         }
       }}
     >
       <DialogTitle
         sx={{
+          width: '100%',
           display: 'flex',
           flexDirection: 'row',
           alignItems: 'center',
@@ -310,6 +299,19 @@ const HandlePayment = ({ onClose, open }: { open: boolean; onClose(): void }) =>
         <CustomTypography variant="h6">Subscription</CustomTypography>
         <CustomIcon name="LUCIDE_ICONS" icon="LuX" onClick={onClose} color={grey['600']} />
       </DialogTitle>
+      <CustomTextInput
+        input={{
+          value: PAYMENT_PRICE,
+          placeholder: 'Enter subscription amount',
+          inputMode: 'numeric',
+          type: 'number',
+          onChange: (e) => setPrice(parseInt(e.target.value)),
+          label: 'Subscription Amount',
+          sx: {
+            marginBottom: '12px'
+          }
+        }}
+      />
       <FormControl fullWidth={true}>
         <FormLabel>
           <CustomTypography variant="body2">
@@ -366,6 +368,20 @@ const HandlePayment = ({ onClose, open }: { open: boolean; onClose(): void }) =>
           Pay {formik.values.totalDays * PAYMENT_PRICE}
         </CustomTypography>
       </Button>
+      <CustomTypography
+        variant="body2"
+        sx={{
+          paddingTop: '4px',
+          textAlign: 'center',
+          // width: '100%',
+          margin: 'auto'
+        }}
+      >
+        Per day:{' '}
+        {Number(PAYMENT_PRICE / (formik.values.totalDays * 26))
+          .toFixed(2)
+          .toString()}
+      </CustomTypography>
     </Dialog>
   )
 }

@@ -7,15 +7,14 @@ const ProductsPage = () => {
     <>
       <Container
         sx={{
-          height: `calc(${window.screen.availHeight}px - 164px)`,
-          maxHeight: `calc(${window.screen.availHeight}px - 164px)`,
-          overflow: 'hidden',
+          height: 'calc(100%)',
+          maxHeight: 'calc(100%)',
+          overflow: 'auto',
           position: 'relative',
           top: 0,
           width: '100%',
-          display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
-          gridTemplateRows: '1fr',
+          display: 'flex',
+          flexGrow: 1,
           gap: '12px'
         }}
       >

@@ -3,7 +3,7 @@ import React from 'react'
 import CustomIcon from '../icons'
 
 type Props = {
-  uploaded_urls?: string[] // Array of uploaded image URLs
+  uploaded_urls?: (File | string)[] // Array of uploaded image URLs
   onChange?(e: React.ChangeEvent<HTMLInputElement>): void // On change handler for file input
   onClear?(index: number): void // On clear specific image handler
   label?: React.ReactNode // Label for the upload area
@@ -39,7 +39,10 @@ const ImageUpload = ({
       <Container>
         {uploaded_urls.map((image, index) => (
           <div key={index} className="image-container">
-            <img src={image} alt={`uploaded_image_${index}`} />
+            <img
+              src={typeof image === 'string' ? image : URL.createObjectURL(image)}
+              alt={`uploaded_image_${index}`}
+            />
             <div className="content">
               <CustomIcon
                 onClick={() => handleClearImage(index)}
@@ -49,7 +52,7 @@ const ImageUpload = ({
                 size={18}
                 sx={{
                   padding: '8px',
-                  backgroundColor: 'red',
+                  backgroundColor: '#ff0000aa',
                   borderRadius: '4px'
                 }}
               />
@@ -91,7 +94,7 @@ const Container = styled('div')({
   '& img': {
     width: '80px',
     height: '80px',
-    objectFit: 'contain',
+    objectFit: 'cover',
     border: '1px solid #262626',
     borderRadius: '12px'
   },
@@ -116,25 +119,34 @@ const Container = styled('div')({
     }
   },
 
-  '& .uploaded-images': {
+  // '& .uploaded-images': {
+  //   display: 'flex',
+  //   flexDirection: 'row',
+  //   gap: '12px',
+  //   minWidth: '80px',
+  //   flexWrap: 'wrap',
+  // }
+  '& .image-container': {
+    position: 'relative',
     display: 'flex',
-    flexDirection: 'row',
-    gap: '12px',
-    minWidth: '80px',
-    flexWrap: 'wrap',
-    '& .image-container': {
-      position: 'relative',
+    flexDirection: 'column',
+    alignItems: 'center',
+    overflow: 'hidden',
+    '.content': {
+      width: '100%',
+      borderRadius: '12px',
+      height: '100%',
+      position: 'absolute',
+      top: '50%',
+      left: '50%',
+      transform: 'translate(-50%, -50%)',
       display: 'flex',
-      flexDirection: 'column',
+      justifyContent: 'center',
       alignItems: 'center',
-
-      '& .content': {
-        position: 'absolute',
-        top: 0,
-        right: 0,
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center'
+      opacity: 0,
+      '&:hover': {
+        opacity: 1,
+        backgroundColor: '#ff0000aa'
       }
     }
   },

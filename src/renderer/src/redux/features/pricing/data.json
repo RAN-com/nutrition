@@ -34,31 +34,31 @@
   },
   {
     "title": "Prestige",
-    "price": 3650,
+    "price": 3999,
     "type": "subscription",
     "validity": "1_year",
     "priceId": "prestige_1_year",
-    "features": ["15 Customers", "15 Staffs", "15 Visitors"]
+    "features": ["20 Customers", "20 Staffs", "100 Visitors"]
   },
   {
-    "title": "Premium Pack",
-    "price": 6800,
+    "title": "Prestige+",
+    "price": 6999,
     "type": "subscription",
     "validity": "1_year",
     "priceId": "premium_pack_1_year",
-    "features": ["30 Customers", "30 Staffs", "30 Visitors"]
+    "features": ["50 Customers", "50 Staffs", "250 Visitors"]
   },
   {
     "title": "Premium+",
-    "price": 8500,
+    "price": 8999,
     "type": "subscription",
     "validity": "1_year",
     "priceId": "premium_plus_1_year",
-    "features": ["50 Customers", "50 Staffs", "50 Visitors"]
+    "features": ["75 Customers", "75 Staffs", "500 Visitors"]
   },
   {
     "title": "Premium++",
-    "price": 15000,
+    "price": 14999,
     "type": "subscription",
     "validity": "1_year",
     "priceId": "premium_plus_plus_1_year",

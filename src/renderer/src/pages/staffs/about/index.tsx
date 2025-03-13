@@ -5,7 +5,9 @@ import {
   debounce,
   Divider,
   keyframes,
-  styled
+  styled,
+  Tab,
+  Tabs
 } from '@mui/material'
 import AboutHeader from './header'
 import { grey } from '@mui/material/colors'
@@ -15,7 +17,7 @@ import CustomTypography from '@renderer/components/typography'
 import { CustomerResponse } from '@renderer/types/customers'
 import { AppointmentData } from '@renderer/types/staff'
 import { VisitorData } from '@renderer/types/visitor'
-import React from 'react'
+import React, { useMemo } from 'react'
 import { staffAssignedCustomers } from '@renderer/firebase/customers'
 import { staffAssignedVisitors } from '@renderer/firebase/visitor'
 import CustomIcon from '@renderer/components/icons'
@@ -29,6 +31,7 @@ import AvailableSoon from '@renderer/components/modal/available-soon'
 import PurchaseSubscription from './purchase-subscription'
 import { asyncInitCardUpdate } from '@renderer/redux/features/user/card'
 import { getAppointmentsBySid } from '@renderer/firebase/appointments'
+import NoImage from '@renderer/assets/image-not-found.jpg'
 
 // Define the keyframe for the rotating animation
 const rotate = keyframes`
@@ -39,6 +42,47 @@ const rotate = keyframes`
     transform: rotate(360deg);
   }
 `
+const timer = (valid_till: string): { years: number; months: number; days: number } | null => {
+  const targetDate = new Date(valid_till)
+  const now = new Date()
+
+  if (isNaN(targetDate.getTime())) {
+    console.error('Invalid date format in valid_till:', valid_till)
+    return null
+  }
+
+  if (targetDate <= now) {
+    return { years: 0, months: 0, days: 0 }
+  }
+
+  let years = targetDate.getFullYear() - now.getFullYear()
+  let months = targetDate.getMonth() - now.getMonth()
+  let days = targetDate.getDate() - now.getDate()
+
+  if (days < 0) {
+    months--
+    const tempDate = new Date(now.getFullYear(), now.getMonth() + 1, 0) // Last day of previous month
+    days += tempDate.getDate()
+  }
+
+  if (months < 0) {
+    years--
+    months += 12
+  }
+  return { years, months, days }
+}
+
+// Example usage:
+// const timeLeft = timer("2025-03-20T00:00:00Z");
+// if (timeLeft) {
+//   console.log(timeLeft);
+// }
+
+// Example usage:
+// const timeLeft = timer("2024-12-25T00:00:00Z");
+// if (timeLeft) {
+//   console.log(timeLeft);
+// }
 
 const AboutStaff = () => {
   const [appointments, setAppointments] = React.useState([] as AppointmentData[])
@@ -125,19 +169,27 @@ const AboutStaff = () => {
   const [open, setOpen] = React.useState(false)
   const [showAvailable, setShowAvailable] = React.useState(false)
   const current_staff_domain = useAppSelector((s) => s.staffs.current_staff_domain)
+  const [currentPic, setCurrentPic] = React.useState('before')
 
+  const timeLeft = useMemo(
+    () =>
+      current_staff_domain?.subscription?.valid_till
+        ? timer(current_staff_domain?.subscription?.valid_till)
+        : null,
+    []
+  )
   return (
     <>
       <AppointmentsCard open={open} onClose={() => setOpen(false)} />
       <Container
         sx={{
-          height: `calc(${window.screen.availHeight}px - 164px)`,
-          maxHeight: `calc(${window.screen.availHeight}px - 164px)`
+          height: 'calc(100%)',
+          maxHeight: 'calc(100%)'
         }}
       >
         <AboutHeader />
         <InnerContainer>
-          <Profile>
+          <Profile className="scrollbar">
             <Avatar
               src={data?.data?.photo_url}
               alt={data?.data?.name}
@@ -210,6 +262,71 @@ const AboutStaff = () => {
                 )}
               </>
             )}
+            {current_staff_domain && current_staff_domain?.subscription && (
+              <div>
+                <CustomTypography>
+                  Valid till&nbsp;
+                  <b>
+                    {timeLeft?.years}Y {timeLeft?.months}M {timeLeft?.days}D
+                  </b>
+                </CustomTypography>
+              </div>
+            )}
+            <div
+              style={{
+                display: 'flex',
+                flex: 1,
+                width: '100%',
+                flexDirection: 'column',
+                padding: '12px 16px',
+                margin: '12px 0px'
+              }}
+            >
+              <Tabs
+                sx={{
+                  '& .MuiTab-root': {
+                    padding: '0px',
+                    height: 20
+                  },
+                  margin: 'auto'
+                }}
+                value={currentPic}
+                onChange={(_, e) => setCurrentPic(e)}
+                variant="scrollable"
+                aria-label="basic tabs example"
+                textColor="primary"
+                indicatorColor="primary"
+              >
+                <Tab
+                  disableFocusRipple
+                  disableRipple
+                  disableTouchRipple
+                  label="Before"
+                  value={'before'}
+                />
+                <Tab
+                  disableFocusRipple
+                  disableRipple
+                  disableTouchRipple
+                  label="After"
+                  value={'after'}
+                />
+              </Tabs>
+              {currentPic === 'before' && (
+                <img
+                  className="staff_picture"
+                  src={staff?.data?.before_picture ?? NoImage}
+                  alt={'Before image'}
+                />
+              )}
+              {currentPic === 'after' && (
+                <img
+                  className="staff_picture"
+                  src={staff?.data?.after_picture ?? NoImage}
+                  alt={'After image'}
+                />
+              )}
+            </div>
             <Divider sx={{ color: 'black', width: '100%', paddingTop: '12px' }} />
             <div
               style={{
@@ -277,6 +394,7 @@ const InnerContainer = styled('div')({
   display: 'grid',
   gridTemplateColumns: 'minmax(320px, 320px) 1fr',
   gap: '24px',
+  overflowY: 'auto',
   '.main-container': {
     width: '100%',
     height: '100%',
@@ -290,8 +408,7 @@ const InnerContainer = styled('div')({
 const Container = styled('div')({
   width: '100%',
   transition: 'all .3s',
-
-  overflow: 'hidden',
+  overflow: 'auto',
   position: 'relative',
   top: 0,
   display: 'grid',
@@ -304,15 +421,22 @@ const Container = styled('div')({
 
 const Profile = styled('div')({
   width: '100%',
-  height: 'max-content',
+  height: '100%',
   maxWidth: '420px',
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
-  justifyContent: 'center',
   backgroundColor: 'white',
   borderRadius: '12px',
-  padding: '12px 24px'
+  padding: '32px 24px',
+  overflowY: 'auto',
+  '& .staff_picture': {
+    width: '100%',
+    height: 'auto',
+    objectFit: 'cover',
+    marginTop: '12px',
+    borderRadius: '12px'
+  }
 })
 
 const Count = styled('div')({

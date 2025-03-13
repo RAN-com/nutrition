@@ -25,7 +25,7 @@ const BillingModal = () => {
     window.electron?.ipcRenderer?.on('pdfGeneratedError', (_event, path) => {
       console.log('Error', path)
     })
-    window.electron?.ipcRenderer?.on('pdfGeneratedSucc', (_event, path) => {
+    window.electron?.ipcRenderer?.on('pdfGeneratedSuccess', (_event, path) => {
       console.log('Path', path)
       alert(`Invoice has been saved in ${path}`)
     })
@@ -33,7 +33,6 @@ const BillingModal = () => {
 
   return (
     <Dialog
-      className="billing-modal"
       open={true}
       onClose={() => navigate('/billing')}
       sx={{
@@ -59,12 +58,9 @@ const BillingModal = () => {
         }
       }}
     >
-      <div className="billing-modal">
+      <div>
         <InvoiceContainer>
-          <Header>
-            <CustomTypography sx={{ '& span': { fontWeight: 'bold' }, gap: '4px' }}>
-              Invoice <span>{currentData?.orderId}</span>
-            </CustomTypography>
+          <Header sx={{ flexDirection: 'row-reverse' }}>
             <CustomIcon
               name="LUCIDE_ICONS"
               icon="LuX"
@@ -72,69 +68,94 @@ const BillingModal = () => {
               onClick={() => navigate('/billing')}
             />
           </Header>
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: '40px 1fr',
-              padding: '24px 0px',
-              gap: '12px',
-              alignItems: 'center'
-            }}
-          >
-            {user?.photo_url && (
-              <img
-                src={user?.photo_url}
-                alt={user?.name}
-                style={{
-                  width: '40px',
-                  height: '40px',
-                  borderRadius: '12px'
-                }}
-              />
-            )}
-            {/* <Avatar src={user?.photo_url ?? undefined} alt={user?.name ?? undefined} /> */}
-            <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <CustomTypography fontWeight={'bold'}>{user?.name}</CustomTypography>
-              <CustomTypography variant={'body2'} fontWeight={'medium'} color={grey[400]}>
-                {user?.center_address}
+          <div className="billing-modal">
+            <Header
+              style={{
+                marginBottom: '12px'
+              }}
+            >
+              <CustomTypography sx={{ '& span': { fontWeight: 'bold' }, gap: '4px' }}>
+                Invoice <span>{currentData?.orderId}</span>
+              </CustomTypography>
+            </Header>
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: '40px 1fr',
+                // padding: '24px 0px',
+                gap: '12px',
+                alignItems: 'center'
+              }}
+            >
+              {user?.photo_url && (
+                <img
+                  src={user?.photo_url}
+                  alt={user?.name}
+                  style={{
+                    width: '40px',
+                    height: '40px',
+                    borderRadius: '12px'
+                  }}
+                />
+              )}
+              {/* <Avatar src={user?.photo_url ?? undefined} alt={user?.name ?? undefined} /> */}
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <CustomTypography fontWeight={'bold'}>{user?.name}</CustomTypography>
+                <CustomTypography variant={'body2'} fontWeight={'medium'} color={grey[400]}>
+                  {user?.center_address}
+                </CustomTypography>
+              </div>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr .5fr auto' }}>
+              <>
+                <CustomTypography
+                  sx={{ margin: '12px 0px' }}
+                  fontWeight={'bold'}
+                  color={grey['400']}
+                >
+                  Product Name
+                </CustomTypography>
+                <CustomTypography
+                  sx={{ margin: '12px 0px' }}
+                  fontWeight={'bold'}
+                  color={grey['400']}
+                >
+                  Quantity
+                </CustomTypography>
+                <CustomTypography
+                  sx={{ margin: '12px 0px' }}
+                  fontWeight={'bold'}
+                  color={grey['400']}
+                >
+                  Price
+                </CustomTypography>
+              </>
+              {currentData?.products?.map((e) => (
+                <>
+                  <CustomTypography sx={{ margin: '8px 0px' }} fontWeight={'bold'}>
+                    {e.detail?.name}
+                  </CustomTypography>
+                  <CustomTypography sx={{ margin: '8px auto' }}>{e.quantity}</CustomTypography>
+                  <CustomTypography sx={{ margin: '8px auto' }}>
+                    ₹ {e.detail?.price}
+                  </CustomTypography>
+                </>
+              ))}
+              <CustomTypography sx={{ margin: '0px 0px' }} fontWeight={'bold'}>
+                Total
+              </CustomTypography>
+              <>&nbsp;</>
+              <CustomTypography sx={{ margin: '0px 0px' }}>₹ {total}</CustomTypography>
+            </div>
+            <div>
+              <CustomTypography gap={'8px'} marginTop={'24px'}>
+                Purchased Date:{' '}
+                <span>{moment(currentData?.order_on).format('DD/mm/yyyy hh:mm')}</span>
+              </CustomTypography>
+              <CustomTypography gap={'8px'}>
+                Purchased Time: <span>{moment(currentData?.order_on).format('hh:mm A')}</span>
               </CustomTypography>
             </div>
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr .5fr auto' }}>
-            <>
-              <CustomTypography sx={{ margin: '12px 0px' }} fontWeight={'bold'} color={grey['400']}>
-                Product Name
-              </CustomTypography>
-              <CustomTypography sx={{ margin: '12px 0px' }} fontWeight={'bold'} color={grey['400']}>
-                Quantity
-              </CustomTypography>
-              <CustomTypography sx={{ margin: '12px 0px' }} fontWeight={'bold'} color={grey['400']}>
-                Price
-              </CustomTypography>
-            </>
-            {currentData?.products?.map((e) => (
-              <>
-                <CustomTypography sx={{ margin: '8px 0px' }} fontWeight={'bold'}>
-                  {e.detail?.name}
-                </CustomTypography>
-                <CustomTypography sx={{ margin: '8px auto' }}>{e.quantity}</CustomTypography>
-                <CustomTypography sx={{ margin: '8px auto' }}>₹ {e.detail?.price}</CustomTypography>
-              </>
-            ))}
-            <CustomTypography sx={{ margin: '0px 0px' }} fontWeight={'bold'}>
-              Total
-            </CustomTypography>
-            <>&nbsp;</>
-            <CustomTypography sx={{ margin: '0px 0px' }}>₹ {total}</CustomTypography>
-          </div>
-          <div>
-            <CustomTypography gap={'8px'} marginTop={'24px'}>
-              Purchased Date:{' '}
-              <span>{moment(currentData?.order_on).format('DD/mm/yyyy hh:mm')}</span>
-            </CustomTypography>
-            <CustomTypography gap={'8px'}>
-              Purchased Time: <span>{moment(currentData?.order_on).format('hh:mm A')}</span>
-            </CustomTypography>
           </div>
         </InvoiceContainer>
       </div>
@@ -157,7 +178,7 @@ const BillingModal = () => {
               window.electron?.ipcRenderer.send(
                 'generatePdf',
                 printDocument?.getHTML(),
-                `${moment(currentData?.order_on).format('DD_MM_YYYY hh:mm: A').toString()}`
+                `${currentData?.buyer.name}-${currentData?.buyer?.email}`.replace('.', '_')
               )
             }
           }}

@@ -137,32 +137,33 @@ const Sidebar = ({
         sx={({ breakpoints }) => ({
           // all: "inherit",
           display: 'grid',
+          width: '100%',
           height: '100%',
           '.sidebar__header': {
             display: 'none'
           },
           '& *': {
             transition: 'all .3s'
-          },
-          [breakpoints.down(830)]: {
-            '.sidebar__header': {
-              display: 'flex'
-            },
-            backgroundColor: 'white',
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            minWidth: '100%',
-            maxWidth: '100%',
-            width: '100%',
-            zIndex: 9999,
-            transition: 'all .3s'
-          },
-          [breakpoints.down(480)]: {
-            width: '100%',
-            maxWidth: '100%',
-            border: 'none'
           }
+          // [breakpoints.down(830)]: {
+          //   '.sidebar__header': {
+          //     display: 'flex'
+          //   },
+          //   backgroundColor: 'white',
+          //   position: 'absolute',
+          //   top: 0,
+          //   left: 0,
+          //   minWidth: '100%',
+          //   maxWidth: '100%',
+          //   width: '100%',
+          //   zIndex: 9999,
+          //   transition: 'all .3s'
+          // },
+          // [breakpoints.down(480)]: {
+          //   width: '100%',
+          //   maxWidth: '100%',
+          //   border: 'none'
+          // }
         })}
       >
         <LogoContainer>

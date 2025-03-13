@@ -17,6 +17,7 @@ import CustomDetailSidebar from './detail-sidebar'
 import PageHeader from '@renderer/components/header/pageHeader'
 import moment from 'moment'
 import { asyncGetStaffs } from '@renderer/redux/features/user/staff'
+import { Navigate, useNavigate } from 'react-router-dom'
 
 const Actions = ({
   user,
@@ -28,7 +29,7 @@ const Actions = ({
   const id = useAppSelector((s) => s.auth.user?.uid as string)
   const [anchorEl, setAnchorEl] = React.useState<Element | null>(null)
   const dispatch = useAppDispatch()
-  // const navigate = useNavigate()
+  const navigate = useNavigate()
   const currentCustomer = useAppSelector((s) => s.customer.current_customer)
   return (
     <>
@@ -61,6 +62,7 @@ const Actions = ({
             setAnchorEl(null)
             if (currentCustomer?.data?.cid !== user?.cid || !currentCustomer) {
               dispatch(asyncSetCurrentUser({ uid: id, cid: user?.cid }))
+              navigate(`/customers/${user?.cid}`)
             }
           }}
         >
@@ -146,7 +148,6 @@ const CustomerPage = (): React.ReactNode => {
   const [limit, setLimit] = React.useState(50)
   const [customer_modal, setCustomerModal] = React.useState(false)
   const [edit_data, setEditData] = React.useState<CustomerResponse>()
-  const currentUser = useAppSelector((s) => s.customer.current_customer)
   const canAddCustomer =
     useAppSelector((s) => s.auth.user?.subscription?.total_customers ?? 0) <= customers.length
 
@@ -165,14 +166,15 @@ const CustomerPage = (): React.ReactNode => {
     <>
       <Container
         sx={{
-          height: '100%',
-          maxHeight: `calc(${window.screen.availHeight}px - 164px)`,
+          height: 'calc(100%)',
+          maxHeight: 'calc(100%)',
           overflow: 'hidden',
           position: 'relative',
           top: 0,
           width: '100%',
           display: 'grid',
-          gridTemplateColumns: currentUser ? '1fr minmax(420px, 460px)' : '1fr',
+          gridTemplateColumns: '1fr',
+          // gridTemplateColumns: currentUser ? '1fr minmax(420px, 460px)' : '1fr',
           gridTemplateRows: '1fr',
           gap: '12px'
         }}
@@ -261,23 +263,6 @@ const CustomerPage = (): React.ReactNode => {
             rowsPerPage={limit}
             loading={false}
           />
-        </div>
-        <div
-          className="scrollbar"
-          style={{
-            all: 'inherit',
-            maxHeight: '100%',
-            gridTemplateColumns: '1fr',
-            gridTemplateRows: 'max-content',
-            overflowY: 'auto',
-            backgroundColor: grey[100],
-            width: currentUser ? '100%' : '0px',
-            gridColumn: '2',
-            opacity: currentUser ? 1 : 0,
-            transition: 'all .3s'
-          }}
-        >
-          <CustomDetailSidebar data={currentUser} />
         </div>
       </Container>
     </>

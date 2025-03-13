@@ -17,6 +17,7 @@ import AboutStaff from '@renderer/pages/staffs/about'
 import BillingPage from '@renderer/pages/billing'
 import BillingModal from '@renderer/pages/billing/billing-modal'
 import NoInternet from '@renderer/components/modal/no-internet'
+import CustomerDetails from '@renderer/pages/customer/details'
 
 const Navigation = () => {
   const user = useAppSelector((s) => s.auth.user)
@@ -36,7 +37,16 @@ const Navigation = () => {
                 },
                 {
                   path: '/customers',
-                  element: <CustomerPage />
+                  children: [
+                    {
+                      index: true,
+                      element: <CustomerPage />
+                    },
+                    {
+                      path: ':customerId',
+                      element: <CustomerDetails />
+                    }
+                  ]
                 },
                 {
                   path: '/products',

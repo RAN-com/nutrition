@@ -186,5 +186,7 @@ export default Cart
 
 const Container = styled('div')({
   width: '100%',
-  transition: 'all .3s'
+  transition: 'all .3s',
+  height: 'calc(100%)',
+  maxHeight: 'calc(100%)'
 })

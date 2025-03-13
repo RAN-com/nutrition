@@ -15,6 +15,8 @@ export type CreateStaff = {
   date_of_birth: string
   medical_issues?: string
   assigned_subdomain?: string
+  before_picture: string
+  after_picture: string
 }
 
 export type StaffData = {
