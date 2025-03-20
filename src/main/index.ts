@@ -27,7 +27,7 @@ function createPdf() {
 function createWindow({ width, height }: { width: number; height: number }): void {
   const mainWindow = new BrowserWindow({
     resizable: true,
-    minWidth: 860,
+    minWidth: 900,
     minHeight: 600,
     maxHeight: height,
     maxWidth: width,

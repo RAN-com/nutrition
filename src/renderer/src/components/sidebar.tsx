@@ -17,6 +17,7 @@ import { setLogoutFlag } from '@renderer/redux/features/user/auth'
 import { useAppDispatch } from '@renderer/redux/store/hook'
 import CustomTypography from './typography'
 import React from 'react'
+
 type SidebarProps = {
   hideExpand: boolean
   isOpened: boolean
