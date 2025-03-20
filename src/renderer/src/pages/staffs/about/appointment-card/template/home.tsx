@@ -4,11 +4,35 @@ import CustomIcon from '@renderer/components/icons'
 import CustomTypography from '@renderer/components/typography'
 import React from 'react'
 import { useAppDispatch, useAppSelector } from '@renderer/redux/store/hook'
-import { bgImages, setCardDetails } from '@renderer/redux/features/user/card'
+import { setCardDetails } from '@renderer/redux/features/user/card'
 import CustomTextInput from '@renderer/components/text-input'
 import { errorToast } from '@renderer/utils/toast'
 import * as Yup from 'yup'
 import { useFormik } from 'formik'
+
+const BGImage1 = 'https://herballife-ran.s3.ap-south-1.amazonaws.com/themes/image-1.png'
+const BGImage2 = 'https://herballife-ran.s3.ap-south-1.amazonaws.com/themes/image-2.png'
+const BGImage3 = 'https://herballife-ran.s3.ap-south-1.amazonaws.com/themes/image-3.png'
+const BGImage4 = 'https://herballife-ran.s3.ap-south-1.amazonaws.com/themes/image-4.png'
+const BGImage5 = 'https://herballife-ran.s3.ap-south-1.amazonaws.com/themes/image-5.png'
+const BGImage6 = 'https://herballife-ran.s3.ap-south-1.amazonaws.com/themes/image-6.png'
+const BGImage7 = 'https://herballife-ran.s3.ap-south-1.amazonaws.com/themes/image-7.png'
+const BGImage8 = 'https://herballife-ran.s3.ap-south-1.amazonaws.com/themes/image-8.png'
+
+export const bgImages = [
+  { bg: BGImage1, color: '#ae5240', backgroundColor: '#F4E8DB' },
+  { bg: BGImage2, color: '#022436', backgroundColor: '#DDE2E5' },
+  { bg: BGImage3, color: '#024747', backgroundColor: '#E6F2EF' },
+  { bg: BGImage4, color: '#af6f25', backgroundColor: '#F5EDE3' },
+  { bg: BGImage5, color: '#2B3E3A', backgroundColor: '#e7e7e7' },
+  { bg: BGImage6, color: '#62CC7E', backgroundColor: '#b2c9b8' },
+  { bg: BGImage7, color: '#F29896', backgroundColor: '#f1dede' },
+  {
+    bg: BGImage8,
+    color: '#121723',
+    backgroundColor: '#d5d7dd'
+  }
+]
 
 const validationSchema = Yup.object({
   whatsapp: Yup.string()
@@ -79,7 +103,7 @@ const HomeTemplate = () => {
           <CustomIcon name={'LUCIDE_ICONS'} icon="LuX" onClick={() => setShowBG(false)} />
         </div>
         <Divider sx={{ marginBottom: '12px' }} />
-        <BGContainers>
+        <BGContainers className="scrollbar">
           {bgImages?.map((e) => (
             <div
               className={['colors', data?.card_theme?.hero_bg_image === e?.bg ? 'show' : ''].join(
@@ -132,7 +156,6 @@ const HomeTemplate = () => {
             style={{
               width: '80px',
               height: '80px',
-              overflow: 'hidden',
               position: 'relative',
               top: 0
             }}
@@ -557,6 +580,7 @@ const FabButton = styled(Button)(({ theme }) => ({
 const BGContainers = styled('div')({
   width: '100%',
   overflowX: 'auto',
+  minHeight: '80px',
   display: 'flex',
   flexWrap: 'nowrap',
   padding: '12px 12px',
@@ -565,11 +589,10 @@ const BGContainers = styled('div')({
   '& .colors': {
     width: '100px',
     height: '100px',
-    padding: '8px',
-    borderRadius: 12,
+    // padding: '8px',
+    borderRadius: '8px',
     cursor: 'pointer',
     boxShadow: `0px 0px 0px 4px #63636386`,
-    overflow: 'hidden',
     '&.show': {
       boxShadow: `0px 0px 0px 4px #81ff9c`,
       '&:hover': {
@@ -577,8 +600,8 @@ const BGContainers = styled('div')({
       }
     },
     '& img': {
-      width: '100%',
-      height: '100%',
+      width: '100px',
+      height: '100px',
       objectFit: 'cover',
       borderRadius: '8px'
     }

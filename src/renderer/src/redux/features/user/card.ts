@@ -1,19 +1,8 @@
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { getCardDetail } from '@renderer/firebase/card'
+import { bgImages } from '@renderer/pages/staffs/about/appointment-card/template/home'
 import { CardCreateData, CardData } from '@renderer/types/card'
 import { errorToast } from '@renderer/utils/toast'
-
-const BGImage1 = 'https://herballife-ran.s3.ap-south-1.amazonaws.com/themes/image-1.png'
-const BGImage2 = 'https://herballife-ran.s3.ap-south-1.amazonaws.com/themes/image-2.png'
-const BGImage3 = 'https://herballife-ran.s3.ap-south-1.amazonaws.com/themes/image-3.png'
-const BGImage4 = 'https://herballife-ran.s3.ap-south-1.amazonaws.com/themes/image-4.png'
-
-export const bgImages = [
-  { bg: BGImage1, color: '#ae5240', backgroundColor: '#F4E8DB' },
-  { bg: BGImage2, color: '#022436', backgroundColor: '#DDE2E5' },
-  { bg: BGImage3, color: '#024747', backgroundColor: '#E6F2EF' },
-  { bg: BGImage4, color: '#af6f25', backgroundColor: '#F5EDE3' }
-]
 
 type INITIAL_STATE = {
   data: CardData | null
@@ -243,7 +232,7 @@ const cardSlice = createSlice({
           personal_details: {
             card_theme: {
               accent_color: bgImages[0].bg,
-              hero_bg_image: bgImages[0].color,
+              hero_bg_image: bgImages[0].bg,
               background_color: bgImages[0].backgroundColor
             },
             center_name: undefined,

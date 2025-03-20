@@ -1,13 +1,12 @@
-import { Chip, Menu, MenuItem, Modal, styled, Tooltip } from '@mui/material'
+import { Chip, Menu, MenuItem, styled, Tooltip } from '@mui/material'
 import { useAppSelector, useAppDispatch } from '@renderer/redux/store/hook'
 import CustomTypography from '../typography'
 import { grey } from '@mui/material/colors'
 import CustomIcon from '../icons'
 import React from 'react'
-import { errorToast } from '@renderer/utils/toast'
-import { deleteFile, uploadFiles } from '@renderer/lib/upload-img'
-import { asyncUpdateUser, setLogoutFlag } from '@renderer/redux/features/user/auth'
+import { setLogoutFlag } from '@renderer/redux/features/user/auth'
 import moment from 'moment'
+import { useNavigate } from 'react-router-dom'
 
 const greetings = () => {
   const time = new Date().getHours()
@@ -42,39 +41,11 @@ const Header = ({ toggleSidebar, showToggle }: Props) => {
   const user = useAppSelector((s) => s.auth.user)
   const dispatch = useAppDispatch()
   const [anchorEl, setAnchorEl] = React.useState<Element | null>(null)
-  const [loading, setLoading] = React.useState(false)
-  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    setLoading(true)
-    setAnchorEl(null)
-    try {
-      const files = e.target.files?.[0]
-      if (!user?.uid) return errorToast('Login Expired. Try Again')
-      if (!files) return errorToast('Select a valid file')
-      if (user?.photo_url) {
-        await deleteFile(user?.photo_url?.split('.com')[0] ?? '')
-      }
-      const upload = await uploadFiles(user?.uid, [files], ['profile'])
-      if (upload?.[0]) {
-        dispatch(asyncUpdateUser({ ...user, photo_url: upload?.[0]?.Location }))
-        setLoading(false)
-        return null
-      }
-      setAnchorEl(null)
-      setLoading(false)
-    } catch (err) {
-      console.log(err)
-      setLoading(false)
 
-      setAnchorEl(null)
-      return null
-    }
-    setLoading(false)
-
-    setAnchorEl(null)
-    return
-  }
+  const navigate = useNavigate()
 
   const { time, timeFormat, date } = clock()
+  const isProfile = window.location.pathname.includes('profile')
 
   return (
     <HeaderContainer className="header">
@@ -142,32 +113,33 @@ const Header = ({ toggleSidebar, showToggle }: Props) => {
             }
           />
         </Tooltip>
-        <Modal open={loading}>
-          <div></div>
-        </Modal>
-        {user?.photo_url ? (
-          <img
-            src={user?.photo_url}
-            alt={user?.name}
-            onClick={(e) => {
-              setAnchorEl(e.currentTarget)
-            }}
-            style={{
-              width: '32px',
-              height: '32px',
-              borderRadius: '100px',
-              cursor: 'pointer'
-            }}
-          />
-        ) : (
-          <CustomIcon
-            name="BOX_ICONS"
-            icon={'BiUser'}
-            color={grey['600']}
-            onClick={(e) => {
-              setAnchorEl(e.currentTarget)
-            }}
-          />
+        {!isProfile && (
+          <>
+            {user?.photo_url ? (
+              <img
+                src={user?.photo_url}
+                alt={user?.name}
+                onClick={(e) => {
+                  setAnchorEl(e.currentTarget)
+                }}
+                style={{
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '100px',
+                  cursor: 'pointer'
+                }}
+              />
+            ) : (
+              <CustomIcon
+                name="BOX_ICONS"
+                icon={'BiUser'}
+                color={grey['600']}
+                onClick={(e) => {
+                  setAnchorEl(e.currentTarget)
+                }}
+              />
+            )}
+          </>
         )}
         <Menu
           open={!!anchorEl}
@@ -181,36 +153,30 @@ const Header = ({ toggleSidebar, showToggle }: Props) => {
         >
           <MenuItem
             sx={{
-              padding: '8px 24px',
+              // gap: '12px',
+              padding: '2px 24px',
               boxShadow: 'unset',
-              position: 'relative',
-              top: 0,
               '&:hover': {
                 backgroundColor: 'transparent'
-              },
-              '& input[type=file]': {
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                zIndex: 1000,
-                width: '100%',
-                height: '100%',
-                cursor: 'pointer',
-                opacity: 0
               }
             }}
-            disableGutters={true}
+            // disableGutters={true}
             disableRipple={true}
             disableTouchRipple={true}
+            onClick={() => {
+              setAnchorEl(null)
+              navigate('/profile')
+            }}
           >
-            <input title={''} type={'file'} accept={'image/*'} onChange={handleImageChange} />
-            <CustomTypography>Update Picture</CustomTypography>
+            {/* <CustomIcon name={'BOX_ICONS'} icon={'BiUser'} color={'black'} size={18} /> */}
+            <CustomTypography>Profile</CustomTypography>
           </MenuItem>
           <MenuItem
             sx={{
               // gap: '12px',
               padding: '2px 24px',
               boxShadow: 'unset',
+              gap: 32,
               '&:hover': {
                 backgroundColor: 'transparent'
               }

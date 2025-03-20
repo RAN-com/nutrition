@@ -12,7 +12,6 @@ import {
   styled
 } from '@mui/material'
 import { grey } from '@mui/material/colors'
-import RecordChart from '@renderer/components/chart'
 import AttendanceDates from '@renderer/components/date/attendance'
 import CustomIcon from '@renderer/components/icons'
 import MarkAttendance from '@renderer/components/modal/attendance'
@@ -22,8 +21,7 @@ import { addTransaction } from '@renderer/firebase'
 import { setSubscriptionToUser } from '@renderer/firebase/customers'
 import {
   asyncGetCurrentCustomerAttendance,
-  asyncSetCurrentUser,
-  resetCurrentUser
+  asyncSetCurrentUser
 } from '@renderer/redux/features/user/customers'
 import { RootState } from '@renderer/redux/store'
 import { useAppDispatch, useAppSelector } from '@renderer/redux/store/hook'
@@ -63,7 +61,6 @@ const CustomDetailSidebar = ({ data }: Props) => {
   }
 
   const [showAttendanceForm, setShowAttendanceForm] = React.useState(false)
-  const records = data?.records?.data ?? []
 
   const [showDialog, setShowDialog] = React.useState(false)
 
@@ -186,21 +183,6 @@ const CustomDetailSidebar = ({ data }: Props) => {
 }
 
 export default CustomDetailSidebar
-
-const Header = styled('div')({
-  width: '100%',
-  height: '60px',
-  display: 'flex',
-  flexDirection: 'row',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-  padding: '12px 18px',
-  position: 'absolute',
-  top: 0,
-  left: 0,
-  zIndex: 10,
-  backgroundColor: 'white'
-})
 
 const Content = styled('div')({
   display: 'flex',

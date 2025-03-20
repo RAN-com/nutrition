@@ -18,6 +18,8 @@ import BillingPage from '@renderer/pages/billing'
 import BillingModal from '@renderer/pages/billing/billing-modal'
 import NoInternet from '@renderer/components/modal/no-internet'
 import CustomerDetails from '@renderer/pages/customer/details'
+import ProfilePage from '@renderer/pages/profile'
+import EditProfile from '@renderer/pages/profile/edit'
 
 const Navigation = () => {
   const user = useAppSelector((s) => s.auth.user)
@@ -53,6 +55,10 @@ const Navigation = () => {
                   element: <ProductsPage />
                 },
                 {
+                  path: '/marathon',
+                  element: <h1>Marathon</h1>
+                },
+                {
                   path: '/visitors',
                   element: <VisitorPage />
                 },
@@ -71,7 +77,17 @@ const Navigation = () => {
                 },
                 {
                   path: '/profile',
-                  element: <h1>Profile</h1>
+                  element: <ProfilePage />,
+                  children: [
+                    {
+                      index: true,
+                      element: <EditProfile />
+                    }
+                    // {
+                    //   path: 'settings',
+                    //   element: <p>Will be available soon</p>
+                    // }
+                  ]
                 },
                 {
                   path: '/appointments',

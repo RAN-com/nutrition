@@ -13,11 +13,10 @@ import { grey, red } from '@mui/material/colors'
 import { CustomerResponse } from '@renderer/types/customers'
 import CreateCustomerModal from '@renderer/components/modal/create-customer'
 import { deleteCustomer } from '@renderer/firebase/customers'
-import CustomDetailSidebar from './detail-sidebar'
 import PageHeader from '@renderer/components/header/pageHeader'
 import moment from 'moment'
 import { asyncGetStaffs } from '@renderer/redux/features/user/staff'
-import { Navigate, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 
 const Actions = ({
   user,

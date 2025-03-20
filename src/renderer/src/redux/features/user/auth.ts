@@ -34,7 +34,7 @@ const name = 'user'
 
 export const asyncUpdateUser = createAsyncThunk(
   `${name}/asyncUpdateUser`,
-  async ({ ...data }: CenterUser) => {
+  async ({ ...data }: Partial<CenterUser>) => {
     return await updateUserDocument({ ...data })
   }
 )

@@ -27,10 +27,10 @@ const validationSchema = yup.object({
 
 const AuthCreate = (): React.ReactNode => {
   const dispatch = useAppDispatch()
+  const loading = useAppSelector((s) => s.auth.login_loading)
   const user = useAppSelector((s) => s.auth.user)
   const navigate = useNavigate()
 
-  const loading = useAppSelector((s) => s.auth.login_loading)
   const [show, setShow] = React.useState(false)
   const formik = useFormik({
     initialValues: {

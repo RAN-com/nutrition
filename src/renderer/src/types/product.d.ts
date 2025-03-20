@@ -4,6 +4,7 @@ export type ProductData = {
   name: string
   price: number
   in_stock: number
+  flavour?: string
   is_available: boolean
   added_on: number
   added_by: string
@@ -31,5 +32,6 @@ export type OrderData = {
     phone: string
     address: string
     mode: string
+    offer?: number
   }
 }

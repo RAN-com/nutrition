@@ -26,14 +26,14 @@ type SidebarProps = {
   expand: boolean
 }
 
-type Options = {
+export type TSidebarOptions = {
   label: string
   value: string
   name?: keyof typeof Icons
   icon?: AllIcons
 }
 
-const options: (Options & { children: Options[] | null })[] = [
+const options: (TSidebarOptions & { children: TSidebarOptions[] | null })[] = [
   {
     label: 'Dashboard',
     value: '/home',
@@ -70,6 +70,13 @@ const options: (Options & { children: Options[] | null })[] = [
     children: null
   },
   {
+    label: 'Marathon',
+    value: '/marathon',
+    name: 'GAME_ICONS',
+    icon: 'GiHealthCapsule',
+    children: null
+  },
+  {
     label: 'Billing',
     value: '/billing',
     name: 'MATERIAL_DESIGN',
@@ -78,7 +85,7 @@ const options: (Options & { children: Options[] | null })[] = [
   }
 ]
 
-const logoutOption: Options[] = [
+const logoutOption: TSidebarOptions[] = [
   {
     label: 'Pricing',
     value: '/pricing',
@@ -134,7 +141,7 @@ const Sidebar = ({
     <Fade in={!isMobile ? true : isOpened}>
       <Container
         className="cs-bar"
-        sx={({ breakpoints }) => ({
+        sx={() => ({
           // all: "inherit",
           display: 'grid',
           width: '100%',

@@ -9,6 +9,9 @@ import { useAppSelector, useAppDispatch } from '@renderer/redux/store/hook'
 import { auth, refreshData } from '@renderer/firebase'
 import { resetUser, setUser } from '@renderer/redux/features/user/auth'
 import { errorToast } from '@renderer/utils/toast'
+import zIndex from '@mui/material/styles/zIndex'
+import CustomIcon from './icons'
+import { green } from '@mui/material/colors'
 
 type Props = {
   children?: React.ReactNode
@@ -55,6 +58,33 @@ const LayoutV2: React.FC<Props> = ({ children }: Props) => {
     }
   }
 
+  const [toTop, setToTop] = React.useState(false)
+
+  React.useEffect(() => {
+    const docRef = document.querySelector('.main.scrollbar')
+    if (!docRef) return
+    docRef?.addEventListener(
+      'scroll',
+      () => {
+        if (docRef.scrollTop >= 100) {
+          setToTop(true)
+        } else {
+          setToTop(false)
+        }
+      },
+      { passive: true }
+    )
+
+    return () =>
+      docRef?.removeEventListener('scroll', () => {
+        if (docRef.scrollTop >= 100) {
+          setToTop(true)
+        } else {
+          setToTop(false)
+        }
+      })
+  }, [])
+
   return (
     <>
       <LogoutWarning />
@@ -94,7 +124,7 @@ const LayoutV2: React.FC<Props> = ({ children }: Props) => {
             }}
           />
         </div>
-        <MainContainer className="scrollbar">
+        <MainContainer className="main scrollbar">
           <Header
             showToggle={isMobile}
             toggleSidebar={() => {
@@ -103,10 +133,27 @@ const LayoutV2: React.FC<Props> = ({ children }: Props) => {
               })
             }}
           />
-          {/* <InnerContainer> */}
           <div className="layout scrollbar">{children ? children : <Outlet />}</div>
-          {/* </InnerContainer> */}
         </MainContainer>
+        <GoTopButton
+          sx={{
+            opacity: toTop ? 1 : 0,
+            zIndex: toTop ? zIndex.modal : -1,
+            transition: 'all .3s'
+          }}
+          onClick={() => {
+            const docRef = document.querySelector('.main.scrollbar')
+            if (!docRef) return
+            docRef?.scrollTo({ top: 0, behavior: 'smooth' })
+          }}
+        >
+          <CustomIcon
+            name="LUCIDE_ICONS"
+            icon="LuChevronUp"
+            color={'white'}
+            stopPropagation={false}
+          />
+        </GoTopButton>
       </LayoutContainer>
     </>
   )
@@ -165,6 +212,22 @@ const MainContainer = styled('div')({
     height: '100%',
     maxWidth: '1280px',
     margin: 'auto',
+    position: 'relative',
+    top: 0,
     padding: '12px 24px'
   }
+})
+
+const GoTopButton = styled('div')({
+  width: '44px',
+  height: '44px',
+  position: 'fixed',
+  bottom: '24px',
+  right: '24px',
+  zIndex: 100,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  borderRadius: 50,
+  backgroundColor: green['400']
 })

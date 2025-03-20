@@ -148,6 +148,8 @@ const PaginatedTable: React.FC<PaginatedTableProps> = ({
           onRowsPerPageChange={onRowsPerPageChange}
           rowsPerPageOptions={[5, 10, 25, 50]} // Custom options for rows per page
           sx={{
+            overflow: 'visible',
+            height: '100%',
             '.MuiTablePagination-actions': {
               '.MuiButtonBase-root': {
                 '&.Mui-disabled': {

@@ -147,7 +147,7 @@ export const createUserDocument = async ({
   return { error: true, message: 'User Created' }
 }
 
-export const updateUserDocument = async ({ uid, ...data }: CenterUser) => {
+export const updateUserDocument = async ({ uid, ...data }: Partial<CenterUser>) => {
   const docRef = doc(firestore, `users/${uid}`)
   const docSnap = await getDoc(docRef)
 
@@ -159,7 +159,7 @@ export const updateUserDocument = async ({ uid, ...data }: CenterUser) => {
   await updateDoc(docRef, {
     ...data
   })
-  return { error: false, message: 'User Exists', data: await getUserDocument(uid) }
+  return { error: false, message: 'User Updated', data: await getUserDocument(uid as string) }
 }
 
 export const getTotalRevenue = async (uid: string) => {

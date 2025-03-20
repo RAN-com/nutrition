@@ -4,7 +4,7 @@ export type CenterUser = {
   city: string
   locality: string
   uid: string
-
+  phone?: string
   center_address: string
   photo_url?: string
   createdOn: string

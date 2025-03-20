@@ -28,7 +28,7 @@ const App = () => {
   const staff = useAppSelector((s) => s.staffs.current_staff)
 
   React.useEffect(() => {
-    window.electron?.ipcRenderer?.on('sizeChanged', (e, props) => {
+    window.electron?.ipcRenderer?.on('sizeChanged', (_e, props) => {
       if (!props) return
       const parsed = JSON.parse(props) as { width: number; height: number }
       if (!parsed) return

@@ -17,12 +17,21 @@ import { updateProduct } from '@renderer/firebase/product'
 import { resetCart } from '@renderer/redux/features/user/products'
 import { useAppSelector, useAppDispatch } from '@renderer/redux/store/hook'
 import { ProductData } from '@renderer/types/product'
+import { errorToast } from '@renderer/utils/toast'
 import { useFormik } from 'formik'
 import React from 'react'
 import * as yup from 'yup'
 type Props = {
   open: boolean
   onClose: () => void
+}
+
+function calculateDiscountedPrice(originalPrice: number, offerPercentage: number): number {
+  if (originalPrice < 0 || offerPercentage < 0 || offerPercentage > 100) {
+    throw new Error('Invalid input values')
+  }
+  const discount: number = (originalPrice * offerPercentage) / 100
+  return originalPrice - discount
 }
 
 const validationSchema = yup.object({
@@ -44,6 +53,11 @@ const validationSchema = yup.object({
     .required('Address is required')
     .min(10, 'Address is too short')
     .max(100, 'Address is too long'),
+  offer: yup
+    .number()
+    .min(0, 'Offer should be greater than or equal to 0')
+    .max(100, 'Offer should be less than or equal to 100')
+    .required(),
   mode: yup.string().required('Mode of Payment is required')
 })
 const Checkout = ({ open, onClose }: Props) => {
@@ -66,17 +80,25 @@ const Checkout = ({ open, onClose }: Props) => {
       email: '',
       phone: '',
       address: '',
-      mode: 'COD'
+      mode: 'COD',
+      offer: 0
     },
     validationSchema,
-    onSubmit: async (values) => {
+    enableReinitialize: true,
+    onSubmit: async (values, { resetForm }) => {
+      if (total === 0) {
+        errorToast('Try Again')
+        resetForm()
+        onClose()
+        return
+      }
       if (user) {
         setLoading(true)
         await confirmOrder(user?.uid as string, {
           order_on: new Date().getTime(),
           order_by: user?.uid as string,
           products: cart,
-          total_price: total,
+          total_price: calculateDiscountedPrice(total, values.offer),
           total_products: cart.length,
           buyer: {
             ...values
@@ -119,6 +141,9 @@ const Checkout = ({ open, onClose }: Props) => {
       })
     }
   }, [])
+
+  console.log(formik.errors)
+
   return (
     <Container
       sx={{
@@ -230,7 +255,7 @@ const Checkout = ({ open, onClose }: Props) => {
                   helperText: formik.touched[k] && formik.errors[k],
                   label: (
                     <CustomTypography marginBottom={'0px'} color={'inherit'}>
-                      {k.charAt(0).toUpperCase() + k.slice(1)}
+                      {k.charAt(0).toUpperCase() + k.slice(1)} {k === 'offer' && '(In percentage)'}
                     </CustomTypography>
                   ),
                   placeholder: k.charAt(0).toUpperCase() + k.slice(1),
@@ -249,7 +274,7 @@ const Checkout = ({ open, onClose }: Props) => {
             }}
           >
             <CustomTypography variant={'body2'} paddingBottom={'12px'}>
-              Total Amount : ${total.toFixed(2)}
+              Total Amount : ₹{calculateDiscountedPrice(total, formik.values.offer).toFixed(2)}
             </CustomTypography>
           </div>
         </div>
@@ -266,7 +291,7 @@ const Checkout = ({ open, onClose }: Props) => {
             sx={{ width: '100%' }}
           >
             <CustomTypography color={'white'} variant={'body2'} textTransform={'none'}>
-              Complete Payment : ${total.toFixed(2)}
+              Complete Payment : ₹{calculateDiscountedPrice(total, formik.values.offer).toFixed(2)}
             </CustomTypography>
           </Button>
         </div>

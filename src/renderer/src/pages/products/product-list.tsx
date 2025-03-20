@@ -36,6 +36,7 @@ const ProductList = () => {
         open={addProduct}
         edit={edit ?? null}
         onClose={() => {
+          dispatch(setProductEdit(undefined))
           setAddProduct(false)
         }}
       />
