@@ -126,9 +126,22 @@ const Home = () => {
               variant={'body1'}
               fontWeight={'bold'}
               fontFamily={'Syne'}
+              whiteSpace={'pre-line'}
+              textAlign={'start'}
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'flex-start',
+                justifyContent: 'flex-start'
+              }}
+              flexDirection={'column'}
+              alignItems={'flex-start'}
+              justifyContent={'flex-start'}
               color={colors[idx % colors.length].replace('0.3', '1')}
             >
-              {v.title}
+              {v.title.split(' ').map((e) => (
+                <span style={{ all: 'inherit' }}>{e}</span>
+              ))}
             </CustomTypography>
 
             <CustomTypography variant={'h4'} fontWeight={'normal'}>
@@ -251,7 +264,8 @@ const Container = styled('div')(({}) => ({
   overflowY: 'auto',
   display: 'flex',
   flexDirection: 'column',
-  gap: '24px'
+  gap: '24px',
+  paddingBottom: '24px'
 }))
 
 const CardContainer = styled('div')({

@@ -161,32 +161,27 @@ const LayoutV2: React.FC<Props> = ({ children }: Props) => {
 
 export default LayoutV2
 
-const LayoutContainer = styled('div')(({ theme }) => ({
+const LayoutContainer = styled('div')(({}) => ({
   width: 'var(--width)',
-  maxWidth: '100vw',
-  minWidth: '100%',
-  // height: '100%',
   height: `var(--height)`,
+
+  maxHeight: 'var(--height)',
+  minHeight: 'var(--height)',
   position: 'relative',
   top: 0,
   left: 0,
-  flexGrow: 1,
+  overflow: 'hidden',
   display: 'flex',
-  flexDirection: 'row',
+  flexDirection: 'row'
   // display: 'grid',
   // gridTemplateRows: '1fr',
   // overscrollBehavior: 'contain',
   // webkitOverflowScrolling: 'touch',
-  [theme.breakpoints.down(800)]: {
-    display: 'grid',
-    gridTemplateColumns: '1fr'
-    // gridTemplateRows: '80px 1fr'
-  }
 }))
 
 const MainContainer = styled('div')({
   width: '100%',
-  height: `100%`,
+  height: 'var(--height)',
   overflowY: 'scroll',
   margin: '0 auto',
   position: 'relative',

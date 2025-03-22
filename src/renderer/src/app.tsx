@@ -19,15 +19,19 @@ import { updateCardValidity } from './firebase/card'
 import { addTransaction, setAdminSubscription } from './firebase'
 import { asyncGetCurrentStaffDomainData } from './redux/features/user/staff'
 import zIndex from '@mui/material/styles/zIndex'
+import { setAppVersion } from './redux/features/user/auth'
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const App = () => {
   const [updateDownloaded, setUpdateDownloaded] = React.useState(false)
   const dispatch = useAppDispatch()
-  const user = useAppSelector((s) => s.auth.user)
+  const { user, app_version } = useAppSelector((s) => s.auth)
   const staff = useAppSelector((s) => s.staffs.current_staff)
 
   React.useEffect(() => {
+    window.electron.ipcRenderer?.on('app_version', (_e, props) => {
+      dispatch(setAppVersion(props))
+    })
     window.electron?.ipcRenderer?.on('sizeChanged', (_e, props) => {
       if (!props) return
       const parsed = JSON.parse(props) as { width: number; height: number }
@@ -62,6 +66,8 @@ const App = () => {
       )
     }
   }, [user, staff])
+
+  console.log(app_version)
 
   const pendingOrder = useAppSelector((s) => s.pricing.pending_order)
 

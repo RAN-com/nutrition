@@ -91,14 +91,15 @@ html {
   font-size: 100%;
   height: -webkit-fill-available;
   /* height: 100%; */
+  height: var(--height);
 }
 
 body {
   height: -webkit-fill-available;
-  height: 100%;
+  maxheight: var(--height);
+  overflow: hidden;
   margin: 0px;
   padding: 0px;
-  height:;
   width: var(--width);
 }
 

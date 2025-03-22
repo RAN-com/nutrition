@@ -33,7 +33,7 @@ function createWindow({ width, height }: { width: number; height: number }): voi
     maxWidth: width,
     autoHideMenuBar: true,
     backgroundMaterial: 'mica',
-    darkTheme: false,
+    darkTheme: true,
     focusable: true,
     fullscreen: false,
     fullscreenable: true,
@@ -41,12 +41,18 @@ function createWindow({ width, height }: { width: number; height: number }): voi
     roundedCorners: true,
     title: 'Nutrition',
     show: true,
+    titleBarStyle: 'default',
+    titleBarOverlay: {
+      color: 'blue',
+      height: 40,
+      symbolColor: 'white'
+    },
     icon: join(__dirname, '../../resources/icon.png'),
     // ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       nodeIntegration: true,
-      devTools: false,
+      devTools: is.dev,
       // devTools: process.env.NODE_ENV === "developm",
       contextIsolation: false
     }

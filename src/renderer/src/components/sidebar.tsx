@@ -153,25 +153,6 @@ const Sidebar = ({
           '& *': {
             transition: 'all .3s'
           }
-          // [breakpoints.down(830)]: {
-          //   '.sidebar__header': {
-          //     display: 'flex'
-          //   },
-          //   backgroundColor: 'white',
-          //   position: 'absolute',
-          //   top: 0,
-          //   left: 0,
-          //   minWidth: '100%',
-          //   maxWidth: '100%',
-          //   width: '100%',
-          //   zIndex: 9999,
-          //   transition: 'all .3s'
-          // },
-          // [breakpoints.down(480)]: {
-          //   width: '100%',
-          //   maxWidth: '100%',
-          //   border: 'none'
-          // }
         })}
       >
         <LogoContainer>
@@ -261,7 +242,8 @@ const Sidebar = ({
           style={{
             padding: '42px 12px 0px 12px',
             position: 'relative',
-            top: 0
+            top: 0,
+            height: 'auto'
           }}
         >
           <div
@@ -418,7 +400,7 @@ const OptionContainer = styled(List)({
   width: '100%',
   height: '100%',
   overflowY: 'auto',
-  padding: '42px 12px 0px 12px'
+  padding: '0px 12px 0px 12px'
 })
 
 const CustomListButton = styled(ListItemButton)({})
@@ -438,16 +420,3 @@ const LogoContainer = styled('div')({
     objectFit: 'contain'
   }
 })
-
-// const Header = styled('div')(({ theme }) => ({
-//   width: '100%',
-//   height: 'max-content',
-//   padding: '12px',
-//   display: 'flex',
-//   flexDirection: 'row',
-//   alignItems: 'center',
-//   justifyContent: 'space-between',
-//   [theme.breakpoints.up(830)]: {
-//     display: 'none'
-//   }
-// }))

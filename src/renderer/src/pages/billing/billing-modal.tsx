@@ -39,10 +39,10 @@ const BillingModal = () => {
         borderRadius: '0px',
         backgroundColor: 'transparent',
         '.MuiPaper-root': {
-          borderRadius: '0px',
           width: 'calc(100% - 24px)',
           maxWidth: '420px',
-          backgroundColor: 'transparent',
+          borderRadius: '12px',
+          backgroundColor: '#fff',
           boxShadow: 'none'
         },
         ['@media print']: {

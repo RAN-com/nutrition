@@ -18,6 +18,7 @@ type INITIAL_STATE = {
   login_loading: boolean
   login_status: string | null
   logout_flag: boolean
+  app_version: string | null
 }
 
 const initialState: INITIAL_STATE = {
@@ -27,7 +28,8 @@ const initialState: INITIAL_STATE = {
   logout_flag: false,
   updating: false,
   expTime: null,
-  startTime: null
+  startTime: null,
+  app_version: null
 }
 
 const name = 'user'
@@ -92,6 +94,9 @@ const userSlice = createSlice({
     },
     resetUser: (state) => {
       Object.assign(state, initialState)
+    },
+    setAppVersion: (state, action) => {
+      state.app_version = action.payload
     }
   },
   extraReducers: (builders) => {
@@ -141,6 +146,6 @@ const userSlice = createSlice({
   }
 })
 
-export const { resetUser, setLogoutFlag, setUser } = userSlice.actions
+export const { resetUser, setLogoutFlag, setUser, setAppVersion } = userSlice.actions
 
 export default userSlice.reducer
