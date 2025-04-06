@@ -13,6 +13,7 @@ import { errorToast, infoToast, successToast } from '@renderer/utils/toast'
 import { encryptData } from '@renderer/utils/crypto'
 import moment from 'moment'
 import { updateStaffCount } from './staffs'
+import { RecordType } from '@renderer/types/record'
 
 export const getCustomer = async (uid: string, cid: string) => {
   try {
@@ -406,16 +407,7 @@ export const addCustomerRecord = async ({
 }: {
   uid: string
   cid: string
-  data: {
-    BMI: number
-    BMR: number
-    BODY_FAT: number
-    MUSCLE_MASS: number
-    BODY_AGE: number
-    TSF: number
-    HEIGHT: number
-    WEIGHT: number
-  }
+  data: Partial<RecordType>
 }) => {
   try {
     // Firestore document reference (single document for all records)
@@ -445,16 +437,15 @@ export const addCustomerRecord = async ({
 
     // Add the new record to the array
     const newRecord = {
-      data,
+      ...data,
       cid,
       recorded_on: moment().format('YYYY-MM-DD'), // Timestamp
       recorded_by: uid
-    }
+    } as RecordType
 
     // Update the Firestore document with the new record
     await setDoc(recordsRef, { records: [...currentRecords, newRecord] }, { merge: true })
 
-    successToast('Record added successfully')
     return newRecord // Return the newly added record
   } catch (error) {
     console.error('Error adding customer record:', error)
@@ -477,7 +468,7 @@ export const getPersonalRecords = async (uid: string, cid: string) => {
     }
 
     // Extract the data (assuming the data field contains an array of records)
-    const data = docSnapshot.data()?.records as CustomerRecords[]
+    const data = docSnapshot.data()?.records as RecordType[]
 
     if (!data) {
       console.error('No customer records found in the document')
@@ -554,12 +545,14 @@ export const setSubscriptionToUser = async ({
   uid,
   cid,
   price,
-  totalDays
+  totalDays,
+  amountPaid
 }: {
   uid: string
   cid: string
   totalDays: number
   price: number
+  amountPaid: number
 }) => {
   try {
     // Firestore document reference (single document for all records)
@@ -595,7 +588,8 @@ export const setSubscriptionToUser = async ({
       daysLeft: totalDays,
       isActive: true,
       totalDays,
-      id: id
+      id: id,
+      amountPaid
     } as AttendanceSubscription
 
     // Update the Firestore document with the new record
@@ -606,6 +600,53 @@ export const setSubscriptionToUser = async ({
   } catch (error) {
     console.error('Error adding customer record:', error)
     throw new Error('Failed to add subscription')
+  }
+}
+
+export const payDueAmount = async ({
+  cid,
+  dueAmount,
+  uid
+}: {
+  uid: string
+  cid: string
+  dueAmount: number
+}) => {
+  try {
+    const recordRef = doc(firestore, `customers/${uid}/subscription/${cid}`)
+    const docSnapshot = await getDoc(recordRef)
+
+    if (!docSnapshot.exists()) {
+      errorToast('No subscription record found for this user.')
+      return
+    }
+
+    const data = docSnapshot.data()?.subscription as AttendanceSubscription[]
+
+    if (!data || !data.filter((e) => e.isActive && e.daysLeft > 0)[0]) {
+      errorToast('No active subscription found for this user.')
+      return
+    }
+
+    const activeSubscription = data.filter((e) => e.isActive && e.daysLeft > 0)[0]
+
+    const updatedData = data.map((e) =>
+      e.id === activeSubscription.id
+        ? {
+            ...e,
+            amountPaid: e.amountPaid + dueAmount
+          }
+        : e
+    )
+
+    await updateDoc(recordRef, { subscription: updatedData })
+
+    successToast('Due amount paid successfully.')
+    return updatedData.filter((e) => e.isActive && e.daysLeft > 0)[0]
+  } catch (error) {
+    console.error('Error paying due amount:', error)
+    errorToast('Failed to pay due amount.')
+    throw error
   }
 }
 

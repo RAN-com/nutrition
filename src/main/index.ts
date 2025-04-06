@@ -52,7 +52,7 @@ function createWindow({ width, height }: { width: number; height: number }): voi
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       nodeIntegration: true,
-      devTools: is.dev,
+      devTools: true,
       // devTools: process.env.NODE_ENV === "developm",
       contextIsolation: false
     }
@@ -76,6 +76,7 @@ function createWindow({ width, height }: { width: number; height: number }): voi
     shell.openExternal(details.url)
     return { action: 'deny' }
   })
+
   if (is.dev) {
     process.env.APPIMAGE = join(
       __dirname,
@@ -98,6 +99,10 @@ function createWindow({ width, height }: { width: number; height: number }): voi
     }
 
     mainWindow.webContents.send('sizeChanged', JSON.stringify(data))
+  })
+
+  ipcMain.on('openUrl', (_event, url: string) => {
+    shell.openExternal(url)
   })
 
   ipcMain.on('generatePdf', (_event, div, fileName: string) => {

@@ -15,6 +15,7 @@ import { AppointmentData } from '@renderer/types/staff'
 import { VisitorData } from '@renderer/types/visitor'
 import React from 'react'
 import NoData from '@renderer/assets/no-data.png'
+import moment from 'moment'
 type Props = {
   appointments: AppointmentData[]
   customers: CustomerResponse[]
@@ -57,7 +58,7 @@ const StaffContent = ({ appointments, customers, loading, visitors }: Props) => 
       <>{e.name}</>,
       <>{e.email}</>,
       <>{e.phone}</>,
-      <>{e.appointment_date}</>,
+      <>{moment(e.appointment_date).format('DD/MM/YYYY HH:mm:ss')}</>,
       <>{e.createdOn}</>
     ]),
     customers: ((data[current] || []) as CustomerResponse[]).map((e) => [

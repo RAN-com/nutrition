@@ -1,34 +1,35 @@
 import React, { useState } from 'react'
 import { LineChart } from '@mui/x-charts'
-import { CustomerRecords } from '@renderer/types/customers'
 import { Accordion, AccordionDetails, AccordionSummary, Box, Button, styled } from '@mui/material'
 import CustomIcon from '../icons'
 import { capitalizeSentence } from '@renderer/utils/functions'
 import CustomTypography from '../typography'
 import RecordForm from './record-input'
-import { VisitorData } from '@renderer/types/visitor'
+import { RecordType } from '@renderer/types/record'
+import moment from 'moment'
 
 type Props = {
-  data: (CustomerRecords | VisitorData['records'][number])[]
+  data: RecordType[]
   type?: 'customer' | 'visitor'
 }
+
 const RecordChart = ({ data, type = 'customer' }: Props) => {
   // Extract labels for each week based on recorded_on timestamp
   const labels = data.map((record, index) => {
-    const date = new Date(record.recorded_on)
+    const date = moment(record?.recorded_on).toDate()
     return `Week ${index + 1} (${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()})`
   })
 
   // Extract series data for each metric (BMI, BMR, BODY_FAT, etc.) across all weeks
   const series = {
-    BMI: data.map((record) => record.data.BMI),
-    BMR: data.map((record) => record.data.BMR),
-    BODY_FAT: data.map((record) => record.data.BODY_FAT),
-    MUSCLE_MASS: data.map((record) => record.data.MUSCLE_MASS),
-    BODY_AGE: data.map((record) => record.data.BODY_AGE),
-    TSF: data.map((record) => record.data.TSF),
-    HEIGHT: data.map((record) => record.data.HEIGHT),
-    WEIGHT: data.map((record) => record.data.WEIGHT)
+    BMI: data.map((record) => record.bmi),
+    BMR: data.map((record) => record.bmr),
+    BODY_FAT: data.map((record) => record.body_fat),
+    MUSCLE_MASS: data.map((record) => record.visceral_fat),
+    BODY_AGE: data.map((record) => record.body_age),
+    TSF: data.map((record) => record.tsf),
+    HEIGHT: data.map((record) => record.height),
+    WEIGHT: data.map((record) => record.weight)
   }
 
   // Series labels
@@ -84,7 +85,7 @@ const RecordChart = ({ data, type = 'customer' }: Props) => {
   const [showForm, setShowForm] = React.useState(false)
 
   return (
-    <div style={{ width: '100%' }}>
+    <div style={{ width: '100%', marginTop: '24px', maxWidth: '740px' }}>
       <RecordForm
         type={type}
         open={showForm}
@@ -102,17 +103,8 @@ const RecordChart = ({ data, type = 'customer' }: Props) => {
         }}
       >
         <CustomTypography variant={'h6'} lineHeight={'1'}>
-          Health Records
+          Chart
         </CustomTypography>
-        <Button
-          variant={'contained'}
-          focusRipple={false}
-          disableTouchRipple={true}
-          disableElevation={true}
-          onClick={() => setShowForm(true)}
-        >
-          <CustomTypography variant={'body2'}>Add Record</CustomTypography>
-        </Button>
       </Box>
 
       <LineChart

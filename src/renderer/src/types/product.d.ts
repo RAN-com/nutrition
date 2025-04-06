@@ -9,6 +9,7 @@ export type ProductData = {
   added_on: number
   added_by: string
   thumbnail?: string
+  type: 'CENTER_USAGE' | 'OUT_PURCHASE'
   product_images?: {
     url: string
     comment?: string

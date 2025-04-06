@@ -37,12 +37,13 @@ const s3 = new S3Client({
 export const uploadFiles = async (
   uid: string,
   files: File[],
-  additionFolderName?: string[]
+  additionFolderName?: string[],
+  replaceFileName?: string
 ): Promise<UploadResponse[]> => {
   const uploadPromises = files.map(async (file) => {
     const fileName = generatePassword()
     const folderPath = additionFolderName
-      ? `${uid}/${additionFolderName?.join('/')}/${fileName}`
+      ? `${uid}/${additionFolderName?.join('/')}/${replaceFileName || fileName}`
       : `${uid}/${fileName}`
 
     const params = {

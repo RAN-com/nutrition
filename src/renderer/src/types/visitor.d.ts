@@ -1,3 +1,5 @@
+import { RecordType } from './record'
+
 export type VisitorCreate = {
   name: string
   gender: string
@@ -34,16 +36,7 @@ export type VisitorData = {
     }
   }
   records: {
-    data: {
-      BMI: number
-      BMR: number
-      BODY_FAT: number
-      MUSCLE_MASS: number
-      BODY_AGE: number
-      TSF: number
-      HEIGHT: number
-      WEIGHT: number
-    }
+    data: RecordType
     vid: string
     recorded_on: string
     recorded_by: string

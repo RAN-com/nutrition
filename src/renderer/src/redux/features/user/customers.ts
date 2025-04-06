@@ -10,10 +10,10 @@ import {
 import {
   AttendanceSubscription,
   CustomerAttendance,
-  CustomerRecords,
   CustomerResponse,
   MarathonData
 } from '@renderer/types/customers'
+import { RecordType } from '@renderer/types/record'
 import { QueryDocumentSnapshot } from 'firebase/firestore'
 import moment from 'moment'
 
@@ -42,7 +42,7 @@ type INITIAL_STATE = {
           data: CustomerAttendance[]
         }[]
         records: {
-          data: CustomerRecords[]
+          data: RecordType[]
         }
       }
     | undefined

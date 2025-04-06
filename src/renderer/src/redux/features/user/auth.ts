@@ -1,4 +1,4 @@
-import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
+import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit'
 import {
   createUser,
   createUserDocument,
@@ -6,6 +6,7 @@ import {
   getUserDocument,
   updateUserDocument
 } from '@renderer/firebase'
+import { Notification } from '@renderer/types/notification'
 import { CenterUser } from '@renderer/types/user'
 import { errorToast, successToast } from '@renderer/utils/toast'
 import moment from 'moment'
@@ -19,6 +20,7 @@ type INITIAL_STATE = {
   login_status: string | null
   logout_flag: boolean
   app_version: string | null
+  notifications: Notification[]
 }
 
 const initialState: INITIAL_STATE = {
@@ -29,7 +31,8 @@ const initialState: INITIAL_STATE = {
   updating: false,
   expTime: null,
   startTime: null,
-  app_version: null
+  app_version: null,
+  notifications: []
 }
 
 const name = 'user'
@@ -97,6 +100,11 @@ const userSlice = createSlice({
     },
     setAppVersion: (state, action) => {
       state.app_version = action.payload
+    },
+    setNotifications: (state, action: PayloadAction<Notification[]>) => {
+      state.notifications = action.payload.sort((a, b) =>
+        moment(b.timestamp).diff(moment(a.timestamp))
+      )
     }
   },
   extraReducers: (builders) => {
@@ -146,6 +154,7 @@ const userSlice = createSlice({
   }
 })
 
-export const { resetUser, setLogoutFlag, setUser, setAppVersion } = userSlice.actions
+export const { resetUser, setLogoutFlag, setUser, setAppVersion, setNotifications } =
+  userSlice.actions
 
 export default userSlice.reducer

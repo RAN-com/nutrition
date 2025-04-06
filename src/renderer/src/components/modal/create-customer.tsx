@@ -28,6 +28,7 @@ import { useAppSelector, useAppDispatch } from '@renderer/redux/store/hook'
 import { addCustomer, updateCustomer } from '@renderer/firebase/customers'
 import { asyncGetCustomers } from '@renderer/redux/features/user/customers'
 import { CustomerResponse } from '@renderer/types/customers'
+import { encryptData } from '@renderer/utils/crypto'
 
 const validationSchema = Yup.object({
   name: Yup.string()
@@ -263,7 +264,10 @@ const CreateCustomerModal = ({
                     const url = await uploadFiles(
                       user?.uid as string,
                       [e.target.files[0]],
-                      ['customers']
+                      ['customers'],
+                      edit
+                        ? edit?.data?.cid
+                        : (encryptData(formik.values.phone as string) as string)
                     )
                     if (url[0]) {
                       formik.setFieldValue('photo_url', url[0].Location)

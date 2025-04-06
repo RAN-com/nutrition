@@ -4,12 +4,14 @@ import {
   CircularProgress,
   Dialog,
   DialogTitle,
+  Fade,
   FormControl,
   FormHelperText,
   FormLabel,
   MenuItem,
   Select,
-  styled
+  styled,
+  Tooltip
 } from '@mui/material'
 import { grey } from '@mui/material/colors'
 import AttendanceDates from '@renderer/components/date/attendance'
@@ -19,6 +21,7 @@ import CustomTextInput from '@renderer/components/text-input'
 import CustomTypography from '@renderer/components/typography'
 import { addTransaction } from '@renderer/firebase'
 import { setSubscriptionToUser } from '@renderer/firebase/customers'
+import { convertCustomerToStaff } from '@renderer/firebase/staffs'
 import {
   asyncGetCurrentCustomerAttendance,
   asyncSetCurrentUser
@@ -30,6 +33,8 @@ import { errorToast, infoToast, successToast } from '@renderer/utils/toast'
 import { useFormik } from 'formik'
 import moment, { Moment } from 'moment'
 import React from 'react'
+import toast from 'react-hot-toast'
+import * as Yup from 'yup'
 
 type Props = {
   data: RootState['customer']['current_customer']
@@ -63,13 +68,6 @@ const CustomDetailSidebar = ({ data }: Props) => {
   const [showAttendanceForm, setShowAttendanceForm] = React.useState(false)
 
   const [showDialog, setShowDialog] = React.useState(false)
-
-  console.log(
-    data?.attendance?.filter((e) => e.month === date.month() && e.year === date.year())?.[0]?.data,
-    date.month(),
-    date.year(),
-    data?.attendance
-  )
 
   return !data && loading ? (
     <CircularProgress variant="indeterminate" />
@@ -137,18 +135,31 @@ const CustomDetailSidebar = ({ data }: Props) => {
                   : 'Buy Subscription'}
               </CustomTypography>
             </Button>
-            <Button
-              focusRipple={false}
-              variant={'outlined'}
-              sx={{ margin: '8px 0px 4px 0px' }}
-              disableTouchRipple={true}
-              disableElevation={true}
-              onClick={() => {}}
-            >
-              <CustomTypography variant="body2" lineHeight={'1'}>
-                Convert to Staff
-              </CustomTypography>
-            </Button>
+            <Tooltip title={'Will be available soon'} placement="right">
+              <span>
+                <Button
+                  focusRipple={false}
+                  variant={'outlined'}
+                  sx={{ margin: '8px 0px 4px 0px' }}
+                  disableTouchRipple={true}
+                  disableElevation={true}
+                  disabled={true}
+                  onClick={async () => {
+                    const convert = await convertCustomerToStaff(admin as string, user as string)
+                    if (convert?.status) {
+                      toast.success(convert?.message)
+                      return
+                    } else {
+                      toast.error(convert?.message)
+                    }
+                  }}
+                >
+                  <CustomTypography variant="body2" lineHeight={'1'}>
+                    Convert to Staff
+                  </CustomTypography>
+                </Button>
+              </span>
+            </Tooltip>
             <CustomTypography
               marginTop={'12px'}
               fontSize={'12px'}
@@ -164,6 +175,7 @@ const CustomDetailSidebar = ({ data }: Props) => {
           <AttendanceDates
             onMonthChange={handleGetAttendance}
             onClick={(e) => {
+              console.log(e, 'Onclick')
               setShowAttendanceForm(true)
               setEdit(e.data ?? undefined)
             }}
@@ -203,29 +215,51 @@ const Profile = styled('div')({
   justifyContent: 'center'
 })
 
+const validationSchema = Yup.object({
+  totalDays: Yup.string()
+    .required('Total days is required')
+    .matches(/^\d+$/, 'Total days must be a whole number'),
+
+  price: Yup.string()
+    .required('Price is required')
+    .matches(/^\d+(\.\d{1,2})?$/, 'Price must be a valid number'),
+
+  amount_paid: Yup.string()
+    .required('Amount paid is required')
+    .matches(/^\d+(\.\d{1,2})?$/, 'Amount paid must be a valid number')
+    .test('is-less-than-price', 'Amount paid must not exceed price', function (value) {
+      const { price } = this.parent
+      const amountPaid = parseFloat(value || '0')
+      const priceValue = parseFloat(price || '0')
+      return amountPaid <= priceValue
+    })
+})
+
 const HandlePayment = ({ onClose, open }: { open: boolean; onClose(): void }) => {
   const admin = useAppSelector((s) => s.auth.user?.uid)
   const customer = useAppSelector((s) => s.customer.current_customer?.data?.cid)
   const dispatch = useAppDispatch()
   const [loading, setLoading] = React.useState(false)
-  const [price, setPrice] = React.useState(6800)
-  const PAYMENT_PRICE = price
   const formik = useFormik({
     initialValues: {
-      totalDays: 1
+      totalDays: '',
+      amount_paid: '',
+      price: ''
     },
+    validationSchema,
     onSubmit: async (values) => {
       setLoading(true)
       try {
         const sub = await setSubscriptionToUser({
-          price: values.totalDays * PAYMENT_PRICE,
+          price: Number(values.totalDays) * Number(formik.values.price),
           uid: admin as string,
           cid: customer as string,
-          totalDays: values.totalDays * 26
+          totalDays: Number(values.totalDays) * 26,
+          amountPaid: parseInt(values.amount_paid)
         })
         if (sub) {
           addTransaction(admin as string, {
-            amount: values.totalDays * PAYMENT_PRICE,
+            amount: Number(values.totalDays) * Number(formik.values.price),
             currency: 'inr',
             data: sub
           })
@@ -250,6 +284,8 @@ const HandlePayment = ({ onClose, open }: { open: boolean; onClose(): void }) =>
       }
     }
   })
+
+  const tot = Number(Number(formik.values.totalDays) * Number(formik.values.price))
 
   return (
     <Dialog
@@ -283,12 +319,31 @@ const HandlePayment = ({ onClose, open }: { open: boolean; onClose(): void }) =>
       </DialogTitle>
       <CustomTextInput
         input={{
-          value: PAYMENT_PRICE,
+          value: formik.values.price,
           placeholder: 'Enter subscription amount',
           inputMode: 'numeric',
+          defaultValue: undefined,
           type: 'number',
-          onChange: (e) => setPrice(parseInt(e.target.value)),
+          onChange: (e) => formik.setFieldValue('price', parseInt(e.target.value)),
           label: 'Subscription Amount',
+          error: (formik.touched.price && Boolean(formik.errors.price))?.valueOf() ?? false,
+          helperText: formik.touched.price && formik.errors.price,
+          sx: {
+            marginBottom: '12px'
+          }
+        }}
+      />
+      <CustomTextInput
+        input={{
+          value: formik.values.amount_paid,
+          placeholder: 'Enter amount paid',
+          inputMode: 'numeric',
+          defaultValue: undefined,
+          type: 'number',
+          error: formik.touched.amount_paid && Boolean(formik.errors.amount_paid),
+          helperText: formik.touched.amount_paid && formik.errors.amount_paid,
+          onChange: (e) => formik.setFieldValue('amount_paid', e.target.value),
+          label: 'Amount Paid',
           sx: {
             marginBottom: '12px'
           }
@@ -314,13 +369,15 @@ const HandlePayment = ({ onClose, open }: { open: boolean; onClose(): void }) =>
           <MenuItem value={10}>10 Months</MenuItem>
           <MenuItem value={12}>12 Months</MenuItem>
         </Select>
-        <FormHelperText>
-          <CustomTypography variant="body2">
-            {/* Give title */}
-            Total amount: ₹{formik.values.totalDays * PAYMENT_PRICE} -{' '}
-            {formik.values.totalDays * 26} days
-          </CustomTypography>
-        </FormHelperText>
+        <Fade in={!!tot}>
+          <FormHelperText sx={{ position: 'relative' }}>
+            {!!tot && (
+              <CustomTypography variant="body2">
+                Total amount: ₹{tot || ''} - {parseInt(formik.values.totalDays) * 26} days
+              </CustomTypography>
+            )}
+          </FormHelperText>
+        </Fade>
       </FormControl>
 
       <Button
@@ -338,6 +395,7 @@ const HandlePayment = ({ onClose, open }: { open: boolean; onClose(): void }) =>
             />
           )
         }
+        disabled={parseInt(`${formik.values.amount_paid || 0}`) <= 0}
         onClick={() => formik.submitForm()}
         sx={{
           width: '100%',
@@ -346,9 +404,7 @@ const HandlePayment = ({ onClose, open }: { open: boolean; onClose(): void }) =>
           marginTop: '12px'
         }}
       >
-        <CustomTypography variant="body2">
-          Pay {formik.values.totalDays * PAYMENT_PRICE}
-        </CustomTypography>
+        <CustomTypography variant="body2">Pay {formik.values.amount_paid}</CustomTypography>
       </Button>
       <CustomTypography
         variant="body2"
@@ -360,7 +416,7 @@ const HandlePayment = ({ onClose, open }: { open: boolean; onClose(): void }) =>
         }}
       >
         Per day:{' '}
-        {Number(PAYMENT_PRICE / (formik.values.totalDays * 26))
+        {Number(Number(formik.values.price) / (Number(formik.values.totalDays) * 26))
           .toFixed(2)
           .toString()}
       </CustomTypography>

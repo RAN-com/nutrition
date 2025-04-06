@@ -86,4 +86,5 @@ export type AttendanceSubscription = {
   totalDays: number
   daysLeft: number
   isActive: boolean
+  amountPaid: number
 }

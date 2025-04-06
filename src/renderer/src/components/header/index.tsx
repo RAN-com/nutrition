@@ -1,4 +1,4 @@
-import { Chip, Menu, MenuItem, styled, Tooltip } from '@mui/material'
+import { Badge, Chip, Menu, MenuItem, styled, Tooltip, Typography } from '@mui/material'
 import { useAppSelector, useAppDispatch } from '@renderer/redux/store/hook'
 import CustomTypography from '../typography'
 import { grey } from '@mui/material/colors'
@@ -7,6 +7,7 @@ import React from 'react'
 import { setLogoutFlag } from '@renderer/redux/features/user/auth'
 import moment from 'moment'
 import { useNavigate } from 'react-router-dom'
+import { Notification } from '@renderer/types/notification'
 
 const greetings = () => {
   const time = new Date().getHours()
@@ -46,7 +47,11 @@ const Header = ({ toggleSidebar, showToggle }: Props) => {
 
   const { time, timeFormat, date } = clock()
   const isProfile = window.location.pathname.includes('profile')
+  const isNotification = window.location.pathname.includes('notifications')
 
+  const [showNotification, setShowNotification] = React.useState<Element | null>(null)
+  const notifications = useAppSelector((s) => s.auth.notifications?.filter((e) => !e.read))
+  const isMoreNotification = notifications?.length > 7
   return (
     <HeaderContainer className="header">
       <div className="greet">
@@ -113,6 +118,18 @@ const Header = ({ toggleSidebar, showToggle }: Props) => {
             }
           />
         </Tooltip>
+        {!isNotification && (
+          <Badge
+            badgeContent={notifications?.length > 7 ? '7+' : notifications.length}
+            color={'primary'}
+            sx={{
+              margin: '0px 12px'
+            }}
+            onClick={(e) => setShowNotification(e.currentTarget)}
+          >
+            <CustomIcon name="FONT_AWESOME" icon="FaRegBell" stopPropagation={false} />
+          </Badge>
+        )}
         {!isProfile && (
           <>
             {user?.photo_url ? (
@@ -141,6 +158,48 @@ const Header = ({ toggleSidebar, showToggle }: Props) => {
             )}
           </>
         )}
+        <Menu
+          anchorEl={showNotification}
+          open={!!showNotification}
+          onClose={() => setShowNotification(null)}
+        >
+          {notifications.length === 0 ? (
+            <MenuItem
+              disableRipple
+              disableTouchRipple
+              sx={{
+                cursor: 'default',
+                '&:hover': {
+                  backgroundColor: 'transparent'
+                }
+              }}
+            >
+              <CustomTypography>No Unread Notifications</CustomTypography>
+            </MenuItem>
+          ) : (
+            notifications.slice(0, isMoreNotification ? 7 : 10).map((e) => (
+              <NotificationMsg
+                {...e}
+                onClick={() => {
+                  setShowNotification(null)
+                  navigate(`/notifications?nId=${e.id}`, { preventScrollReset: true })
+                }}
+              />
+            ))
+          )}
+          {
+            <MenuItem
+              onClick={() => {
+                setShowNotification(null)
+                navigate(`/notifications`, { preventScrollReset: true })
+              }}
+            >
+              <Typography color={'primary'} variant="body2">
+                Go to Notifications
+              </Typography>
+            </MenuItem>
+          }
+        </Menu>
         <Menu
           open={!!anchorEl}
           anchorEl={anchorEl}
@@ -199,6 +258,39 @@ const Header = ({ toggleSidebar, showToggle }: Props) => {
 }
 
 export default Header
+
+const NotificationMsg = (data: Notification & { onClick(): void }) => {
+  return (
+    <MenuItem
+      disableRipple
+      disableTouchRipple
+      onClick={data.onClick}
+      style={{
+        width: '100%',
+        minWidth: '320px',
+        maxWidth: '320px',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'flex-start'
+      }}
+    >
+      {/* <div style={{ width: '100%' }}> */}
+      <CustomTypography fontWeight={'600'}>{data.title}</CustomTypography>
+      <CustomTypography
+        fontWeight={'400'}
+        fontSize={'12px'}
+        width={'100%'}
+        maxWidth={'100%'}
+        overflow={'hidden'}
+        flexWrap={'wrap'}
+        textOverflow={'ellipsis'}
+      >
+        {data.message.slice(0, 50).concat('...')}
+      </CustomTypography>
+      {/* </div> */}
+    </MenuItem>
+  )
+}
 
 const HeaderContainer = styled('header')({
   width: '100%',

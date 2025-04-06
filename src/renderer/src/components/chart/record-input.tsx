@@ -47,6 +47,11 @@ const validationSchema = yup.object().shape({
     .required('Muscle mass is required')
     .positive('Muscle mass must be a positive number')
     .typeError('Muscle mass must be a number'),
+  visceral_fat: yup
+    .number()
+    .required('Visceral Fat is required')
+    .positive('Visceral Fat must be a positive number')
+    .typeError('Visceral Fat must be a number'),
   body_age: yup
     .number()
     .required('Body age is required')
@@ -86,6 +91,7 @@ const RecordForm = ({ open, onClose, type }: Props) => {
       muscle_mass: undefined as undefined | number,
       body_age: undefined as undefined | number,
       triceps_skinfold: undefined as undefined | number,
+      visceral_fat: undefined as undefined | number,
       photo_url: [] as (string | File)[]
     },
     enableReinitialize: true,
@@ -97,14 +103,17 @@ const RecordForm = ({ open, onClose, type }: Props) => {
         await addVisitorRecord({
           uid: admin?.uid as string,
           data: {
-            BMI: values?.bmi ?? 0,
-            BMR: values?.bmr ?? 0,
-            BODY_FAT: values?.body_fat_percentage ?? 0,
-            TSF: values?.triceps_skinfold ?? 0,
-            MUSCLE_MASS: values?.muscle_mass ?? 0,
-            BODY_AGE: values?.body_age ?? 0,
-            WEIGHT: values?.height ?? 0,
-            HEIGHT: values.height ?? 0
+            bmi: values?.bmi ?? 0,
+            bmr: values?.bmr ?? 0,
+            body_fat: values?.body_fat_percentage ?? 0,
+            tsf: values?.triceps_skinfold ?? 0,
+            skeletal_muscle: values?.muscle_mass ?? 0,
+            body_age: values?.body_age ?? 0,
+            weight: values?.weight ?? 0,
+            height: values?.height ?? 0,
+            recorded_by: admin?.uid as string,
+            visceral_fat: values.visceral_fat ?? 0,
+            recorded_on: moment().format('YYYY-MM-DD:hh:mm:ss')
           },
           recorded_by: admin?.uid as string,
           recorded_on: moment().format('YYYY-MM-DD:hh:mm:ss'),
@@ -133,14 +142,16 @@ const RecordForm = ({ open, onClose, type }: Props) => {
         uid: admin?.uid as string,
         cid: user?.data?.[type === 'customer' ? 'cid' : 'vid'] as string,
         data: {
-          BMI: values?.bmi ?? 0,
-          BMR: values?.bmr ?? 0,
-          BODY_FAT: values?.body_fat_percentage ?? 0,
-          TSF: values?.triceps_skinfold ?? 0,
-          MUSCLE_MASS: values?.muscle_mass ?? 0,
-          BODY_AGE: values?.body_age ?? 0,
-          WEIGHT: values?.weight ?? 0,
-          HEIGHT: values.height ?? 0
+          bmi: values?.bmi ?? 0,
+          bmr: values?.bmr ?? 0,
+          body_fat: values?.body_fat_percentage ?? 0,
+          tsf: values?.triceps_skinfold ?? 0,
+          skeletal_muscle: values?.muscle_mass ?? 0,
+          body_age: values?.body_age ?? 0,
+          weight: values?.weight ?? 0,
+          height: values?.height ?? 0,
+          recorded_by: admin?.uid as string,
+          recorded_on: moment().format('YYYY-MM-DD:hh:mm:ss')
         }
       })
         .then(() => {
@@ -160,11 +171,10 @@ const RecordForm = ({ open, onClose, type }: Props) => {
           setLoading(false)
           onClose?.()
         })
+      onClose?.()
     }
   })
 
-  console.log(user, type, formik.values)
-  // Filter out gender and hip_circumference if its male
   const keys = Object.keys(formik.values).filter((k) => {
     if (k === 'hip_circumference') {
       return user?.data?.gender === 'female'
@@ -172,7 +182,6 @@ const RecordForm = ({ open, onClose, type }: Props) => {
     return k !== 'gender'
   })
 
-  console.log(formik.errors)
   return (
     <Dialog
       className="scrollbar"

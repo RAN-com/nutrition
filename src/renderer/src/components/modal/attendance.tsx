@@ -17,7 +17,7 @@ type Props = {
 }
 
 import * as Yup from 'yup'
-import { addAttendance, updateAttendance } from '@renderer/firebase/customers'
+import { addAttendance, payDueAmount, updateAttendance } from '@renderer/firebase/customers'
 import { useAppSelector, useAppDispatch } from '@renderer/redux/store/hook'
 import {
   asyncGetCurrentCustomerAttendance,
@@ -28,9 +28,9 @@ import { deleteFile, uploadFiles } from '@renderer/lib/upload-img'
 
 const validationSchema = Yup.object().shape({
   date: Yup.string().required('Date is required').typeError('Invalid date format'),
-  weight: Yup.number().required('Weight is required'),
+  weight: Yup.number().required('Weight is required').min(10, 'Enter valid weight'),
   photo_url: Yup.array().required('Photo is required'),
-  amount_paid: Yup.number().notRequired(),
+  amount_paid: Yup.number().optional().min(100, 'Minimum amount is Rs.100'),
   mark_status: Yup.boolean()
     .required('Mark status is required')
     .oneOf([true, false], 'Mark status must be true or false')
@@ -39,12 +39,16 @@ const validationSchema = Yup.object().shape({
 const MarkAttendance = ({ open, onClose, edit }: Props) => {
   const user = useAppSelector((s) => s.auth.user)
   const dispatch = useAppDispatch()
+  const subscription = useAppSelector((s) => s.customer?.current_customer?.subscription)
+
   const customer = useAppSelector((s) => s.customer.current_customer?.data)
   const [loading, setLoading] = React.useState(false)
+  const currentDate = useAppSelector((s) => s.customer.selected_attendance_date)
+
   const formik = useFormik({
-    enableReinitialize: !!edit,
+    enableReinitialize: !!edit || !!currentDate,
     initialValues: {
-      date: edit?.date ?? moment.now(),
+      date: moment(currentDate?.date || edit?.date).toISOString(),
       weight: edit?.weight ?? '',
       mark_status: edit?.mark_status || false,
       photo_url: edit?.photo_url ?? []
@@ -52,8 +56,20 @@ const MarkAttendance = ({ open, onClose, edit }: Props) => {
 
     validationSchema,
     onSubmit: async (values) => {
-      console.log(user, customer)
       if (!user?.uid || !customer?.cid) return alert('Login again')
+      if (
+        !!values.amount_paid &&
+        values.amount_paid > 0 &&
+        values.amount_paid <= (subscription?.price || 0) - (subscription?.amountPaid || 0)
+      ) {
+        await payDueAmount({ uid: user?.uid, cid: customer.cid, dueAmount: values.amount_paid })
+      } else {
+        formik.setFieldError(
+          'amount_paid',
+          `Due amount should be less than or equal to ${(subscription?.price || 0) - (subscription?.amountPaid || 0)} `
+        )
+        return
+      }
       if (!!edit) {
         await updateAttendance({
           uid: user?.uid,
@@ -124,6 +140,8 @@ const MarkAttendance = ({ open, onClose, edit }: Props) => {
     }
   })
 
+  const pending = subscription?.price === subscription?.amountPaid
+
   return (
     <Dialog
       open={open}
@@ -189,6 +207,26 @@ const MarkAttendance = ({ open, onClose, edit }: Props) => {
             placeholder: `Enter Weight`
           }}
         />
+        {!pending && (
+          <CustomTextInput
+            formProps={{
+              sx: {
+                marginTop: '12px'
+              }
+            }}
+            input={{
+              inputMode: 'decimal',
+              type: 'number',
+              error: (formik.touched.amount_paid && Boolean(formik.errors.amount_paid))?.valueOf(),
+              helperText: formik.touched.amount_paid && formik.errors.amount_paid,
+              label: <CustomTypography>Due amount {'(Optional)'}</CustomTypography>,
+              name: 'amount_paid',
+              value: formik.values.amount_paid,
+              onChange: formik.handleChange,
+              placeholder: `Enter Due Amount`
+            }}
+          />
+        )}
         <ImageUpload
           onClear={async (index: number) => {
             // Delete the file when it's cleared
@@ -221,8 +259,18 @@ const MarkAttendance = ({ open, onClose, edit }: Props) => {
           name="radio-buttons-group"
           onChange={(e) => formik.setFieldValue('mark_status', e.target.value === 'present')}
         >
-          <FormControlLabel value="absent" control={<Radio />} label="Absent" />
-          <FormControlLabel value="present" control={<Radio />} label="Present" />
+          <FormControlLabel
+            checked={!formik.values.mark_status}
+            value={'absent'}
+            control={<Radio />}
+            label="Absent"
+          />
+          <FormControlLabel
+            checked={formik.values.mark_status}
+            value="present"
+            control={<Radio />}
+            label="Present"
+          />
         </RadioGroup>
 
         <Button

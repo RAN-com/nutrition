@@ -2,7 +2,7 @@ import { styled, Tab, Tabs } from '@mui/material'
 import CustomDetailSidebar from './detail-sidebar'
 import { useAppSelector, useAppDispatch } from '@renderer/redux/store/hook'
 import React from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Outlet, useNavigate } from 'react-router-dom'
 import CustomIcon from '@renderer/components/icons'
 import CustomTypography from '@renderer/components/typography'
 import { resetCurrentUser } from '@renderer/redux/features/user/customers'
@@ -19,33 +19,43 @@ const CustomerDetails = () => {
     }
   }, [current_customer])
 
-  const [tab, setTab] = React.useState('records')
+  const [tab, setTab] = React.useState('')
+
+  const isRecords = location.pathname.includes('records')
+  const outletAvailable = location.pathname.split(`/customers/${current_customer?.data?.cid}/`)[1]
 
   return (
     <>
-      <Container className="scrollbar">
-        <div style={{ width: '100%', height: 'max-content', position: 'sticky', top: 110 }}>
-          <Header
-            sx={{
-              height: '44px'
-            }}
-          >
-            <CustomTypography
-              sx={{ gap: 8, cursor: 'pointer' }}
-              color={grey['600']}
-              onClick={() => dispatch(resetCurrentUser())}
+      <Container
+        className="scrollbar"
+        style={{
+          gridTemplateColumns: isRecords ? '1fr' : 'minmax(280px, 420px) 1fr'
+        }}
+      >
+        {!isRecords && (
+          <div style={{ width: '100%', height: 'max-content', position: 'sticky', top: 110 }}>
+            <Header
+              sx={{
+                height: '44px'
+              }}
             >
-              <CustomIcon
-                name="LUCIDE_ICONS"
-                icon={'LuArrowLeft'}
+              <CustomTypography
+                sx={{ gap: 8, cursor: 'pointer' }}
                 color={grey['600']}
-                stopPropagation={false}
-              />
-              Back to Customers
-            </CustomTypography>
-          </Header>
-          <CustomDetailSidebar data={current_customer} />
-        </div>
+                onClick={() => dispatch(resetCurrentUser())}
+              >
+                <CustomIcon
+                  name="LUCIDE_ICONS"
+                  icon={'LuArrowLeft'}
+                  color={grey['600']}
+                  stopPropagation={false}
+                />
+                Back to Customers
+              </CustomTypography>
+            </Header>
+            <CustomDetailSidebar data={current_customer} />
+          </div>
+        )}
         <DetailsBar>
           <Header sx={{ height: '44px' }}>
             <Tabs
@@ -54,11 +64,28 @@ const CustomerDetails = () => {
                 setTab(value)
               }}
             >
+              {isRecords && (
+                <Tab
+                  disableFocusRipple
+                  disableRipple
+                  disableTouchRipple
+                  label={'Back'}
+                  onClick={() => {
+                    const path = `/customers/${current_customer?.data?.cid}`
+                    navigate(path)
+                  }}
+                  value={'home'}
+                />
+              )}
               <Tab
                 disableFocusRipple
                 disableRipple
                 disableTouchRipple
                 label={'Records'}
+                onClick={() => {
+                  const path = `/customers/${current_customer?.data?.cid}/records`
+                  navigate(path)
+                }}
                 value={'records'}
               />
               <Tab
@@ -67,10 +94,18 @@ const CustomerDetails = () => {
                 disableTouchRipple
                 label={'Photo gallery'}
                 value={'photo gallery'}
+                onClick={() => {
+                  const path = `/customers/${current_customer?.data?.cid}/photo_gallery`
+                  navigate(path)
+                }}
               />
             </Tabs>
           </Header>
-          <DetailsContainer>{tab}</DetailsContainer>
+          {!!outletAvailable && (
+            <DetailsContainer>
+              <Outlet />
+            </DetailsContainer>
+          )}
         </DetailsBar>
       </Container>
     </>
@@ -99,8 +134,7 @@ const Header = styled('div')({
 const Container = styled('div')({
   width: '100%',
   display: 'grid',
-  gap: '16px',
-  gridTemplateColumns: 'minmax(280px, 420px) 1fr'
+  gap: '16px'
 })
 
 const DetailsBar = styled('div')({

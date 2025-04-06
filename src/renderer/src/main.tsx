@@ -10,7 +10,6 @@ import { ThemeProvider } from '@emotion/react'
 import { theme } from './theme/index'
 import { CssBaseline, GlobalStyles } from '@mui/material'
 import { Toaster } from 'react-hot-toast'
-import zIndex from '@mui/material/styles/zIndex'
 
 const resizeOps = (): void => {
   const vh = window.innerHeight * 0.01
@@ -68,13 +67,13 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
             }}
           />
           <Toaster
-            containerStyle={{ zIndex: zIndex.modal * 10 }}
-            toastOptions={{
-              style: {
-                // position: "fixed",
-                zIndex: zIndex.modal * 10
-              }
-            }}
+          // containerStyle={{ zIndex: zIndex.modal * 10 }}
+          // toastOptions={{
+          //   style: {
+          //     // position: "fixed",
+          //     zIndex: zIndex.modal * 10
+          //   }
+          // }}
           />
           <CssBaseline />
           {/* <Layout> */}

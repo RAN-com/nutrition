@@ -2,6 +2,7 @@ import { Divider, MenuItem, styled } from '@mui/material'
 import CustomIcon from '@renderer/components/icons'
 import { TSidebarOptions } from '@renderer/components/sidebar'
 import CustomTypography from '@renderer/components/typography'
+import { useAppSelector } from '@renderer/redux/store/hook'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 
 const menu: TSidebarOptions[] = [
@@ -9,14 +10,13 @@ const menu: TSidebarOptions[] = [
     label: 'Personal',
     value: ''
   }
-  // {
-  //   label: 'Settings',
-  //   value: 'settings'
-  // }
 ]
 const ProfilePage = () => {
   const navigate = useNavigate()
   const path = useLocation()
+
+  const version = useAppSelector((s) => s.auth.app_version)
+
   return (
     <Container>
       <Sidebar>
@@ -46,6 +46,9 @@ const ProfilePage = () => {
             {/* </ListItemIcon> */}
           </MenuItem>
         ))}
+        <CustomTypography fontSize={'12px'} margin={'auto'} padding={'12px 0px 4px 0px'}>
+          v.{version}
+        </CustomTypography>
       </Sidebar>
       <FormContainer>
         <Header>

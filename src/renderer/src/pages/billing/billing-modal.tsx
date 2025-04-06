@@ -4,7 +4,6 @@ import CustomIcon from '@renderer/components/icons'
 import CustomTypography from '@renderer/components/typography'
 import { useAppSelector } from '@renderer/redux/store/hook'
 import moment from 'moment'
-import React from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 
 const BillingModal = () => {
@@ -14,23 +13,9 @@ const BillingModal = () => {
     (s) => s.orders.orders?.filter((e) => e.orderId === orderId)[0]
   )
   const navigate = useNavigate()
-  const total = currentData?.products.reduce(
-    (sum, { detail }) =>
-      sum +
-      detail.price * currentData?.products.filter((e) => e.detail.pid === detail.pid)[0].quantity,
-    0
-  )
+  const total = currentData?.total_price
 
-  React.useEffect(() => {
-    window.electron?.ipcRenderer?.on('pdfGeneratedError', (_event, path) => {
-      console.log('Error', path)
-    })
-    window.electron?.ipcRenderer?.on('pdfGeneratedSuccess', (_event, path) => {
-      console.log('Path', path)
-      alert(`Invoice has been saved in ${path}`)
-    })
-  }, [])
-
+  const gst = (total - parseInt(`${currentData?.buyer?.offer || 0}`) / 100) * 0.18
   return (
     <Dialog
       open={true}
@@ -141,6 +126,28 @@ const BillingModal = () => {
                   </CustomTypography>
                 </>
               ))}
+              {parseInt(`${currentData?.buyer?.offer || '0'}`) > 0 && (
+                <>
+                  <CustomTypography fontWeight={'bold'} color={grey['400']}>
+                    Discount
+                  </CustomTypography>
+                  <CustomTypography fontWeight={'bold'} color={grey['400']}></CustomTypography>
+                  <CustomTypography fontWeight={'bold'} color={grey['400']}>
+                    {currentData?.buyer?.offer}%
+                  </CustomTypography>
+                </>
+              )}
+              {parseInt(`${currentData?.buyer?.offer || '0'}`) > 0 && (
+                <>
+                  <CustomTypography fontWeight={'bold'} color={grey['400']}>
+                    GST
+                  </CustomTypography>
+                  <CustomTypography fontWeight={'bold'} color={grey['400']}></CustomTypography>
+                  <CustomTypography fontWeight={'bold'} color={grey['400']}>
+                    {gst}
+                  </CustomTypography>
+                </>
+              )}
               <CustomTypography sx={{ margin: '0px 0px' }} fontWeight={'bold'}>
                 Total
               </CustomTypography>

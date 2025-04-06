@@ -13,6 +13,9 @@ import {
 import { firestore } from '.'
 import { errorToast, successToast } from '@renderer/utils/toast'
 import { ProductData } from '@renderer/types/product'
+import { encryptData } from '@renderer/utils/crypto'
+import moment from 'moment'
+import { capitalizeSentence } from '@renderer/utils/functions'
 export const lastDoc = async (uid: string) => {
   try {
     const productsRef = collection(firestore, `users/${uid}/products`)
@@ -69,17 +72,17 @@ export const addProduct = async (uid: string, product: Omit<ProductData, 'pid'>)
     const lastId = await lastDoc(uid)
     if (lastId) {
       const tempPid = parseInt(lastId?.pid.split('PRODUCT-')[1])
-      pid = `PRODUCT-${tempPid + 1}`
+      pid = encryptData(`PRODUCT-${tempPid + 1}` + moment().toString()) as string
     } else {
-      pid = `PRODUCT-1`
+      pid = encryptData(`PRODUCT-1` + moment().toString()) as string
     }
     const productRef = collection(firestore, `users/${uid}/products`)
-    const docRef = await addDoc(productRef, { ...product, pid })
-    successToast('Product added with id: ' + pid)
-    return docRef
+    await addDoc(productRef, { ...product, pid })
+    successToast(`Product added to ${capitalizeSentence(product.type).replace('_', ' ')}`)
+    return true
   } catch (error) {
     errorToast('Error adding product:')
-    throw error
+    return false
   }
 }
 
@@ -107,6 +110,7 @@ export const updateProduct = async (
       }
 
       await updateDoc(productRef, updatedData)
+
       showToast && successToast('Product updated successfully')
     } else {
       showToast && errorToast('No product found with the specified Product ID')
@@ -118,13 +122,27 @@ export const updateProduct = async (
   }
 }
 
-export const deleteProduct = async (uid: string, productId: string) => {
+export const deleteProduct = async (uid: string, pid: string) => {
   try {
-    const productRef = doc(firestore, `users/${uid}/products/${productId}`)
-    await deleteDoc(productRef)
-    successToast('Product deleted successfully')
+    const productsRef = collection(firestore, `users/${uid}/products`)
+    const productQuery = query(productsRef, where('pid', '==', pid))
+
+    const querySnapshot = await getDocs(productQuery)
+
+    if (!querySnapshot.empty) {
+      // Assuming pid is unique, so we take the first matchin   g document
+      const docToDelete = querySnapshot.docs[0]
+      const productRef = doc(firestore, `users/${uid}/products/${docToDelete.id}`)
+
+      await deleteDoc(productRef)
+
+      successToast('Product deleted successfully')
+    } else {
+      errorToast('No product found with the specified Product ID')
+    }
   } catch (error) {
-    errorToast('Error deleting product')
+    errorToast('Error deleting product:')
+    console.error('Error deleting product:', error)
     throw error
   }
 }

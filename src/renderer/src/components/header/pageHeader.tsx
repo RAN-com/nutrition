@@ -10,8 +10,8 @@ const PageHeader = ({ start, end, sx }: Props) => {
   return (
     (start || end) && (
       <Container sx={sx}>
-        {start}
-        {end}
+        {start && start}
+        {end && end}
       </Container>
     )
   )

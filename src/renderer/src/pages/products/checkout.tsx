@@ -25,13 +25,21 @@ type Props = {
   open: boolean
   onClose: () => void
 }
-
 function calculateDiscountedPrice(originalPrice: number, offerPercentage: number): number {
   if (originalPrice < 0 || offerPercentage < 0 || offerPercentage > 100) {
     throw new Error('Invalid input values')
   }
-  const discount: number = (originalPrice * offerPercentage) / 100
-  return originalPrice - discount
+
+  if (offerPercentage > 0) {
+    const discount: number = (originalPrice * offerPercentage) / 100
+    // The original code has a strange calculation here. Multiplying the discount by (offerPercentage === 0 ? 0 : 18 / 100)
+    // is only applied when the offerPercentage is greater than zero and will result in 0 when offerPercentage is zero.
+    // If we assume that 18% is a tax or some other fee, applied only to the discount, then the below is the correct implementation.
+    const taxOrFee: number = originalPrice - discount + (originalPrice - discount) * 0.18 // 18 / 100 = 0.18
+    return taxOrFee
+  } else {
+    return originalPrice
+  }
 }
 
 const validationSchema = yup.object({
@@ -52,7 +60,7 @@ const validationSchema = yup.object({
     .string()
     .required('Address is required')
     .min(10, 'Address is too short')
-    .max(100, 'Address is too long'),
+    .max(90, 'Address is too long'),
   offer: yup
     .number()
     .min(0, 'Offer should be greater than or equal to 0')
@@ -143,6 +151,7 @@ const Checkout = ({ open, onClose }: Props) => {
   }, [])
 
   console.log(formik.errors)
+  const discountPrice = calculateDiscountedPrice(total, formik.values.offer).toFixed(2)
 
   return (
     <Container
@@ -250,7 +259,15 @@ const Checkout = ({ open, onClose }: Props) => {
                   },
                   value: formik.values[k],
                   id: k,
-                  onChange: (e) => formik.setFieldValue(k, e.target.value),
+                  onChange: (e) => {
+                    if (k === 'offer') {
+                      if (parseInt(e.target.value) > 90) {
+                        formik.setFieldError('offer', 'Discount Price should be less than 90%')
+                        return
+                      }
+                    }
+                    formik.setFieldValue(k, e.target.value)
+                  },
                   error: formik.touched[k] && Boolean(formik.errors[k]),
                   helperText: formik.touched[k] && formik.errors[k],
                   label: (
@@ -259,7 +276,7 @@ const Checkout = ({ open, onClose }: Props) => {
                     </CustomTypography>
                   ),
                   placeholder: k.charAt(0).toUpperCase() + k.slice(1),
-                  type: k === 'phone' ? 'tel' : 'text' // phone number
+                  type: k === 'offer' ? 'number' : k === 'phone' ? 'tel' : 'text' // phone number
                 }}
               />
             )
@@ -274,7 +291,7 @@ const Checkout = ({ open, onClose }: Props) => {
             }}
           >
             <CustomTypography variant={'body2'} paddingBottom={'12px'}>
-              Total Amount : ₹{calculateDiscountedPrice(total, formik.values.offer).toFixed(2)}
+              Total Amount : ₹{discountPrice}
             </CustomTypography>
           </div>
         </div>
@@ -291,10 +308,18 @@ const Checkout = ({ open, onClose }: Props) => {
             sx={{ width: '100%' }}
           >
             <CustomTypography color={'white'} variant={'body2'} textTransform={'none'}>
-              Complete Payment : ₹{calculateDiscountedPrice(total, formik.values.offer).toFixed(2)}
+              Complete Payment : ₹{discountPrice}
             </CustomTypography>
           </Button>
         </div>
+        {formik.values.offer > 0 && (
+          <CustomTypography
+            fontSize={'12px'}
+            style={{ padding: '0px 24px', paddingBottom: '32px' }}
+          >
+            18% GST APPLICABLE
+          </CustomTypography>
+        )}
       </Paper>
     </Container>
   )

@@ -1,4 +1,14 @@
-import { collection, addDoc, getDocs, query, limit, orderBy } from 'firebase/firestore'
+import {
+  collection,
+  addDoc,
+  getDocs,
+  query,
+  limit as fsLimit,
+  orderBy,
+  startAfter,
+  QueryDocumentSnapshot,
+  DocumentData
+} from 'firebase/firestore'
 import { OrderData } from '@renderer/types/product'
 import { firestore } from '.'
 import { errorToast, successToast } from '@renderer/utils/toast'
@@ -6,7 +16,7 @@ import { errorToast, successToast } from '@renderer/utils/toast'
 const lastDoc = async (uid: string) => {
   try {
     const productsRef = collection(firestore, `users/${uid}/orders`)
-    const productQuery = query(productsRef, orderBy('order_on', 'desc'), limit(1))
+    const productQuery = query(productsRef, orderBy('order_on', 'desc'), fsLimit(1))
     const docsRef = await getDocs(productQuery)
 
     if (docsRef.size >= 1) {
@@ -42,36 +52,30 @@ export const confirmOrder = async (uid: string, product: Omit<OrderData, 'orderI
     throw error
   }
 }
-
 export const getPaginatedOrders = async (
   uid: string,
-  page: number,
-  limitSize: number
+  limitSize: number,
+  cursor: QueryDocumentSnapshot<DocumentData> | null
 ): Promise<{
   orders: OrderData[]
   total: number
+  lastVisible: QueryDocumentSnapshot<DocumentData> | null
 }> => {
-  try {
-    const productsRef = collection(firestore, `users/${uid}/orders`)
+  const ordersRef = collection(firestore, `users/${uid}/orders`)
+  const baseQuery = query(ordersRef, orderBy('order_on', 'desc'))
+  const paginatedQuery = cursor
+    ? query(baseQuery, startAfter(cursor), fsLimit(limitSize))
+    : query(baseQuery, fsLimit(limitSize))
 
-    const offset = (page - 1) * limitSize
+  const [querySnapshot, totalSnapshot] = await Promise.all([
+    getDocs(paginatedQuery),
+    getDocs(ordersRef)
+  ])
 
-    const productQuery = query(productsRef, orderBy('order_on', 'desc'), limit(offset + limitSize))
-    const querySnapshot = await getDocs(productQuery)
-
-    const totalSnapshot = await getDocs(productsRef) // Fetch total count
-    const total = totalSnapshot.size
-
-    const paginatedDocs = querySnapshot.docs.slice(offset, offset + limitSize)
-    console.log('Paginated docs:', paginatedDocs) // Debugging
-
-    return {
-      total,
-      orders: paginatedDocs.map((doc) => doc.data() as OrderData)
-    }
-  } catch (error) {
-    console.error('Error fetching paginated orders:', error) // Debugging
-    throw error
+  return {
+    orders: querySnapshot.docs.map((doc) => doc.data() as OrderData),
+    total: totalSnapshot.size,
+    lastVisible: querySnapshot.docs.at(-1) ?? null
   }
 }
 

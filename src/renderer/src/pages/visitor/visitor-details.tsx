@@ -1,4 +1,4 @@
-import { Avatar, Button, styled } from '@mui/material'
+import { Avatar, Button, IconButton, styled } from '@mui/material'
 import { grey } from '@mui/material/colors'
 import RecordChart from '@renderer/components/chart'
 import CustomIcon from '@renderer/components/icons'
@@ -9,17 +9,26 @@ import { VisitorData } from '@renderer/types/visitor'
 // import { CustomerRecords } from '../../types/customers'
 import { convertVisitorToCustomer } from '@renderer/firebase/visitor'
 import { errorToast } from '@renderer/utils/toast'
+import React from 'react'
+import UpdateVisitorRecord from './record'
+import toast from 'react-hot-toast'
+import WhatsAppInput from './whatsapp-input'
 
 type Props = { visitor: VisitorData | null }
 
 const VisitorDetails = ({ visitor }: Props) => {
   const data = visitor?.data ?? null
-  const records = (visitor?.records ?? []) as VisitorData['records']
+  const records = (visitor?.records ?? []).map(
+    (e) => e.data
+  ) as VisitorData['records'][number]['data'][]
   const dispatch = useAppDispatch()
   const admin = useAppSelector((s) => s.auth.user)
+  const [show, setShow] = React.useState(false)
+  const [showMsgInput, setShowMsgInput] = React.useState(false)
 
   return (
     <div>
+      <UpdateVisitorRecord open={show} onClose={() => setShow(false)} />
       <Header>
         <div>&nbsp;</div>
         <CustomIcon
@@ -29,6 +38,11 @@ const VisitorDetails = ({ visitor }: Props) => {
           onClick={() => dispatch(setCurrentVisitor(''))}
         />
       </Header>
+      <WhatsAppInput
+        onClose={() => setShowMsgInput(false)}
+        open={showMsgInput}
+        phone={visitor?.data.phone}
+      />
       <Content sx={{}}>
         <Profile>
           <Avatar
@@ -51,21 +65,47 @@ const VisitorDetails = ({ visitor }: Props) => {
             +91-{data?.phone}
           </CustomTypography>
         </Profile>
+        <div
+          style={{
+            height: 'auto',
+            display: 'flex',
+            flex: 1,
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '12px',
+            marginTop: '24px',
+            marginBottom: '8px'
+          }}
+        >
+          <IconButton onClick={() => setShowMsgInput(true)}>
+            <CustomIcon name="FONT_AWESOME_6" icon="FaWhatsapp" stopPropagation={false} />
+          </IconButton>
+          <Button variant="outlined" sx={{ flex: 1 }} onClick={() => setShow(true)}>
+            Add Record
+          </Button>
+        </div>
+        {/* <Toaster /> */}
         <Button
           variant="contained"
           color="primary"
           disabled={records?.length === 0}
-          sx={{ marginTop: '24px', marginBottom: '8px' }}
           disableRipple={true}
           disableElevation={true}
           disableFocusRipple={true}
           disableTouchRipple={true}
           onClick={async () => {
-            if (!confirm('Are you sure you want to convert this visitor to customer?')) return
+            // if (!confirm('Are you sure you want to convert this visitor to customer?')) return
+            console.log('COnverting')
             const convert = await convertVisitorToCustomer(
               admin?.uid as string,
               data?.vid as string
             )
+
+            if (!convert?.status) {
+              toast.error(convert?.message as string, {})
+              return
+            }
 
             if (convert) {
               if (convert.status === 'success') {
@@ -87,7 +127,7 @@ const VisitorDetails = ({ visitor }: Props) => {
             }
           }}
         >
-          {records?.length >= 1 ? 'Convert to Customer' : 'Add Records'}
+          {'Convert to Customer'}
         </Button>
         <CustomTypography fontSize={'12px'} textAlign={'center'} margin={'auto'}>
           {records.length >= 1

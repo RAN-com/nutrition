@@ -3,6 +3,7 @@ import { firestore } from './'
 import { StaffData } from '@renderer/types/staff'
 import { errorToast, successToast } from '@renderer/utils/toast'
 import { encryptData } from '@renderer/utils/crypto'
+import { CustomerResponse } from '@renderer/types/customers'
 
 export const getStaff = async (uid: string, sid: string) => {
   try {
@@ -191,5 +192,39 @@ export const updateStaffCount = async ({
       message: 'Failed to update staff',
       status: false
     }
+  }
+}
+
+export const convertCustomerToStaff = async (uid: string, cid: string) => {
+  try {
+    const visitorDocRef = doc(firestore, `users/${uid}/customers/${cid}`)
+    const visitorDocSnap = await getDoc(visitorDocRef)
+
+    if (!visitorDocSnap.exists()) {
+      return {
+        status: false,
+        message: 'Not Found'
+      }
+    }
+
+    // Get the visitor data
+    const visitorData = visitorDocSnap.data() as CustomerResponse
+
+    const data = visitorData
+    const checkExistingCid = encryptData(data.phone) as string
+    const check = await getStaff(uid, checkExistingCid)
+    if (check?.data) {
+      return {
+        status: false,
+        message: 'Staff with the customer phone number already exists'
+      }
+    }
+    return {
+      status: true,
+      message: 'working'
+    }
+  } catch (error: any) {
+    errorToast(error.message || 'An error occurred while converting the visitor')
+    return { status: 'error', message: error.message }
   }
 }

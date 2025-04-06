@@ -2,9 +2,10 @@ import styled from '@emotion/styled'
 import { ProductData } from '@renderer/types/product'
 import CustomTypography from '../typography'
 import CustomIcon from '../icons'
-import { grey } from '@mui/material/colors'
+import { grey, red } from '@mui/material/colors'
 import { useAppSelector } from '@renderer/redux/store/hook'
 import NotFound from '../../assets/image-not-found.jpg'
+import { Tooltip } from '@mui/material'
 
 type Props = {
   data: ProductData
@@ -13,8 +14,9 @@ type Props = {
   showEdit?: boolean
   onAddCard?(): void
   onRemove?(): void
+  onDelete?(): void
 }
-const ProductCard = ({ data, onClick, onEdit, onAddCard, onRemove }: Props) => {
+const ProductCard = ({ data, onClick, onEdit, onAddCard, onRemove, onDelete }: Props) => {
   const isAdded = useAppSelector((s) =>
     s.product.cart.products.some((e) => e.detail.pid === data.pid)
   )
@@ -30,28 +32,49 @@ const ProductCard = ({ data, onClick, onEdit, onAddCard, onRemove }: Props) => {
           <CustomTypography variant={'body2'}>{data?.in_stock} Left</CustomTypography>
         </div>
         <div className="icons">
+          <div style={{ display: 'flex', flexDirection: 'row', gap: '4px' }}>
+            <Tooltip title={''}>
+              <span>
+                <CustomIcon
+                  name="BOOTSTRAP_ICONS"
+                  icon={isAdded ? 'BsCartX' : 'BsCart'}
+                  size={18}
+                  color={grey[800]}
+                  onClick={() => (isAdded ? onRemove?.() : onAddCard?.())}
+                  sx={{
+                    padding: '8px',
+                    backgroundColor: grey['200'],
+                    borderRadius: '12px'
+                  }}
+                />
+              </span>
+            </Tooltip>
+            <CustomIcon
+              onTouchStart={onEdit}
+              name="MATERIAL_DESIGN"
+              icon="MdEdit"
+              size={18}
+              color={grey[800]}
+              onClick={onEdit}
+              sx={{
+                padding: '8px',
+                backgroundColor: grey['200'],
+                borderRadius: '12px'
+              }}
+            />
+          </div>
+
           <CustomIcon
-            name="BOOTSTRAP_ICONS"
-            icon={isAdded ? 'BsCartX' : 'BsCart'}
-            size={18}
-            color={grey[800]}
-            onClick={() => (isAdded ? onRemove?.() : onAddCard?.())}
-            sx={{
-              padding: '8px',
-              backgroundColor: grey['200'],
-              borderRadius: '12px'
-            }}
-          />
-          <CustomIcon
-            onTouchStart={onEdit}
+            className="delete_icon"
+            onTouchStart={onDelete}
             name="MATERIAL_DESIGN"
-            icon="MdEdit"
+            icon="MdDelete"
             size={18}
-            color={grey[800]}
-            onClick={onEdit}
+            color={red[800]}
+            onClick={onDelete}
             sx={{
               padding: '8px',
-              backgroundColor: grey['200'],
+              backgroundColor: red[100],
               borderRadius: '12px'
             }}
           />
@@ -78,7 +101,17 @@ const Container = styled('div')({
   flexDirection: 'column',
   borderRadius: '12px',
   backgroundColor: '#ffffff',
-  padding: '12px'
+  padding: '12px',
+  '.delete_icon': {
+    opacity: 0,
+    pointerEvents: 'none'
+  },
+  '&:hover': {
+    '.delete_icon': {
+      opacity: 1,
+      pointerEvents: 'all'
+    }
+  }
 })
 
 const ImageContainer = styled('div')({

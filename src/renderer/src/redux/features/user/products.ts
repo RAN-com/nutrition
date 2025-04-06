@@ -16,6 +16,7 @@ type INITIAL_STATE = {
     products: { detail: ProductData; quantity: number }[]
   }
   loading: boolean
+  isCheckoutActive: boolean
 }
 
 const initialState: INITIAL_STATE = {
@@ -26,6 +27,7 @@ const initialState: INITIAL_STATE = {
     size: 0,
     total: 0
   },
+  isCheckoutActive: false,
   cart: {
     products: []
   },
@@ -56,6 +58,9 @@ const productSlice = createSlice({
   name,
   initialState,
   reducers: {
+    setCheckoutState: (state, action: PayloadAction<boolean>) => {
+      state.isCheckoutActive = action.payload
+    },
     setQuantity: (
       state,
       action: PayloadAction<{ id: string; quantity: number; type: 'add' | 'remove' }>
@@ -227,7 +232,8 @@ export const {
   deleteFromCart,
   setProductEdit,
   setQuantity,
-  resetCart
+  resetCart,
+  setCheckoutState
 } = productSlice.actions
 
 export default productSlice.reducer

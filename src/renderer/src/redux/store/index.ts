@@ -20,6 +20,7 @@ import visitorSlice from '../features/user/visitors'
 import pricingSlice from '../features/pricing/slice'
 import staffSlice from '../features/user/staff'
 import cardSlice from '../features/user/card'
+import uiSlice from './ui/slice'
 
 // Define RootState type based on combined reducers
 const appReducer = combineReducers({
@@ -30,7 +31,8 @@ const appReducer = combineReducers({
   visitor: visitorSlice,
   pricing: pricingSlice,
   staffs: staffSlice,
-  card: cardSlice
+  card: cardSlice,
+  ui: uiSlice
 })
 
 // Persist configuration

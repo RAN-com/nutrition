@@ -8,7 +8,7 @@ import {
 } from '@mui/x-date-pickers'
 import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment'
 import { setCurrentAttendanceDate } from '@renderer/redux/features/user/customers'
-import { useAppDispatch } from '@renderer/redux/store/hook'
+import { useAppDispatch, useAppSelector } from '@renderer/redux/store/hook'
 import { CustomerAttendance } from '@renderer/types/customers'
 import moment, { Moment } from 'moment'
 import React from 'react'
@@ -86,9 +86,10 @@ const isSelected = (day: Moment, values: string[]): string[] => {
     : [...values, formatted_date]
 }
 
-const AttendanceDates = ({ values, maxPrevDate, onClick, onMonthChange }: Props) => {
+const AttendanceDates = ({ values, onClick, onMonthChange }: Props) => {
   const [highlightDates, setHighlightedDays] = React.useState<string[]>([])
   const dispatch = useAppDispatch()
+  const sub = useAppSelector((s) => s.customer.current_customer?.subscription)
 
   React.useEffect(() => {
     if (values.length === 0) {
@@ -106,19 +107,26 @@ const AttendanceDates = ({ values, maxPrevDate, onClick, onMonthChange }: Props)
             type: typeof a?.mark_status === 'boolean' ? 'marked' : 'past_unmarked'
           })
         )
+
         onClick({
           data: a,
           type: a.mark_status ? 'marked' : 'past_unmarked'
         })
         return
-      } else if (v.format(format) === moment().format(format)) {
-        const updatedValues = isSelected(v, values.map((e) => e.date) as string[])
-        setHighlightedDays(updatedValues)
-        onClick?.({
-          data: null,
-          type: 'add_new'
-        })
       }
+      // 🔥 Remove date check to allow past attendance marking
+      const updatedValues = isSelected(v, values.map((e) => e.date) as string[])
+      setHighlightedDays(updatedValues)
+      dispatch(
+        setCurrentAttendanceDate({
+          date: v.format(format),
+          type: 'past_unmarked'
+        })
+      )
+      onClick?.({
+        data: null,
+        type: 'add_new'
+      })
     },
     [values]
   )
@@ -131,7 +139,7 @@ const AttendanceDates = ({ values, maxPrevDate, onClick, onMonthChange }: Props)
     return dates
   }
 
-  const allowedDates = values.map((e) => moment(e.date).day()).concat(moment().day())
+  const due = (sub?.price || 0) - (sub?.amountPaid || 0)
 
   return (
     <LocalizationProvider dateAdapter={AdapterMoment}>
@@ -153,8 +161,7 @@ const AttendanceDates = ({ values, maxPrevDate, onClick, onMonthChange }: Props)
         slots={{
           day: ServerDay
         }}
-        shouldDisableDate={(d) => !allowedDates.includes(d.day())}
-        minDate={moment(maxPrevDate)}
+        minDate={moment().subtract(3, 'days')}
         slotProps={{
           day: (e) => ({
             ...e,
@@ -163,7 +170,7 @@ const AttendanceDates = ({ values, maxPrevDate, onClick, onMonthChange }: Props)
           })
         }}
         onChange={(v: Moment) => {
-          console.log(values)
+          console.log(values, 'values')
           handleChange(v, values.filter((e) => moment(e.date).isSame(v))[0])
         }}
         sx={{
@@ -183,6 +190,16 @@ const AttendanceDates = ({ values, maxPrevDate, onClick, onMonthChange }: Props)
           }
         }}
       />
+      {due > 0 && (
+        <>
+          <CustomTypography fontWeight={'bold'} fontSize={'14px'}>
+            Due Amount:&nbsp;<CustomTypography fontSize={'16px'}>₹{due}</CustomTypography>
+          </CustomTypography>
+          <CustomTypography fontSize={'10px'}>
+            Due Amount can be cleared when marking attendance
+          </CustomTypography>
+        </>
+      )}
     </LocalizationProvider>
   )
 }

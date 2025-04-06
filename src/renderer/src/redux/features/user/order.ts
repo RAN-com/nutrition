@@ -1,64 +1,88 @@
+// redux/features/orders/orderSlice.ts
+
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { getPaginatedOrders } from '@renderer/firebase/order'
 import { RootState } from '@renderer/redux/store'
 import { OrderData } from '@renderer/types/product'
+import { QueryDocumentSnapshot, DocumentData } from 'firebase/firestore'
 
-type INITIAL_STATE = {
+interface OrdersState {
   orders: OrderData[]
   total_orders: number
-  page: number
   limit: number
   loading: boolean
+  cursorStack: QueryDocumentSnapshot<DocumentData>[] // ← for back support
+  lastVisible: QueryDocumentSnapshot<DocumentData> | null
+  currentPage: number
 }
 
-const initialState: INITIAL_STATE = {
-  limit: 5,
+const initialState: OrdersState = {
   orders: [],
   total_orders: 0,
-  page: 1,
-  loading: false
+  limit: 20,
+  loading: false,
+  cursorStack: [],
+  lastVisible: null,
+  currentPage: 1
 }
 
-const name = 'orders'
-
 export const asyncGetOrders = createAsyncThunk(
-  `${name}/asyncGetOrders`,
-  async ({ uid }: { uid: string }, { getState }) => {
+  'orders/asyncGetOrders',
+  async ({ uid, direction }: { uid: string; direction?: 'next' | 'prev' }, { getState }) => {
     const state = (getState() as RootState).orders
-    return getPaginatedOrders(uid, state.page, state.limit)
+
+    const cursor =
+      direction === 'next'
+        ? (state.cursorStack.at(state.currentPage - 1) ?? null)
+        : (state.cursorStack.at(state.currentPage - 3) ?? null)
+
+    const result = await getPaginatedOrders(uid, state.limit, cursor)
+
+    return { ...result, direction }
   }
 )
 
 const orderSlice = createSlice({
-  name,
+  name: 'orders',
   initialState,
   reducers: {
-    setOrderPageLimit: (state, action: PayloadAction<number>) => {
-      state.limit = action.payload
+    resetOrders: (state) => {
+      state.orders = []
+      state.total_orders = 0
+      state.lastVisible = null
+      state.cursorStack = []
+      state.currentPage = 1
     },
-    setOrderPage: (state, action) => {
-      state.page = action.payload
+    setOrderLimit: (state, action: PayloadAction<number>) => {
+      state.limit = action.payload
     }
   },
-  extraReducers: (builders) => {
-    builders.addCase(asyncGetOrders.pending, (state) => {
+  extraReducers: (builder) => {
+    builder.addCase(asyncGetOrders.pending, (state) => {
       state.loading = true
     })
+    builder.addCase(asyncGetOrders.fulfilled, (state, action) => {
+      const { orders, total, lastVisible, direction } = action.payload
 
-    builders.addCase(asyncGetOrders.rejected, (state) => {
+      state.orders = orders
+      state.total_orders = total
+      state.lastVisible = lastVisible
+
+      if (direction === 'next') {
+        state.cursorStack.push(lastVisible!)
+        state.currentPage += 1
+      } else if (direction === 'prev') {
+        state.cursorStack.pop()
+        state.currentPage = Math.max(1, state.currentPage - 1)
+      }
+
       state.loading = false
     })
-
-    builders.addCase(asyncGetOrders.fulfilled, (state, action) => {
-      if (action.payload) {
-        state.orders = action.payload.orders
-        state.total_orders = action.payload.total
-      }
+    builder.addCase(asyncGetOrders.rejected, (state) => {
       state.loading = false
     })
   }
 })
 
-export const { setOrderPage, setOrderPageLimit } = orderSlice.actions
-
+export const { resetOrders, setOrderLimit } = orderSlice.actions
 export default orderSlice.reducer

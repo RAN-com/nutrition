@@ -30,6 +30,11 @@ type Props = {
   onClose(): void
 }
 
+const productType = [
+  { id: 'OUT_PURCHASE', value: 'Out Purchase' },
+  { id: 'CENTER_USAGE', value: 'Center Usage' }
+]
+
 const flavours = [
   { id: 'vanilla', value: 'Vanilla' },
   { id: 'kulfi', value: 'Kulfi' },
@@ -51,6 +56,7 @@ const validationSchema = Yup.object().shape({
     .min(1, 'Stock quantity must be at least ₹1'),
   is_available: Yup.boolean().required('Availability status is required'),
   thumbnail: Yup.mixed().required('Thumbnail must be a valid URL'),
+  product_type: Yup.string().required('Product Type is required'),
   flavour: Yup.string().when('name', (name: any, schema) => {
     return name && name.includes('Formula 1')
       ? schema.required('Flavour is required for Formula 1 products')
@@ -72,7 +78,8 @@ const CreateProduct = ({ edit, open, onClose }: Props) => {
       in_stock: edit?.in_stock ?? 0,
       thumbnail: (edit?.thumbnail || null) ?? (null as (File | string) | null),
       // product_images: edit?.product_images ?? ([] as { url: string | File; comment: string }[]),
-      is_available: edit?.is_available ?? true
+      is_available: edit?.is_available ?? true,
+      product_type: edit?.type ?? 'OUT_PURCHASE'
     },
     validationSchema,
     onSubmit: async (values, { resetForm }) => {
@@ -99,7 +106,7 @@ const CreateProduct = ({ edit, open, onClose }: Props) => {
 
       try {
         if (!edit) {
-          const upload = await addProduct(user?.uid, {
+          await addProduct(user?.uid, {
             in_stock: values.in_stock ?? null,
             is_available: values.is_available,
             name: values.name ?? null,
@@ -108,9 +115,10 @@ const CreateProduct = ({ edit, open, onClose }: Props) => {
             // product_images: product_images as { url: string; comment: string }[],
             thumbnail: thumbnail as string,
             added_on: new Date().getTime() ?? null,
-            added_by: user?.uid ?? null
+            added_by: user?.uid ?? null,
+            type: values.product_type
           })
-          console.log(upload)
+
           setLoading(false)
           dispatch(asyncGetProducts({ uid: user?.uid }))
           formik.resetForm()
@@ -201,7 +209,8 @@ const CreateProduct = ({ edit, open, onClose }: Props) => {
         in_stock: edit?.in_stock || 0,
         thumbnail: edit?.thumbnail || null || (null as (File | string) | null),
         // product_images: edit?.product_images || ([] as { url: string | File; comment: string }[]),
-        is_available: edit?.is_available || true
+        is_available: edit?.is_available || true,
+        product_type: edit?.type ?? 'CENTER_USAGE'
       })
     } else {
       formik.resetForm()
@@ -254,7 +263,27 @@ const CreateProduct = ({ edit, open, onClose }: Props) => {
         </div>
         <form onSubmit={formik.handleSubmit}>
           {keys.map((key) => {
-            if (
+            if (key.includes('product_type')) {
+              return (
+                <>
+                  <CustomTypography>{key?.toString() + '*'}</CustomTypography>
+                  <Select
+                    sx={{ width: '100%' }}
+                    size="small"
+                    value={formik.values.product_type ?? ''}
+                    onChange={(e) => formik.setFieldValue('product_type', e.target.value)}
+                    error={Boolean(
+                      formik.touched[key as keyof typeof formik.errors] &&
+                        formik.errors[key as keyof typeof formik.errors]
+                    )}
+                  >
+                    {productType.map((fl) => (
+                      <MenuItem value={fl.id}>{fl.value}</MenuItem>
+                    ))}
+                  </Select>
+                </>
+              )
+            } else if (
               key !== 'product_images' &&
               key !== 'thumbnail' &&
               key !== 'is_available' &&

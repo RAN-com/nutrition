@@ -3,7 +3,18 @@ import React from 'react'
 import { errorToast, successToast } from './utils/toast'
 import RestartModal from './components/modal/restart'
 import { useAppSelector, useAppDispatch } from './redux/store/hook'
-import { Button, Dialog, Modal, Typography, debounce, styled } from '@mui/material'
+import {
+  Button,
+  Dialog,
+  Modal,
+  ThemeProvider,
+  Typography,
+  createTheme,
+  debounce,
+  responsiveFontSizes,
+  styled,
+  useTheme
+} from '@mui/material'
 import PaymentSecure from '@renderer/assets/payment-waiting.png'
 import PaymentWaiting from '@renderer/assets/payment-pending.png'
 import PaymentSuccess from '@renderer/assets/payment-success.png'
@@ -19,43 +30,78 @@ import { updateCardValidity } from './firebase/card'
 import { addTransaction, setAdminSubscription } from './firebase'
 import { asyncGetCurrentStaffDomainData } from './redux/features/user/staff'
 import zIndex from '@mui/material/styles/zIndex'
-import { setAppVersion } from './redux/features/user/auth'
+import { setAppVersion, setNotifications } from './redux/features/user/auth'
+import { listenToNotifications } from './firebase/notifications'
+import { setDimensions } from './redux/store/ui/slice'
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const App = () => {
   const [updateDownloaded, setUpdateDownloaded] = React.useState(false)
   const dispatch = useAppDispatch()
-  const { user, app_version } = useAppSelector((s) => s.auth)
+  const { user } = useAppSelector((s) => s.auth)
   const staff = useAppSelector((s) => s.staffs.current_staff)
+  const dimension = useAppSelector((s) => s.ui.dimensions)
 
   React.useEffect(() => {
-    window.electron.ipcRenderer?.on('app_version', (_e, props) => {
-      dispatch(setAppVersion(props))
+    const { ipcRenderer } = window.electron || {}
+
+    if (ipcRenderer) {
+      ipcRenderer.on('app_version', (_e, props) => {
+        dispatch(setAppVersion(props))
+      })
+
+      ipcRenderer.on('sizeChanged', (_e, props) => {
+        if (props) {
+          const { width, height } = JSON.parse(props) || {}
+          if (width && height) {
+            document.documentElement.style.setProperty('--width', `${width}px`)
+            document.documentElement.style.setProperty('--height', `${height}px`)
+            dispatch(
+              setDimensions({
+                height,
+                width
+              })
+            )
+            const root = document.getElementById('root')
+            if (root) {
+              root.style.width = `${width}px`
+              root.style.height = `${height}px`
+            }
+          }
+        }
+      })
+
+      ipcRenderer.on('updateAvailable', () => {
+        const confirmDownload = window.confirm('New update available. Download now?')
+        window.electron.updateResponse(confirmDownload ? 'startDownload' : 'startDownload')
+        if (!confirmDownload) {
+          alert('Update will be downloaded for a smooth experience')
+        }
+      })
+
+      ipcRenderer.on('updateDownloaded', () => {
+        setUpdateDownloaded(true)
+      })
+    }
+
+    return () => {
+      ipcRenderer?.removeAllListeners('app_version')
+      ipcRenderer?.removeAllListeners('sizeChanged')
+      ipcRenderer?.removeAllListeners('updateAvailable')
+      ipcRenderer?.removeAllListeners('updateDownloaded')
+    }
+  }, [dispatch])
+
+  React.useEffect(() => {
+    if (!user) return
+
+    const unsubscribe = listenToNotifications(user.uid, (newNotifications) => {
+      dispatch(setNotifications(newNotifications))
     })
-    window.electron?.ipcRenderer?.on('sizeChanged', (_e, props) => {
-      if (!props) return
-      const parsed = JSON.parse(props) as { width: number; height: number }
-      if (!parsed) return
-      document.documentElement.style.setProperty('--width', `${parsed.width}px`)
-      document.documentElement.style.setProperty('--height', `${parsed.height}px`)
-      const root = document.getElementById('root')
-      if (!root) return
-      root.style.width = `${parsed.width}px`
-      root.style.height = `${parsed.height}px`
-    })
-    window.electron?.ipcRenderer.on('updateAvailable', () => {
-      const confirmDownload = window.confirm('New update available. Download now?')
-      if (confirmDownload) {
-        window.electron.updateResponse('startDownload')
-      } else {
-        alert('Updated will be downloaded for smooth experience')
-        window.electron.updateResponse('startDownload')
-      }
-    })
-    window.electron?.ipcRenderer.on('updateDownloaded', () => {
-      setUpdateDownloaded(true)
-    })
-  }, [])
+
+    return () => unsubscribe()
+  }, [user, dispatch])
+
   React.useEffect(() => {
     if (user) {
       dispatch(
@@ -67,12 +113,40 @@ const App = () => {
     }
   }, [user, staff])
 
-  console.log(app_version)
-
   const pendingOrder = useAppSelector((s) => s.pricing.pending_order)
+  const th = useTheme()
 
   return (
-    <>
+    <ThemeProvider
+      theme={responsiveFontSizes(
+        createTheme({
+          ...th,
+          components: {
+            MuiModal: {
+              styleOverrides: {
+                root: {
+                  ...dimension
+                }
+              }
+            },
+            MuiButton: {
+              styleOverrides: {
+                root: {
+                  textTransform: 'none'
+                }
+              }
+            },
+            MuiDialog: {
+              styleOverrides: {
+                root: {
+                  ...dimension
+                }
+              }
+            }
+          }
+        })
+      )}
+    >
       <PaymentModel open={!!pendingOrder} />
       <RestartModal
         open={updateDownloaded}
@@ -86,7 +160,7 @@ const App = () => {
       />
 
       <Navigation />
-    </>
+    </ThemeProvider>
   )
 }
 

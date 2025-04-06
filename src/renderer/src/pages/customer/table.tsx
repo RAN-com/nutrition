@@ -29,6 +29,8 @@ interface PaginatedTableProps {
   total?: number
   clickable?: boolean
   onClick?(e: number): void
+  showLoadableRow?: boolean
+  loadableClick?(): void
 }
 
 const PaginatedTable: React.FC<PaginatedTableProps> = ({
@@ -42,7 +44,9 @@ const PaginatedTable: React.FC<PaginatedTableProps> = ({
   sx,
   total,
   showPagination = true,
-  onClick
+  onClick,
+  showLoadableRow,
+  loadableClick
 }) => {
   const paginatedRows =
     data?.row?.length >= 1
@@ -117,13 +121,12 @@ const PaginatedTable: React.FC<PaginatedTableProps> = ({
                   onClick={() => onClick?.(idx)}
                   sx={{
                     cursor: clickable ? 'pointer' : 'unset',
-                    '&:last-child td, &:last-child th': { border: 0 },
+                    // '&:last-child td, &:last-child th': { border: 0 },
                     th: {
                       '&:hover': {
                         backgroundColor: '#f6f6f7b7'
                       },
-                      whiteSpace: 'nowrap',
-                      borderBottomColor: '#3f3f3f'
+                      whiteSpace: 'nowrap'
                     }
                   }}
                 >
@@ -134,6 +137,17 @@ const PaginatedTable: React.FC<PaginatedTableProps> = ({
                   ))}
                 </TableRow>
               ))
+            )}
+            {showLoadableRow && (
+              <TableRow>
+                <TableCell
+                  onClick={loadableClick}
+                  colSpan={data?.header?.length ?? 2}
+                  align="center"
+                >
+                  Load More
+                </TableCell>
+              </TableRow>
             )}
           </TableBody>
         </Table>

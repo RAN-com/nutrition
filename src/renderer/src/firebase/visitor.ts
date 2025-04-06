@@ -105,7 +105,7 @@ export const addVisitor = async ({
     }
 
     // Generate unique visitor ID
-    const vid = (encryptData(`${phone}`) ?? '')?.split('/').join('')
+    const vid = encryptData(`${phone}`)
     const docRef = doc(firestore, `users/${created_by}/visitors/${vid}`)
 
     // Check if the visitor already exists
@@ -249,7 +249,10 @@ export const convertVisitorToCustomer = async (uid: string, vid: string) => {
     const visitorDocSnap = await getDoc(visitorDocRef)
 
     if (!visitorDocSnap.exists()) {
-      throw new Error('Visitor document does not exist.')
+      return {
+        status: false,
+        message: 'Not Found'
+      }
     }
 
     // Get the visitor data
@@ -259,9 +262,11 @@ export const convertVisitorToCustomer = async (uid: string, vid: string) => {
 
     const checkExistingCid = encryptData(data.phone) as string
     const check = await getCustomer(uid, checkExistingCid)
-    if (check) {
-      errorToast(`Customer with the visitor email exists...`)
-      return
+    if (check?.data) {
+      return {
+        status: false,
+        message: 'Customer with the visitor phone number exists'
+      }
     }
 
     // Add the visitor data to the customers collection

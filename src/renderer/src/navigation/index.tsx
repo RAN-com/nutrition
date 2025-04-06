@@ -20,6 +20,11 @@ import NoInternet from '@renderer/components/modal/no-internet'
 import CustomerDetails from '@renderer/pages/customer/details'
 import ProfilePage from '@renderer/pages/profile'
 import EditProfile from '@renderer/pages/profile/edit'
+import CustomerRecords from '@renderer/pages/customer/records'
+import MarathonPage from '@renderer/pages/marathon'
+import Notifications from '@renderer/pages/notifications'
+import { grey } from '@mui/material/colors'
+import CustomTypography from '@renderer/components/typography'
 
 const Navigation = () => {
   const user = useAppSelector((s) => s.auth.user)
@@ -38,6 +43,10 @@ const Navigation = () => {
                   element: <Home />
                 },
                 {
+                  path: '/marathon',
+                  element: <MarathonPage />
+                },
+                {
                   path: '/customers',
                   children: [
                     {
@@ -46,7 +55,21 @@ const Navigation = () => {
                     },
                     {
                       path: ':customerId',
-                      element: <CustomerDetails />
+                      element: <CustomerDetails />,
+                      children: [
+                        {
+                          path: 'records',
+                          element: <CustomerRecords />
+                        },
+                        {
+                          path: 'photo_gallery',
+                          element: (
+                            <CustomTypography color={grey['600']}>
+                              This page Will be available soon
+                            </CustomTypography>
+                          )
+                        }
+                      ]
                     }
                   ]
                 },
@@ -92,6 +115,10 @@ const Navigation = () => {
                 {
                   path: '/appointments',
                   element: <h1>Appointments</h1>
+                },
+                {
+                  path: '/notifications',
+                  element: <Notifications />
                 },
                 {
                   path: '/billing',
