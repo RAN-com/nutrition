@@ -52,7 +52,7 @@ function createWindow({ width, height }: { width: number; height: number }): voi
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       nodeIntegration: true,
-      devTools: true,
+      devTools: is.dev,
       // devTools: process.env.NODE_ENV === "developm",
       contextIsolation: false
     }
@@ -61,7 +61,9 @@ function createWindow({ width, height }: { width: number; height: number }): voi
   mainWindow.setMenu(null)
   mainWindow.on('ready-to-show', () => {
     mainWindow.show()
-    mainWindow.webContents.openDevTools()
+    if (is.dev) {
+      mainWindow.webContents.openDevTools()
+    }
     const size = mainWindow.getSize()
     console.log(`Window resized to: ${size[0]} x ${size[1]}`)
     const data = {

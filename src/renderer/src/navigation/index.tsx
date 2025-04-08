@@ -1,4 +1,4 @@
-import { createBrowserRouter, Navigate, RouterProvider } from 'react-router-dom'
+import { createHashRouter, Navigate, RouterProvider } from 'react-router-dom'
 import CheckAuth from './chech/auth'
 import AuthLogin from '@renderer/pages/auth/login'
 import AuthCreate from '@renderer/pages/auth/create'
@@ -28,7 +28,7 @@ import CustomTypography from '@renderer/components/typography'
 
 const Navigation = () => {
   const user = useAppSelector((s) => s.auth.user)
-  const router = createBrowserRouter([
+  const router = createHashRouter([
     {
       element: <NoInternet />,
       children: [
