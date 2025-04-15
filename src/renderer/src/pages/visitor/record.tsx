@@ -26,17 +26,9 @@ const validationSchema = Yup.object().shape({
     .min(0, 'Body fat must be at least 0')
     .max(100, 'Body fat must not exceed 100')
     .required('Body fat percentage is required'),
-  chest: Yup.number()
-    .positive('Chest measurement must be positive')
-    .required('Chest measurement is required'),
   bmi: Yup.number().positive('BMI must be positive').required('BMI is required'),
-  waist: Yup.number()
-    .positive('Waist measurement must be positive')
-    .required('Waist measurement is required'),
   bmr: Yup.number().positive('BMR must be positive').required('BMR is required'),
-  hip: Yup.number()
-    .positive('Hip measurement must be positive')
-    .required('Hip measurement is required'),
+
   visceral_fat: Yup.number()
     .min(0, 'Visceral fat must be at least 0')
     .max(100, 'Visceral fat must not exceed 100')
@@ -92,6 +84,7 @@ const UpdateVisitorRecord = ({ open, onClose, edit }: Props) => {
               vid: currentUser?.data.vid as string
             })
           )
+          onClose()
           resetForm()
         } else {
           errorToast(JSON.stringify('Something went wrong') ?? '')
@@ -102,7 +95,6 @@ const UpdateVisitorRecord = ({ open, onClose, edit }: Props) => {
   })
 
   const keys = Object.keys(formik.values)
-
   return (
     <Dialog
       open={open}

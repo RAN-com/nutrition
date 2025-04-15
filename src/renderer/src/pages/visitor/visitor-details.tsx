@@ -95,8 +95,7 @@ const VisitorDetails = ({ visitor }: Props) => {
           disableFocusRipple={true}
           disableTouchRipple={true}
           onClick={async () => {
-            // if (!confirm('Are you sure you want to convert this visitor to customer?')) return
-            console.log('COnverting')
+            if (!confirm('Are you sure you want to convert this visitor to customer?')) return
             const convert = await convertVisitorToCustomer(
               admin?.uid as string,
               data?.vid as string

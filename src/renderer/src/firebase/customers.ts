@@ -130,12 +130,18 @@ export const addCustomer = async ({
 
 export const deleteCustomer = async (created_by_uid: string, uid: string) => {
   try {
+    const records = doc(firestore, `customers/${created_by_uid}/records/${uid}`)
+    const attendance = doc(firestore, `customers/${created_by_uid}/attendance/${uid}`)
+    const subscription = doc(firestore, `customers/${created_by_uid}/subscription/${uid}`)
     const docRef = doc(firestore, `users/${created_by_uid}/customers/${uid}`)
+
     await deleteDoc(docRef)
-    successToast(`Customer deleted successfully`)
+    await deleteDoc(attendance)
+    await deleteDoc(subscription)
+    await deleteDoc(records)
+
     return { status: 'success', message: `Customer ${uid} deleted successfully` }
   } catch (error) {
-    errorToast('Error deleting customer')
     return { status: 'error', error }
   }
 }
@@ -593,7 +599,7 @@ export const setSubscriptionToUser = async ({
     } as AttendanceSubscription
 
     // Update the Firestore document with the new record
-    await setDoc(recordsRef, { subscription: [...currentRecords, newRecord] }, { merge: true })
+    await setDoc(recordsRef, { subscription: [...currentRecords, newRecord] })
 
     successToast('Subscription added successfully')
     return newRecord // Return the newly added record
@@ -663,4 +669,27 @@ export const staffAssignedCustomers = async (uid: string, sid: string) => {
   } catch (err) {
     return []
   }
+}
+
+export const checkCustomerValidForConversion = async (uid: string, cid: string) => {
+  const recordsRef = doc(firestore, `customers/${uid}/subscription/${cid}`)
+
+  // Fetch the current records
+  const existingDoc = await getDoc(recordsRef)
+
+  if (!existingDoc.exists()) {
+    return false
+  }
+
+  const d = existingDoc.data().subscription as AttendanceSubscription[]
+
+  if (d.length === 1 && d[0].isActive) {
+    return false
+  }
+
+  const latestSubscription = d[d.length - 1].isActive
+
+  if (latestSubscription) return false
+
+  return true
 }

@@ -1,7 +1,8 @@
 import { Avatar, styled } from '@mui/material'
-import { grey } from '@mui/material/colors'
+import { grey, red } from '@mui/material/colors'
 import CustomTypography from '../typography'
 import React from 'react'
+import CustomIcon from '../icons'
 
 type Props = {
   name: string
@@ -10,9 +11,20 @@ type Props = {
   photo_url?: string
   children?: React.ReactNode
   onClick(): void
+  onMoreClick?(): void
+  onDelete?(): void
 }
 
-const UserCard = ({ name, email, phone, photo_url, children, onClick }: Props) => {
+const UserCard = ({
+  name,
+  email,
+  phone,
+  photo_url,
+  children,
+  onClick,
+  onMoreClick,
+  onDelete
+}: Props) => {
   return (
     <Card onClick={onClick}>
       <div
@@ -39,6 +51,24 @@ const UserCard = ({ name, email, phone, photo_url, children, onClick }: Props) =
           <CustomTypography fontSize={'0.8rem'}>{phone}</CustomTypography>
         </div>
       </div>
+      <div style={{ gap: '12px', display: 'flex', flexDirection: 'column' }}>
+        <CustomIcon
+          onClick={onMoreClick}
+          name="MATERIAL_DESIGN"
+          icon="MdMoreVert"
+          color={grey['600']}
+        />
+        <CustomIcon
+          onClick={onDelete}
+          name="MATERIAL_DESIGN"
+          icon="MdDelete"
+          color={red['600']}
+          style={{
+            gridColumn: 2,
+            gridRow: 2
+          }}
+        />
+      </div>
       {children}
     </Card>
   )
@@ -52,9 +82,11 @@ const Card = styled('div')({
   minHeight: 'max-content',
   maxHeight: 'max-content',
   padding: '12px 24px',
+  paddingRight: 12,
   borderRadius: '12px',
   display: 'grid',
-  gridTemplateColumns: '1fr',
+  alignItems: 'start',
+  gridTemplateColumns: '1fr  auto',
   gridTemplateRows: 'auto 1fr',
   cursor: 'pointer',
   backgroundColor: '#ffffff',

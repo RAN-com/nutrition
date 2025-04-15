@@ -1,4 +1,5 @@
 import { CustomerRecords } from './customers.d'
+import { RecordType } from './record'
 
 export type CreateStaff = {
   name: string
@@ -17,6 +18,7 @@ export type CreateStaff = {
   assigned_subdomain?: string
   before_picture: string
   after_picture: string
+  about?: string
 }
 
 export type StaffData = {
@@ -24,7 +26,7 @@ export type StaffData = {
   total_customers_assigned: number
   total_visitors_assigned: number
   total_appointments_recorded: number
-  records: CustomerRecords[]
+  records: RecordType[]
 }
 
 export type AppointmentData = {

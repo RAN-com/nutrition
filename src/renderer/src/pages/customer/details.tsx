@@ -2,7 +2,7 @@ import { styled, Tab, Tabs } from '@mui/material'
 import CustomDetailSidebar from './detail-sidebar'
 import { useAppSelector, useAppDispatch } from '@renderer/redux/store/hook'
 import React from 'react'
-import { Outlet, useNavigate } from 'react-router-dom'
+import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import CustomIcon from '@renderer/components/icons'
 import CustomTypography from '@renderer/components/typography'
 import { resetCurrentUser } from '@renderer/redux/features/user/customers'
@@ -10,6 +10,8 @@ import { grey } from '@mui/material/colors'
 
 const CustomerDetails = () => {
   const dispatch = useAppDispatch()
+  const location = useLocation()
+
   const { current_customer, current_customer_loading } = useAppSelector((s) => s.customer)
   const navigate = useNavigate()
   React.useEffect(() => {
@@ -23,6 +25,8 @@ const CustomerDetails = () => {
 
   const isRecords = location.pathname.includes('records')
   const outletAvailable = location.pathname.split(`/customers/${current_customer?.data?.cid}/`)[1]
+
+  console.log('Location', location.pathname)
 
   return (
     <>
@@ -101,7 +105,7 @@ const CustomerDetails = () => {
               />
             </Tabs>
           </Header>
-          {!!outletAvailable && (
+          {outletAvailable && (
             <DetailsContainer>
               <Outlet />
             </DetailsContainer>

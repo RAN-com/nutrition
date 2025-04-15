@@ -173,6 +173,10 @@ export const embedAllStyles = (selector: string, title: string = 'Health Record'
       .set_print_transform_origin {
          transform: none;
         }
+
+        .hide_on_print: {
+        opacity: 0;
+        }
       </style>
     </head>
     <body>

@@ -1,3 +1,5 @@
+import { RecordType } from './record'
+
 export type CustomerResponse = {
   name: string
   photo_url: string
@@ -62,16 +64,7 @@ export type MarathonNotes = {
 }
 
 export type CustomerRecords = {
-  data: {
-    BMI: number
-    BMR: number
-    BODY_FAT: number
-    MUSCLE_MASS: number
-    BODY_AGE: number
-    TSF: number
-    HEIGHT: number
-    WEIGHT: number
-  }
+  data: RecordType[]
   cid: string
   recorded_on: number
   recorded_by: string

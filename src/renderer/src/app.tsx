@@ -99,7 +99,9 @@ const App = () => {
       dispatch(setNotifications(newNotifications))
     })
 
-    return () => unsubscribe()
+    return () => {
+      unsubscribe()
+    }
   }, [user, dispatch])
 
   React.useEffect(() => {

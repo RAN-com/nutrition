@@ -4,6 +4,7 @@ import {
   CircularProgress,
   debounce,
   Divider,
+  Fade,
   keyframes,
   styled,
   Tab,
@@ -32,6 +33,7 @@ import PurchaseSubscription from './purchase-subscription'
 import { asyncInitCardUpdate } from '@renderer/redux/features/user/card'
 import { getAppointmentsBySid } from '@renderer/firebase/appointments'
 import NoImage from '@renderer/assets/image-not-found.jpg'
+import { useSearchParams } from 'react-router-dom'
 
 // Define the keyframe for the rotating animation
 const rotate = keyframes`
@@ -178,6 +180,10 @@ const AboutStaff = () => {
         : null,
     []
   )
+
+  const [query] = useSearchParams()
+  const fullWidth = query.get('tab') === 'records'
+
   return (
     <>
       <AppointmentsCard open={open} onClose={() => setOpen(false)} />
@@ -188,192 +194,211 @@ const AboutStaff = () => {
         }}
       >
         <AboutHeader />
-        <InnerContainer>
-          <Profile className="scrollbar">
-            <Avatar
-              src={data?.data?.photo_url}
-              alt={data?.data?.name}
-              sx={{
-                width: '120px',
-                height: '120px',
-                border: '1px solid'
-              }}
-            />
-
-            <CustomTypography variant="h5" marginTop={'12px'}>
-              {data?.data?.name}
-            </CustomTypography>
-            <CustomTypography variant="body2" lineHeight={'1'}>
-              {data?.data?.email}
-            </CustomTypography>
-            <CustomTypography variant="body2" marginTop={'8px'} lineHeight={'1'}>
-              +91-{data?.data?.phone}
-            </CustomTypography>
-            <AvailableSoon open={showAvailable} onClose={() => setShowAvailable(false)} />
-            {domain_loading ? (
-              <CircularProgress variant="indeterminate" size={24} />
-            ) : (
-              <>
-                {!current_staff_domain?.subscription ? (
-                  <PurchaseSubscription handleFunc={() => setRefresh(true)} />
-                ) : (
-                  <Button
-                    focusRipple={false}
-                    variant={'contained'}
-                    sx={{ margin: '8px 0px 4px 0px' }}
-                    disableTouchRipple={true}
-                    disableElevation={true}
-                    onClick={() => {
-                      setOpen(true)
-                      if (current_staff_domain) {
-                        dispatch(
-                          asyncInitCardUpdate({ sid: current_staff_domain?.staff_id as string })
-                        )
-                      }
-                    }}
-                    size={'large'}
-                    // disabled={!staff?.data?.assigned_subdomain}
-                    startIcon={
-                      <CustomIcon
-                        name={'LUCIDE_ICONS'}
-                        icon="LuExternalLink"
-                        color="white"
-                        size={18}
-                      />
-                    }
+        <InnerContainer
+          sx={{
+            gridTemplateColumns: fullWidth ? '1fr' : 'minmax(320px, 320px) 1fr'
+          }}
+        >
+          {!fullWidth && (
+            <Fade in={!fullWidth}>
+              <Profile className="scrollbar">
+                <Avatar
+                  src={data?.data?.photo_url}
+                  alt={data?.data?.name}
+                  sx={{
+                    width: '120px',
+                    height: '120px',
+                    border: '1px solid'
+                  }}
+                />
+                <CustomTypography variant="h5" marginTop={'12px'}>
+                  {data?.data?.name}
+                </CustomTypography>
+                <CustomTypography variant="body2" lineHeight={'1'}>
+                  {data?.data?.email}
+                </CustomTypography>
+                <CustomTypography variant="body2" marginTop={'8px'} lineHeight={'1'}>
+                  +91-{data?.data?.phone}
+                </CustomTypography>
+                {data?.data?.about && (
+                  <CustomTypography
+                    margin={'12px 0px'}
+                    variant="body2"
+                    sx={{ display: 'inline-block', textAlign: 'center' }}
                   >
-                    <CustomTypography variant="body2" lineHeight={'1'}>
-                      {!current_staff_domain?.subscription ? 'Buy Subscription' : 'Customize Card'}
-                    </CustomTypography>
-                  </Button>
+                    <b>About:</b> {data?.data?.about}
+                  </CustomTypography>
                 )}
-                {!current_staff_domain?.subscription && (
+                <AvailableSoon open={showAvailable} onClose={() => setShowAvailable(false)} />
+                {domain_loading ? (
+                  <CircularProgress variant="indeterminate" size={24} />
+                ) : (
                   <>
-                    <CustomTypography
-                      fontSize={'0.7rem'}
-                      marginBottom={'12px'}
-                      textAlign={'center'}
-                      maxWidth={'250px'}
-                      color={grey['400']}
-                    >
-                      Buy subscription to create visiting card for {staff?.data?.name}
-                    </CustomTypography>
+                    {!current_staff_domain?.subscription ? (
+                      <PurchaseSubscription handleFunc={() => setRefresh(true)} />
+                    ) : (
+                      <Button
+                        focusRipple={false}
+                        variant={'contained'}
+                        sx={{ margin: '8px 0px 4px 0px' }}
+                        disableTouchRipple={true}
+                        disableElevation={true}
+                        onClick={() => {
+                          setOpen(true)
+                          if (current_staff_domain) {
+                            dispatch(
+                              asyncInitCardUpdate({ sid: current_staff_domain?.staff_id as string })
+                            )
+                          }
+                        }}
+                        size={'large'}
+                        // disabled={!staff?.data?.assigned_subdomain}
+                        startIcon={
+                          <CustomIcon
+                            name={'LUCIDE_ICONS'}
+                            icon="LuExternalLink"
+                            color="white"
+                            size={18}
+                          />
+                        }
+                      >
+                        <CustomTypography variant="body2" lineHeight={'1'}>
+                          {!current_staff_domain?.subscription
+                            ? 'Buy Subscription'
+                            : 'Customize Card'}
+                        </CustomTypography>
+                      </Button>
+                    )}
+                    {!current_staff_domain?.subscription && (
+                      <>
+                        <CustomTypography
+                          fontSize={'0.7rem'}
+                          marginBottom={'12px'}
+                          textAlign={'center'}
+                          maxWidth={'250px'}
+                          color={grey['400']}
+                        >
+                          Buy subscription to create visiting card for {staff?.data?.name}
+                        </CustomTypography>
+                      </>
+                    )}
                   </>
                 )}
-              </>
-            )}
-            {current_staff_domain && current_staff_domain?.subscription && (
-              <div>
-                <CustomTypography>
-                  Valid till&nbsp;
-                  <b>
-                    {timeLeft?.years}Y {timeLeft?.months}M {timeLeft?.days}D
-                  </b>
-                </CustomTypography>
-              </div>
-            )}
-            <div
-              style={{
-                display: 'flex',
-                flex: 1,
-                width: '100%',
-                flexDirection: 'column',
-                padding: '12px 16px',
-                margin: '12px 0px'
-              }}
-            >
-              <Tabs
-                sx={{
-                  '& .MuiTab-root': {
-                    padding: '0px',
-                    height: 20
-                  },
-                  margin: 'auto'
-                }}
-                value={currentPic}
-                onChange={(_, e) => setCurrentPic(e)}
-                variant="scrollable"
-                aria-label="basic tabs example"
-                textColor="primary"
-                indicatorColor="primary"
-              >
-                <Tab
-                  disableFocusRipple
-                  disableRipple
-                  disableTouchRipple
-                  label="Before"
-                  value={'before'}
-                />
-                <Tab
-                  disableFocusRipple
-                  disableRipple
-                  disableTouchRipple
-                  label="After"
-                  value={'after'}
-                />
-              </Tabs>
-              {currentPic === 'before' && (
-                <img
-                  className="staff_picture"
-                  src={staff?.data?.before_picture ?? NoImage}
-                  alt={'Before image'}
-                />
-              )}
-              {currentPic === 'after' && (
-                <img
-                  className="staff_picture"
-                  src={staff?.data?.after_picture ?? NoImage}
-                  alt={'After image'}
-                />
-              )}
-            </div>
-            <Divider sx={{ color: 'black', width: '100%', paddingTop: '12px' }} />
-            <div
-              style={{
-                width: '100%',
-                padding: '24px 0px',
-                // borderTop: '1px solid #dbdbdb',
-                display: 'flex',
-                flexDirection: 'column'
-              }}
-            >
-              {render_data.map((e) => (
-                <Count>
-                  <CustomIcon
-                    name={e.name as keyof typeof Icons}
-                    icon={e.icon as AllIcons}
-                    color={'white'}
-                    changeCursor={false}
-                    sx={{
-                      padding: '12px',
-                      backgroundColor: '#2c3bbd',
-                      borderRadius: '100px'
-                    }}
-                  />
+                {current_staff_domain && current_staff_domain?.subscription && (
                   <div>
-                    <CustomTypography fontSize={'12px'} color={grey['500']}>
-                      Total {e.label}
-                    </CustomTypography>
-                    <CustomTypography variant={'h5'}>
-                      {Number(e.value).toLocaleString('en-IN')}
+                    <CustomTypography>
+                      Valid till&nbsp;
+                      <b>
+                        {timeLeft?.years}Y {timeLeft?.months}M {timeLeft?.days}D
+                      </b>
                     </CustomTypography>
                   </div>
-                  <CustomIcon
-                    name={'LUCIDE_ICONS'}
-                    icon={'LuRefreshCcw'}
-                    onClick={() => setRefresh(true)}
+                )}
+                <div
+                  style={{
+                    display: 'flex',
+                    flex: 1,
+                    width: '100%',
+                    flexDirection: 'column',
+                    padding: '12px 16px',
+                    margin: '12px 0px'
+                  }}
+                >
+                  <Tabs
                     sx={{
-                      padding: '12px',
-                      borderRadius: '100px',
-                      animation: loading ? `${rotate}  2s  linear infinite` : 'none' // Applying the rotation animation
+                      '& .MuiTab-root': {
+                        padding: '0px',
+                        height: 20
+                      },
+                      margin: 'auto'
                     }}
-                  />
-                </Count>
-              ))}
-            </div>
-          </Profile>
+                    value={currentPic}
+                    onChange={(_, e) => setCurrentPic(e)}
+                    variant="scrollable"
+                    aria-label="basic tabs example"
+                    textColor="primary"
+                    indicatorColor="primary"
+                  >
+                    <Tab
+                      disableFocusRipple
+                      disableRipple
+                      disableTouchRipple
+                      label="Before"
+                      value={'before'}
+                    />
+                    <Tab
+                      disableFocusRipple
+                      disableRipple
+                      disableTouchRipple
+                      label="After"
+                      value={'after'}
+                    />
+                  </Tabs>
+                  {currentPic === 'before' && (
+                    <img
+                      className="staff_picture"
+                      src={staff?.data?.before_picture ?? NoImage}
+                      alt={'Before image'}
+                    />
+                  )}
+                  {currentPic === 'after' && (
+                    <img
+                      className="staff_picture"
+                      src={staff?.data?.after_picture ?? NoImage}
+                      alt={'After image'}
+                    />
+                  )}
+                </div>
+                <Divider sx={{ color: 'black', width: '100%', paddingTop: '12px' }} />
+                <div
+                  style={{
+                    width: '100%',
+                    padding: '24px 0px',
+                    // borderTop: '1px solid #dbdbdb',
+                    display: 'flex',
+                    flexDirection: 'column'
+                  }}
+                >
+                  {render_data.map((e) => (
+                    <Count>
+                      <CustomIcon
+                        name={e.name as keyof typeof Icons}
+                        icon={e.icon as AllIcons}
+                        color={'white'}
+                        changeCursor={false}
+                        sx={{
+                          padding: '12px',
+                          backgroundColor: '#2c3bbd',
+                          borderRadius: '100px'
+                        }}
+                      />
+                      <div>
+                        <CustomTypography fontSize={'12px'} color={grey['500']}>
+                          Total {e.label}
+                        </CustomTypography>
+                        <CustomTypography variant={'h5'}>
+                          {Number(e.value).toLocaleString('en-IN')}
+                        </CustomTypography>
+                      </div>
+                      <CustomIcon
+                        name={'LUCIDE_ICONS'}
+                        icon={'LuRefreshCcw'}
+                        onClick={() => setRefresh(true)}
+                        sx={{
+                          padding: '12px',
+                          borderRadius: '100px',
+                          animation: loading ? `${rotate}  2s  linear infinite` : 'none' // Applying the rotation animation
+                        }}
+                      />
+                    </Count>
+                  ))}
+                </div>
+              </Profile>
+            </Fade>
+          )}
           <div className="main-container">
             <StaffContent
+              records={data?.records || []}
               loading={loading}
               appointments={appointments}
               customers={customers}
@@ -392,7 +417,7 @@ const InnerContainer = styled('div')({
   width: '100%',
   height: '100%',
   display: 'grid',
-  gridTemplateColumns: 'minmax(320px, 320px) 1fr',
+  transition: 'all .3s',
   gap: '24px',
   overflowY: 'auto',
   '.main-container': {

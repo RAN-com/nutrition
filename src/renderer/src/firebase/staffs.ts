@@ -4,6 +4,9 @@ import { StaffData } from '@renderer/types/staff'
 import { errorToast, successToast } from '@renderer/utils/toast'
 import { encryptData } from '@renderer/utils/crypto'
 import { CustomerResponse } from '@renderer/types/customers'
+import moment from 'moment'
+import { checkCustomerValidForConversion, deleteCustomer, getPersonalRecords } from './customers'
+import { RecordType } from '@renderer/types/record'
 
 export const getStaff = async (uid: string, sid: string) => {
   try {
@@ -89,6 +92,7 @@ export const getTotalStaffs = async (uid: string) => {
 export const addStaff = async (
   data: Partial<StaffData['data']> & {
     available_limit: number
+    records: RecordType[]
   }
 ) => {
   try {
@@ -108,17 +112,18 @@ export const addStaff = async (
       return { status: 'exists', data: staffDoc.data() }
     }
 
+    const { records, ...others } = data
     // Add the new staff data
     await setDoc(docRef, {
       data: {
-        ...data,
+        ...others,
         createdOn: new Date().toISOString(),
         sid: uid
       },
       total_appointments_recorded: 0,
       total_customers_assigned: 0,
       total_visitors_assigned: 0,
-      records: []
+      records: records
     } as StaffData)
 
     successToast(`Staff added successfully`)
@@ -195,12 +200,12 @@ export const updateStaffCount = async ({
   }
 }
 
-export const convertCustomerToStaff = async (uid: string, cid: string) => {
+export const convertCustomerToStaff = async (uid: string, cid: string, limit: number) => {
   try {
-    const visitorDocRef = doc(firestore, `users/${uid}/customers/${cid}`)
-    const visitorDocSnap = await getDoc(visitorDocRef)
+    const customerRef = doc(firestore, `users/${uid}/customers/${cid}`)
+    const customerSnap = await getDoc(customerRef)
 
-    if (!visitorDocSnap.exists()) {
+    if (!customerSnap.exists()) {
       return {
         status: false,
         message: 'Not Found'
@@ -208,20 +213,55 @@ export const convertCustomerToStaff = async (uid: string, cid: string) => {
     }
 
     // Get the visitor data
-    const visitorData = visitorDocSnap.data() as CustomerResponse
+    const customerData = customerSnap.data() as CustomerResponse
 
-    const data = visitorData
+    const data = customerData
     const checkExistingCid = encryptData(data.phone) as string
     const check = await getStaff(uid, checkExistingCid)
-    if (check?.data) {
-      return {
-        status: false,
-        message: 'Staff with the customer phone number already exists'
+
+    if (!check?.status) {
+      const checkUserRecord = await checkCustomerValidForConversion(uid, cid)
+
+      if (checkUserRecord) {
+        const records = await getPersonalRecords(uid, cid)
+
+        const add = await addStaff({
+          available_limit: limit,
+          about: customerData?.medical_issues,
+          address: customerData?.address,
+          phone: customerData?.phone,
+          photo_url: customerData?.photo_url,
+          date_of_birth: customerData?.date_of_birth,
+          createdBy: uid,
+          sid: checkExistingCid,
+          gender: customerData?.gender,
+          name: customerData?.name,
+          uid,
+          createdOn: moment().toISOString(),
+          email: customerData?.email,
+          medical_issues: customerData?.medical_issues,
+          records: records ?? []
+        })
+
+        if (add.status) {
+          await deleteCustomer(uid, customerData?.cid)
+          return add
+        } else {
+          return add
+        }
+      } else {
+        return {
+          status: false,
+          data: null,
+          message:
+            'Customer may be new or might have an active subscription. Finish the attendance and try again.'
+        }
       }
     }
+
     return {
-      status: true,
-      message: 'working'
+      status: false,
+      message: `Staff with this ${data.phone} number exists. Change the number of customer and try again`
     }
   } catch (error: any) {
     errorToast(error.message || 'An error occurred while converting the visitor')

@@ -7,7 +7,7 @@ import ImageUpload from '../image-upload'
 import moment from 'moment'
 import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
-import { grey } from '@mui/material/colors'
+import { grey, red } from '@mui/material/colors'
 import { DatePicker } from '@mui/x-date-pickers'
 import * as Yup from 'yup'
 import CustomIcon from '../icons'
@@ -30,8 +30,21 @@ const validationSchema = Yup.object({
     .required('Phone is required'),
   before_picture: Yup.string().required(),
   after_picture: Yup.string().required(),
-  address: Yup.string().required('Address is required')
+  address: Yup.string().required('Address is required'),
+  about: Yup.string()
+    .required('About is required')
+    .min(10, 'Minimum of 10 characters is required')
+    .max(1000, 'About should be less than 1000 characters')
 })
+
+const upload = async (type: string | File, uid: string) => {
+  if (typeof type === 'string') return type
+  const res = await uploadFiles(uid, [type], ['staffs'])
+  if (!res) {
+    return undefined
+  }
+  return res[0].Location
+}
 
 const CreateStaffModal = ({
   onClose,
@@ -55,6 +68,7 @@ const CreateStaffModal = ({
       gender: edit?.data?.gender ?? '',
       phone: edit?.data?.phone ?? '',
       address: edit?.data?.address ?? '',
+      about: edit?.data?.about ?? '',
       date_of_birth: edit?.data?.date_of_birth ?? '',
       medical_issues: edit?.data?.medical_issues ?? '',
       photo_url: edit?.data?.photo_url ?? '',
@@ -62,7 +76,7 @@ const CreateStaffModal = ({
       after_picture: edit?.data?.after_picture ?? ''
     },
     validationSchema,
-    onSubmit: () => {
+    onSubmit: async () => {
       setLoading(true)
       if (!user) {
         setLoading(false)
@@ -70,10 +84,19 @@ const CreateStaffModal = ({
         return
       }
       try {
+        const [before, after, profile] = await Promise.all([
+          upload(formik.values.before_picture, user?.uid),
+          upload(formik.values.after_picture, user?.uid),
+          upload(formik.values.photo_url, user?.uid)
+        ])
+
         if (edit?.data) {
           updateStaff(edit?.data.createdBy, edit?.data?.sid, {
             ...edit?.data,
-            ...formik.values
+            ...formik.values,
+            before_picture: before,
+            after_picture: after,
+            photo_url: profile
           })
             .then(() => {
               setLoading(false)
@@ -90,6 +113,7 @@ const CreateStaffModal = ({
           addStaff({
             createdBy: user?.uid,
             available_limit: user?.subscription?.total_staffs as number,
+            records: [],
             ...formik.values
           })
             .then(() => {
@@ -111,13 +135,6 @@ const CreateStaffModal = ({
     }
   })
 
-  // React.useEffect(() => {
-  //   if (Object.keys(formik.errors).length > 0 && !formik.dirty) {
-  //     Object.keys(formik.errors).map((e) => errorToast(e))
-  //   }
-  // }, [formik.errors])
-
-  console.log(formik.errors)
   const keys = Object.keys(formik.values)
   return (
     <Dialog
@@ -182,30 +199,38 @@ const CreateStaffModal = ({
             k.includes('before_picture') ||
             k.includes('after_picture') ? (
             <>
-              <CustomTypography marginTop={'12px'} color={grey['500']}>
+              <CustomTypography
+                marginTop={'12px'}
+                color={!!formik.errors[k] ? red['400'] : grey['500']}
+              >
                 {k.includes('photo_url')
                   ? 'Upload Image(Optional)'
                   : `Upload ${k.split('_').join(' ')}*`}
               </CustomTypography>
               <ImageUpload
                 onClear={async () => {
-                  const split = formik.values.photo_url.split('.com')
-                  const [_, ...filename] = split[split.length - 1].split('/')
-                  await deleteFile(filename.join('/'))
-                  formik.setFieldValue('photo_url', '')
+                  if (typeof formik.values[k] === 'string') {
+                    const split = formik.values[k].split('.com')
+                    const [_, ...filename] = split[split.length - 1].split('/')
+                    await deleteFile(filename.join('/'))
+                    formik.setFieldValue(k, '')
+                  } else {
+                    formik.setFieldValue(k, '')
+                  }
                 }}
                 multiple={false}
-                uploaded_urls={[formik.values.photo_url].filter(Boolean)}
+                uploaded_urls={[formik.values[k]].filter(Boolean)}
                 onChange={async (e) => {
                   if (e.target.files && e.target.files.length === 1) {
-                    const url = await uploadFiles(
-                      user?.uid as string,
-                      [e.target.files[0]],
-                      ['customers']
-                    )
-                    if (url[0]) {
-                      formik.setFieldValue('photo_url', url[0].Location)
-                    }
+                    formik.setFieldValue(k, e.target.files[0])
+                    // const url = await uploadFiles(
+                    //   user?.uid as string,
+                    //   [e.target.files[0]],
+                    //   ['customers']
+                    // )
+                    // if (url[0]) {
+                    //   formik.setFieldValue(k, url[0].Location)
+                    // }
                   }
                 }}
               />
@@ -234,7 +259,11 @@ const CreateStaffModal = ({
                 name: k,
                 value: formik.values[k as keyof typeof formik.values],
                 onChange: formik.handleChange,
-                placeholder: `Enter ${capitalizeSentence(k)}`
+                placeholder: `Enter ${capitalizeSentence(k)}`,
+                ...(k.includes('about') && {
+                  multiline: true,
+                  minRows: 5
+                })
               }}
               key={idx}
             />

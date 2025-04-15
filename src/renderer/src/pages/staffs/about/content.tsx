@@ -16,11 +16,16 @@ import { VisitorData } from '@renderer/types/visitor'
 import React from 'react'
 import NoData from '@renderer/assets/no-data.png'
 import moment from 'moment'
+import { useAppSelector } from '@renderer/redux/store/hook'
+import { RecordType } from '@renderer/types/record'
+import Records from '@renderer/pages/customer/record-chart'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 type Props = {
   appointments: AppointmentData[]
   customers: CustomerResponse[]
   visitors: VisitorData[]
   loading: boolean
+  records: RecordType[]
 }
 
 const headers = {
@@ -29,10 +34,17 @@ const headers = {
   visitors: ['Name', 'Email', 'Phone', 'Gender', 'Address']
 }
 
-const StaffContent = ({ appointments, customers, loading, visitors }: Props) => {
-  const [current, setCurrent] = React.useState<'visitors' | 'customers' | 'appointments'>(
-    'appointments'
-  )
+const StaffContent = ({ appointments, customers, loading, visitors, records }: Props) => {
+  const [query] = useSearchParams()
+  const current = (query.get('tab') || 'appointments') as
+    | 'visitors'
+    | 'customers'
+    | 'appointments'
+    | 'about'
+    | 'records'
+  const navigation = useNavigate()
+
+  const [staff, admin] = useAppSelector((s) => [s.staffs.current_staff, s.auth.user])
   const [page, setPage] = React.useState({
     appointments: 0,
     customers: 0,
@@ -89,13 +101,22 @@ const StaffContent = ({ appointments, customers, loading, visitors }: Props) => 
           <Tabs
             value={current}
             onChange={(_evt, value) => {
-              setCurrent(value)
+              query.set('tab', value)
+              const qr = query.toString()
+              navigation(`/staffs/${staff?.data?.sid}?${qr}`)
             }}
             variant="scrollable"
             aria-label="basic tabs example"
             textColor="primary"
             indicatorColor="primary"
           >
+            <Tab
+              disableFocusRipple
+              disableRipple
+              disableTouchRipple
+              label="About"
+              value={'about'}
+            />
             <Tab
               disableFocusRipple
               disableRipple
@@ -117,10 +138,20 @@ const StaffContent = ({ appointments, customers, loading, visitors }: Props) => 
               label="Customers"
               value={'customers'}
             />
+
+            <Tab
+              disableFocusRipple
+              disableRipple
+              disableTouchRipple
+              label="Past Records"
+              value={'records'}
+            />
           </Tabs>
         </Box>
       </div>
-      <CustomTypography variant="h4">Recent {capitalize(current ?? '')}</CustomTypography>
+      {current !== 'about' && current !== 'records' && (
+        <CustomTypography variant="h4">Recent {capitalize(current ?? '')}</CustomTypography>
+      )}
       {/* <div className="table-container"> */}
       {rows?.[current]?.length === 0 ? (
         <Box
@@ -139,6 +170,22 @@ const StaffContent = ({ appointments, customers, loading, visitors }: Props) => 
           <img src={NoData} alt={'hey'} />
           <CustomTypography>{capitalize(current)} data couldn't be found</CustomTypography>
         </Box>
+      ) : current.includes('about') ? (
+        <CustomTypography
+          textAlign={'center'}
+          width={'100%'}
+          sx={{ alignItems: 'center', justifyContent: 'center' }}
+        >
+          {staff?.data?.about}
+        </CustomTypography>
+      ) : current === 'records' ? (
+        <Records
+          records={records}
+          gender={staff?.data?.gender as string}
+          center_address={admin?.center_address as string}
+          name={staff?.data?.name as string}
+          phone={staff?.data?.phone}
+        />
       ) : (
         <PaginatedTable
           sx={{

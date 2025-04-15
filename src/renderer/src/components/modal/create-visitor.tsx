@@ -20,7 +20,6 @@ import { grey } from '@mui/material/colors'
 import { DatePicker } from '@mui/x-date-pickers'
 import * as Yup from 'yup'
 import React from 'react'
-import { errorToast } from '@renderer/utils/toast'
 import CustomIcon from '../icons'
 import { deleteFile, uploadFiles } from '@renderer/lib/upload-img'
 import { useAppSelector, useAppDispatch } from '@renderer/redux/store/hook'
@@ -138,12 +137,6 @@ const AddVisitorModal = ({
       }
     }
   })
-
-  React.useEffect(() => {
-    if (Object.keys(formik.errors).length > 0 && !formik.dirty) {
-      Object.keys(formik.errors).map((e) => errorToast(e))
-    }
-  }, [formik.errors])
 
   React.useEffect(() => {
     if (!edit) formik.resetForm()

@@ -20,7 +20,8 @@ import {
   getDocs,
   setDoc,
   initializeFirestore,
-  updateDoc
+  updateDoc,
+  onSnapshot
 } from 'firebase/firestore'
 import { encryptData } from '@renderer/utils/crypto'
 import moment from 'moment'
@@ -313,10 +314,47 @@ export const setAdminSubscription = async ({
   }
 }
 
+export const addAction = async (
+  uid: string,
+  action: 'add' | 'remove',
+  key: 'total_customers' | 'total_products' | 'total_staffs' | 'total_visitors'
+) => {
+  const docRef = doc(firestore, `users/${uid}`)
+  const docSnap = await getDoc(docRef)
+
+  if (!docSnap?.exists()) {
+    return { error: true, message: 'User Not Found', data: null }
+  }
+
+  const data = docSnap.data() as CenterUser
+  if (!data.subscription) {
+    errorToast("You don't have an valid subscription")
+    return false
+  }
+
+  const { subscription } = data
+
+  subscription[key] = action === 'add' ? subscription?.[key] - 1 : subscription?.[key] + 1
+
+  await updateDoc(docRef, { subscription })
+  return { error: false, message: 'Action performed successfully', data: subscription }
+}
+
 export const addTransaction = async (uid: string, ...data) => {
   // make it as a collectoin and add it to the firestore
   const id = encryptData(moment().format('YYYY-MM-DD-HH-mm-ss'))
   const docRef = doc(firestore, `users/${uid}/transactions/${id}`)
   await setDoc(docRef, { ...data, transactionId: id })
   return true
+}
+
+export const subscribeToUserData = (uid: string, callback: (data: CenterUser | null) => void) => {
+  const docRef = doc(firestore, `users/${uid}`)
+  return onSnapshot(docRef, (docSnap) => {
+    if (docSnap.exists()) {
+      callback(docSnap.data() as CenterUser)
+    } else {
+      callback(null)
+    }
+  })
 }

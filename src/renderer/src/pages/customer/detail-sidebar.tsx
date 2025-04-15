@@ -33,7 +33,7 @@ import { errorToast, infoToast, successToast } from '@renderer/utils/toast'
 import { useFormik } from 'formik'
 import moment, { Moment } from 'moment'
 import React from 'react'
-import toast from 'react-hot-toast'
+import { useNavigate } from 'react-router-dom'
 import * as Yup from 'yup'
 
 type Props = {
@@ -44,9 +44,10 @@ const CustomDetailSidebar = ({ data }: Props) => {
   const [date, setDate] = React.useState(moment())
   const dispatch = useAppDispatch()
   const [edit, setEdit] = React.useState<CustomerAttendance>()
-  const [admin, user] = useAppSelector((s) => [
+  const [admin, user, limit] = useAppSelector((s) => [
     s.auth.user?.uid,
-    s.customer.current_customer?.data?.cid
+    s.customer.current_customer?.data?.cid,
+    s.auth.user?.subscription?.total_staffs
   ])
   const loading = useAppSelector((s) => s.customer.current_customer_loading)
 
@@ -68,6 +69,7 @@ const CustomDetailSidebar = ({ data }: Props) => {
   const [showAttendanceForm, setShowAttendanceForm] = React.useState(false)
 
   const [showDialog, setShowDialog] = React.useState(false)
+  const navigation = useNavigate()
 
   return !data && loading ? (
     <CircularProgress variant="indeterminate" />
@@ -135,7 +137,7 @@ const CustomDetailSidebar = ({ data }: Props) => {
                   : 'Buy Subscription'}
               </CustomTypography>
             </Button>
-            <Tooltip title={'Will be available soon'} placement="right">
+            <Tooltip title={''} placement="right">
               <span>
                 <Button
                   focusRipple={false}
@@ -143,14 +145,20 @@ const CustomDetailSidebar = ({ data }: Props) => {
                   sx={{ margin: '8px 0px 4px 0px' }}
                   disableTouchRipple={true}
                   disableElevation={true}
-                  disabled={true}
                   onClick={async () => {
-                    const convert = await convertCustomerToStaff(admin as string, user as string)
+                    if (!confirm('This is a irreversible action. Do you want to continue ?')) return
+                    console.log(data.records)
+                    const convert = await convertCustomerToStaff(
+                      admin as string,
+                      user as string,
+                      (limit || 0) as number
+                    )
                     if (convert?.status) {
-                      toast.success(convert?.message)
+                      console.log(convert?.message)
+                      navigation('/staffs', { replace: true, flushSync: true })
                       return
                     } else {
-                      toast.error(convert?.message)
+                      errorToast(convert?.message)
                     }
                   }}
                 >

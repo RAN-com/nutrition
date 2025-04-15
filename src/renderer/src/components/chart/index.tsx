@@ -85,7 +85,7 @@ const RecordChart = ({ data, type = 'customer' }: Props) => {
   const [showForm, setShowForm] = React.useState(false)
 
   return (
-    <div style={{ width: '100%', marginTop: '24px', maxWidth: '740px' }}>
+    <div style={{ width: '100%', marginTop: '24px' }} className={'hide-scrollbar'}>
       <RecordForm
         type={type}
         open={showForm}
@@ -123,6 +123,7 @@ const RecordChart = ({ data, type = 'customer' }: Props) => {
         expanded={showFilter}
         onChange={() => setShowFilter((prev) => !prev)}
         elevation={0}
+        className="hide_on_print"
       >
         <AccordionSummary
           expandIcon={

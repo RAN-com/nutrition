@@ -16,6 +16,7 @@ import CreateStaffModal from '@renderer/components/modal/create-staff'
 import { useNavigate } from 'react-router-dom'
 import UserCard from '@renderer/components/card/users'
 import CustomTextInput from '@renderer/components/text-input'
+import { deleteStaff } from '@renderer/firebase/staffs'
 
 const StaffPage = () => {
   const dispatch = useAppDispatch()
@@ -70,7 +71,7 @@ const StaffPage = () => {
           width: '100%',
           display: 'grid',
           gridTemplateColumns: '1fr',
-        gridTemplateRows: '1fr',
+          gridTemplateRows: '1fr',
           gap: '12px'
         }}
       >
@@ -206,7 +207,20 @@ const StaffPage = () => {
                     dispatch(setCurrentStaff(e.data.sid))
                     navigate(`/staffs/${e.data.sid}`)
                   }}
+                  onDelete={async () => {
+                    await deleteStaff(e.data?.createdBy, e.data.sid)
+                    dispatch(asyncSetTotalStaff({ uid: user?.uid as string }))
+                    dispatch(
+                      asyncGetStaffs({
+                        uid: user?.uid as string
+                      })
+                    )
+                  }}
                   name={e.data?.name}
+                  onMoreClick={() => {
+                    setEditData(e.data)
+                    setStaffModal(true)
+                  }}
                   email={e.data?.email}
                   phone={e.data?.phone}
                   photo_url={e.data?.photo_url ?? ''}
