@@ -285,11 +285,33 @@ export const updateAttendance = async ({
     }
 
     const data = attendanceSnap.data() as { records: CustomerAttendance[] }
-    const updatedRecords = data.records.map((record: CustomerAttendance) =>
-      record.date === attendanceData.date && record.mark_status !== attendanceData?.mark_status
-        ? { ...record, ...attendanceData }
+
+    if (
+      !data.records.some((record: CustomerAttendance) =>
+        moment(record.date).isSame(moment(attendanceData.date))
+      )
+    ) {
+      if (
+        confirm(
+          'This is a past and this will be considered as a new entry. Do you want to continue'
+        )
+      ) {
+        return addAttendance({ uid, cid, attendanceData })
+      } else {
+        return
+      }
+    }
+    const updatedRecords = (data.records || []).map((record: CustomerAttendance) =>
+      moment(record.date).isSame(moment(attendanceData.date))
+        ? { ...record, mark_status: attendanceData.mark_status }
         : record
     )
+
+    if (!attendanceData.mark_status) {
+      await addDaysToSubscription(uid, cid, 1)
+    } else {
+      await reduceDaysLeft(uid, cid)
+    }
 
     await updateDoc(docRef, { records: updatedRecords })
 
@@ -331,10 +353,13 @@ export const addAttendance = async ({
     const docRef = doc(firestore, `customers/${uid}/attendance/${cid}`)
     const attendanceSnap = await getDoc(docRef)
 
-    const reduced = await reduceDaysLeft(uid, cid)
-    if (reduced === null) {
-      errorToast('Subscription has expired')
-      return
+    // Reduce days left only if mark_status is true
+    if (attendanceData.mark_status) {
+      const reduced = await reduceDaysLeft(uid, cid)
+      if (reduced === null) {
+        errorToast('Subscription has expired')
+        return
+      }
     }
 
     const data = attendanceSnap.data() as {
@@ -512,6 +537,38 @@ export const getActiveSubscription = async (uid: string, cid: string) => {
   } catch (error) {
     return null
   }
+}
+
+export const addDaysToSubscription = async (uid: string, cid: string, daysToAdd: number) => {
+  const recordRef = doc(firestore, `customers/${uid}/subscription/${cid}`)
+  const docSnapshot = await getDoc(recordRef)
+
+  if (!docSnapshot.exists()) {
+    console.error('No such document found')
+    return null
+  }
+
+  const data = docSnapshot.data()?.subscription as AttendanceSubscription[]
+
+  if (!data || !data.filter((e) => e.isActive && e.daysLeft > 0)[0]) {
+    console.error('No active subscription found in the document')
+    return null
+  }
+
+  const activeSubscription = data.filter((e) => e.isActive && e.daysLeft > 0)[0]
+
+  const updatedData = data.map((e) =>
+    e.id === activeSubscription.id
+      ? {
+          ...e,
+          daysLeft: e.totalDays > e.daysLeft + daysToAdd ? e.daysLeft + daysToAdd : e.totalDays
+        }
+      : e
+  )
+
+  await updateDoc(recordRef, { subscription: updatedData })
+
+  return updatedData.filter((e) => e.isActive && e.daysLeft > 0)[0]
 }
 
 export const reduceDaysLeft = async (uid: string, cid: string) => {

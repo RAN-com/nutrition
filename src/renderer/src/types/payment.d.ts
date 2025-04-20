@@ -15,6 +15,7 @@ export type CreateCardPaymentProps = {
   oid?: string
   pricingType?: string
   payment_details?: PaymentDetails
+  canApproveWithoutPayment?: boolean
 }
 
 export type CreateAdminPayment = {
@@ -28,4 +29,5 @@ export type CreateAdminPayment = {
   pricingType?: string
   status?: 'paid' | 'pending' | 'failed' | null
   payment_details?: PaymentDetails
+  canApproveWithoutPayment?: boolean
 }

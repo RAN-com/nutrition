@@ -174,6 +174,7 @@ const Payment = () => {
 
   const [clicked, setClicked] = React.useState(false)
   const staff = useAppSelector((s) => s.staffs.current_staff)
+  const dev = useAppSelector((s) => s.ui.toggle_dev_mode)
 
   async function handlePayment() {
     try {
@@ -202,7 +203,8 @@ const Payment = () => {
           order: order?.order,
           sid: staff?.data?.sid as string,
           type: 'VISITING_CARD',
-          status: 'pending'
+          status: 'pending',
+          canApproveWithoutPayment: dev || false
         })
 
         if (store.status) {

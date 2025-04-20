@@ -132,6 +132,7 @@ function createWindow({ width, height }: { width: number; height: number }): voi
                     mainWindow.webContents.send('pdfGeneratedError', error)
                     console.error(`PDF save failed: ${error}`)
                   } else {
+                    shell.openPath(result.filePath)
                     mainWindow.webContents.send('pdfGeneratedSuccess', result.filePath)
                     console.log(`PDF saved to ${result.filePath}`)
                   }

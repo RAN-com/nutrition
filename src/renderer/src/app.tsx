@@ -32,7 +32,8 @@ import { asyncGetCurrentStaffDomainData } from './redux/features/user/staff'
 import zIndex from '@mui/material/styles/zIndex'
 import { setAppVersion, setNotifications } from './redux/features/user/auth'
 import { listenToNotifications } from './firebase/notifications'
-import { setDimensions } from './redux/store/ui/slice'
+import { setDimensions, toggleDevMode } from './redux/store/ui/slice'
+import CustomTextInput from './components/text-input'
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const App = () => {
@@ -40,7 +41,51 @@ const App = () => {
   const dispatch = useAppDispatch()
   const { user } = useAppSelector((s) => s.auth)
   const staff = useAppSelector((s) => s.staffs.current_staff)
-  const dimension = useAppSelector((s) => s.ui.dimensions)
+  const { dimensions, toggle_dev_mode } = useAppSelector((s) => s.ui)
+  const [showModal, setShowModal] = React.useState(false)
+
+  const [password, setPassword] = React.useState('')
+
+  React.useEffect(() => {
+    let lastKeyPressTime = 0
+
+    const handlePress = (ev: KeyboardEvent) => {
+      const now = Date.now()
+
+      if (ev.ctrlKey && ev.shiftKey && ev.altKey && ev.key === 'D') {
+        lastKeyPressTime = now
+        console.log('Combination ctrl+shift+alt+D detected')
+      }
+
+      if (ev.ctrlKey && ev.shiftKey && ev.altKey && ev.key === 'O') {
+        if (now - lastKeyPressTime <= 2000) {
+          console.log('Combination ctrl+shift+alt+E detected within 2 seconds of O')
+          setShowModal(true)
+        } else {
+          console.log('Action dismissed as E was not pressed within 2 seconds of O')
+        }
+
+        lastKeyPressTime = 0
+      }
+
+      if (ev.ctrlKey && ev.shiftKey && ev.altKey && ev.key === 'F') {
+        if (now - lastKeyPressTime <= 2000) {
+          console.log('Combination ctrl+shift+alt+E detected within 2 seconds of F')
+          dispatch(toggleDevMode(false))
+          setShowModal(false)
+        } else {
+          console.log('Action dismissed as E was not pressed within 2 seconds of F')
+        }
+
+        lastKeyPressTime = 0
+      }
+
+      console.log(ev.key)
+    }
+
+    window.addEventListener('keydown', handlePress)
+    return () => window.removeEventListener('keydown', handlePress)
+  }, [])
 
   React.useEffect(() => {
     const { ipcRenderer } = window.electron || {}
@@ -127,11 +172,17 @@ const App = () => {
             MuiModal: {
               styleOverrides: {
                 root: {
-                  ...dimension
+                  ...dimensions
                 }
               }
             },
             MuiButton: {
+              defaultProps: {
+                disableElevation: true,
+                disableFocusRipple: true,
+                disableRipple: true,
+                disableTouchRipple: true
+              },
               styleOverrides: {
                 root: {
                   textTransform: 'none'
@@ -141,7 +192,7 @@ const App = () => {
             MuiDialog: {
               styleOverrides: {
                 root: {
-                  ...dimension
+                  ...dimensions
                 }
               }
             }
@@ -160,7 +211,84 @@ const App = () => {
           window.electron?.updateResponse('install_now')
         }}
       />
-
+      <Dialog
+        open={showModal}
+        onClose={() => {
+          setShowModal(false)
+          setPassword('')
+        }}
+        sx={{
+          '.MuiPaper-root': {
+            width: '100%',
+            maxWidth: '320px',
+            padding: '16px 24px',
+            paddingBottom: '32px',
+            position: 'relative',
+            top: 0,
+            gap: '12px'
+          },
+          zIndex: zIndex.modal * zIndex.modal
+        }}
+      >
+        {toggle_dev_mode ? (
+          <div
+            style={{
+              display: 'flex',
+              width: '100%',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexDirection: 'column',
+              gap: '8px',
+              padding: '0px'
+            }}
+          >
+            <CustomTypography textAlign={'center'}>
+              You already have access to dev mode
+            </CustomTypography>
+            <Button
+              fullWidth
+              variant="contained"
+              onClick={() => {
+                setPassword('')
+                setShowModal(false)
+              }}
+            >
+              Close
+            </Button>
+          </div>
+        ) : (
+          <>
+            <CustomTypography variant="h6">Enable Access</CustomTypography>
+            <CustomTextInput
+              input={{
+                size: 'small',
+                onChange: (e) => setPassword(e.target.value),
+                type: 'password',
+                label: 'Enter your developer password'
+              }}
+            />
+            <Button
+              disabled={password.length === 0 || password.length < 8}
+              variant="contained"
+              onClick={() => {
+                setPassword('')
+                setShowModal(false)
+                if (password === 'devmodeaccess') {
+                  dispatch(toggleDevMode(true))
+                  successToast('You have the developer access')
+                  return
+                } else {
+                  setPassword('')
+                  setShowModal(false)
+                  errorToast('Wrong Password')
+                }
+              }}
+            >
+              Submit
+            </Button>
+          </>
+        )}
+      </Dialog>
       <Navigation />
     </ThemeProvider>
   )

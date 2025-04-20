@@ -1,4 +1,4 @@
-import { Backdrop, Button, Dialog, FormControlLabel, Radio, RadioGroup } from '@mui/material'
+import { Button, Dialog, FormControlLabel, Modal, Radio, RadioGroup } from '@mui/material'
 import { CustomerAttendance } from '@renderer/types/customers'
 import { useFormik } from 'formik'
 import React from 'react'
@@ -30,7 +30,7 @@ const validationSchema = Yup.object().shape({
   date: Yup.string().required('Date is required').typeError('Invalid date format'),
   weight: Yup.number().required('Weight is required').min(10, 'Enter valid weight'),
   photo_url: Yup.array().required('Photo is required'),
-  amount_paid: Yup.number().optional().min(100, 'Minimum amount is Rs.100'),
+  amount_paid: Yup.number().optional().nullable(),
   mark_status: Yup.boolean()
     .required('Mark status is required')
     .oneOf([true, false], 'Mark status must be true or false')
@@ -51,11 +51,13 @@ const MarkAttendance = ({ open, onClose, edit }: Props) => {
       date: moment(currentDate?.date || edit?.date).toISOString(),
       weight: edit?.weight ?? '',
       mark_status: edit?.mark_status || false,
-      photo_url: edit?.photo_url ?? []
+      photo_url: edit?.photo_url ?? [],
+      amount_paid: 0
     } as Partial<CustomerAttendance>,
 
     validationSchema,
     onSubmit: async (values) => {
+      setLoading(true)
       if (!user?.uid || !customer?.cid) return alert('Login again')
       if (
         !!values.amount_paid &&
@@ -63,12 +65,6 @@ const MarkAttendance = ({ open, onClose, edit }: Props) => {
         values.amount_paid <= (subscription?.price || 0) - (subscription?.amountPaid || 0)
       ) {
         await payDueAmount({ uid: user?.uid, cid: customer.cid, dueAmount: values.amount_paid })
-      } else {
-        formik.setFieldError(
-          'amount_paid',
-          `Due amount should be less than or equal to ${(subscription?.price || 0) - (subscription?.amountPaid || 0)} `
-        )
-        return
       }
       if (!!edit) {
         await updateAttendance({
@@ -141,6 +137,7 @@ const MarkAttendance = ({ open, onClose, edit }: Props) => {
   })
 
   const pending = subscription?.price === subscription?.amountPaid
+  console.log(formik.errors)
 
   return (
     <Dialog
@@ -170,7 +167,9 @@ const MarkAttendance = ({ open, onClose, edit }: Props) => {
         }
       }}
     >
-      <Backdrop open={loading} sx={{ position: 'fixed', zIndex: 100000000 }} />
+      <Modal open={loading}>
+        <></>
+      </Modal>
       <form onSubmit={formik.handleSubmit}>
         <div className="header">
           <CustomTypography variant={'h6'}>Mark Attendance</CustomTypography>

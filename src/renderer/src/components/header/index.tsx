@@ -48,12 +48,13 @@ const Header = ({ toggleSidebar, showToggle }: Props) => {
   const { time, timeFormat, date } = clock()
   const isProfile = window.location.pathname.includes('profile')
   const isNotification = window.location.pathname.includes('notifications')
+  const isDev = useAppSelector((s) => s.ui.toggle_dev_mode)
 
   const [showNotification, setShowNotification] = React.useState<Element | null>(null)
   const notifications = useAppSelector((s) => s.auth.notifications?.filter((e) => !e.read))
   const isMoreNotification = notifications?.length > 7
   return (
-    <HeaderContainer className="header">
+    <HeaderContainer className="header" sx={{ backgroundColor: isDev ? '#96c9fa' : '#fff' }}>
       <div className="greet">
         <CustomTypography variant="h4" lineHeight={1}>
           {greetings()}

@@ -4,12 +4,6 @@ import {
   CircularProgress,
   Dialog,
   DialogTitle,
-  Fade,
-  FormControl,
-  FormHelperText,
-  FormLabel,
-  MenuItem,
-  Select,
   styled,
   Tooltip
 } from '@mui/material'
@@ -70,6 +64,8 @@ const CustomDetailSidebar = ({ data }: Props) => {
 
   const [showDialog, setShowDialog] = React.useState(false)
   const navigation = useNavigate()
+  const sub = useAppSelector((s) => s.customer.current_customer?.subscription)
+  const due = (sub?.price || 0) - (sub?.amountPaid || 0)
 
   return !data && loading ? (
     <CircularProgress variant="indeterminate" />
@@ -136,6 +132,19 @@ const CustomDetailSidebar = ({ data }: Props) => {
                     : 'Subscription Over. Purchase Again'
                   : 'Buy Subscription'}
               </CustomTypography>
+            </Button>
+            <Button
+              sx={{
+                padding: '0px',
+                marginTop: '0.4rem',
+                cursor: 'default'
+              }}
+              disableElevation
+              disableFocusRipple
+              disableRipple
+              disableTouchRipple
+            >
+              Amount Pending: {due}
             </Button>
             <Tooltip title={''} placement="right">
               <span>
@@ -224,16 +233,17 @@ const Profile = styled('div')({
 })
 
 const validationSchema = Yup.object({
-  totalDays: Yup.string()
+  totalDays: Yup.number()
     .required('Total days is required')
-    .matches(/^\d+$/, 'Total days must be a whole number'),
+    .min(7, 'Total days must be at least 7'),
 
   price: Yup.string()
     .required('Price is required')
-    .matches(/^\d+(\.\d{1,2})?$/, 'Price must be a valid number'),
+    .matches(/^\d+(\.\d{1,2})?$/, 'Enter a valid subscription amount'),
 
   amount_paid: Yup.string()
-    .required('Amount paid is required')
+    .optional()
+    .nullable()
     .matches(/^\d+(\.\d{1,2})?$/, 'Amount paid must be a valid number')
     .test('is-less-than-price', 'Amount paid must not exceed price', function (value) {
       const { price } = this.parent
@@ -249,10 +259,11 @@ const HandlePayment = ({ onClose, open }: { open: boolean; onClose(): void }) =>
   const dispatch = useAppDispatch()
   const [loading, setLoading] = React.useState(false)
   const formik = useFormik({
+    enableReinitialize: true,
     initialValues: {
-      totalDays: '',
+      totalDays: 7,
       amount_paid: '',
-      price: ''
+      price: 2000
     },
     validationSchema,
     onSubmit: async (values) => {
@@ -262,7 +273,7 @@ const HandlePayment = ({ onClose, open }: { open: boolean; onClose(): void }) =>
           price: Number(values.totalDays) * Number(formik.values.price),
           uid: admin as string,
           cid: customer as string,
-          totalDays: Number(values.totalDays) * 26,
+          totalDays: Number(values.totalDays),
           amountPaid: parseInt(values.amount_paid)
         })
         if (sub) {
@@ -293,7 +304,11 @@ const HandlePayment = ({ onClose, open }: { open: boolean; onClose(): void }) =>
     }
   })
 
-  const tot = Number(Number(formik.values.totalDays) * Number(formik.values.price))
+  const perDay = (
+    Number(formik.values.price) > 0 && Number(formik.values.totalDays) > 0
+      ? Number(formik.values.price) / Number(formik.values.totalDays)
+      : 0
+  ).toFixed(2)
 
   return (
     <Dialog
@@ -327,7 +342,7 @@ const HandlePayment = ({ onClose, open }: { open: boolean; onClose(): void }) =>
       </DialogTitle>
       <CustomTextInput
         input={{
-          value: formik.values.price,
+          value: `${formik.values.price}`,
           placeholder: 'Enter subscription amount',
           inputMode: 'numeric',
           defaultValue: undefined,
@@ -357,36 +372,22 @@ const HandlePayment = ({ onClose, open }: { open: boolean; onClose(): void }) =>
           }
         }}
       />
-      <FormControl fullWidth={true}>
-        <FormLabel>
-          <CustomTypography variant="body2">
-            {/* Give title */}
-            Select the duration of the subscription
-          </CustomTypography>
-        </FormLabel>
-        <Select
-          value={formik.values.totalDays}
-          fullWidth={true}
-          onChange={formik.handleChange}
-          name="totalDays"
-        >
-          <MenuItem value={1}>1 Month</MenuItem>
-          <MenuItem value={3}>3 Months</MenuItem>
-          <MenuItem value={6}>6 Months</MenuItem>
-          <MenuItem value={9}>9 Months</MenuItem>
-          <MenuItem value={10}>10 Months</MenuItem>
-          <MenuItem value={12}>12 Months</MenuItem>
-        </Select>
-        <Fade in={!!tot}>
-          <FormHelperText sx={{ position: 'relative' }}>
-            {!!tot && (
-              <CustomTypography variant="body2">
-                Total amount: ₹{tot || ''} - {parseInt(formik.values.totalDays) * 26} days
-              </CustomTypography>
-            )}
-          </FormHelperText>
-        </Fade>
-      </FormControl>
+      <CustomTextInput
+        input={{
+          value: `${formik.values.totalDays}`,
+          placeholder: 'Enter total days',
+          inputMode: 'numeric',
+          defaultValue: undefined,
+          type: 'number',
+          error: formik.touched.totalDays && Boolean(formik.errors.totalDays),
+          helperText: formik.touched.totalDays && formik.errors.totalDays,
+          onChange: (e) => formik.setFieldValue('totalDays', e.target.value),
+          label: 'Total days of subscription',
+          sx: {
+            marginBottom: '12px'
+          }
+        }}
+      />
 
       <Button
         variant="contained"
@@ -403,7 +404,7 @@ const HandlePayment = ({ onClose, open }: { open: boolean; onClose(): void }) =>
             />
           )
         }
-        disabled={parseInt(`${formik.values.amount_paid || 0}`) <= 0}
+        disabled={loading || formik.values.totalDays <= 0}
         onClick={() => formik.submitForm()}
         sx={{
           width: '100%',
@@ -423,10 +424,7 @@ const HandlePayment = ({ onClose, open }: { open: boolean; onClose(): void }) =>
           margin: 'auto'
         }}
       >
-        Per day:{' '}
-        {Number(Number(formik.values.price) / (Number(formik.values.totalDays) * 26))
-          .toFixed(2)
-          .toString()}
+        Per day: {perDay}
       </CustomTypography>
     </Dialog>
   )

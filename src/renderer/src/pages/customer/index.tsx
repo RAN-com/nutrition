@@ -173,7 +173,6 @@ const CustomerPage = (): React.ReactNode => {
           width: '100%',
           display: 'grid',
           gridTemplateColumns: '1fr',
-          // gridTemplateColumns: currentUser ? '1fr minmax(420px, 460px)' : '1fr',
           gridTemplateRows: '1fr',
           gap: '12px'
         }}

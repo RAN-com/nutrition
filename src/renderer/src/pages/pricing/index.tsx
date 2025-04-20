@@ -22,6 +22,7 @@ const Pricing = () => {
   const navigate = useNavigate()
   const admin = useAppSelector((s) => s.auth.user)
   const pendingOrder = useAppSelector((s) => s.pricing.pending_order)
+  const dev = useAppSelector((s) => s.ui.toggle_dev_mode)
 
   const handlePayment = async (price: CenterUserPricing) => {
     try {
@@ -45,7 +46,8 @@ const Pricing = () => {
           type: 'SUBSCRIPTION',
           sid: undefined,
           status: 'pending',
-          pricingType: price?.title
+          pricingType: price?.title,
+          canApproveWithoutPayment: dev || false
         })
 
         if (store.status) {
