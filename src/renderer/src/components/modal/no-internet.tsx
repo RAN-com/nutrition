@@ -20,7 +20,7 @@ const NoInternet = () => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: '#242424'
+            backgroundColor: '#a6a6a64d'
           },
           '& .container': {
             display: 'flex',
@@ -75,7 +75,7 @@ const NoInternet = () => {
                 disableFocusRipple
                 disableRipple
                 disableTouchRipple
-                onClick={() => window?.electron?.updateResponse('quit_app')}
+                onClick={() => window?.close()}
               >
                 <CustomTypography textTransform={'none'} color={'white'}>
                   Close

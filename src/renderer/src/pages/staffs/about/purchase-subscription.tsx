@@ -24,7 +24,7 @@ import * as yup from 'yup'
 const validationSchema = yup.object({
   domain: yup
     .string()
-    .matches(/^[a-zA-Z0-9_]+$/, 'Only alphanumeric characters and underscores are allowed.')
+    .matches(/^[a-z0-9_]+$/, 'Only lowercase letters, numbers, and underscores are allowed.')
     .min(4, 'Domain must be at least 3 characters')
     .max(16, 'Domain cannot exceed 50 characters')
     .required('Domain is required')
@@ -64,7 +64,7 @@ const PurchaseSubscription = ({}: Props) => {
         }
         await dispatch(
           asyncGetCurrentStaffDomainData({
-            domain: values.domain
+            domain: values.domain.toLowerCase()
           })
         )
       }
@@ -110,7 +110,7 @@ const PurchaseSubscription = ({}: Props) => {
           size: 'small',
           placeholder: 'Enter Domain Name',
           name: 'domain',
-          value: formik.values.domain,
+          value: formik.values.domain.toLowerCase(),
           color: isAvailable ? 'success' : 'error',
           error: (formik.touched.domain && Boolean(formik.errors.domain))?.valueOf(),
           helperText: formik.touched.domain && formik.errors.domain,
@@ -120,7 +120,7 @@ const PurchaseSubscription = ({}: Props) => {
             if (value.length >= 4) {
               setLoading(true)
               debounce(async () => {
-                const data = await domainExists(value)
+                const data = await domainExists(value.toLowerCase())
                 setIsAvailable(!data)
                 console.log(data, 'Checking:::', value)
                 setLoading(false)

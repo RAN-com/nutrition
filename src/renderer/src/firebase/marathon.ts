@@ -1,9 +1,20 @@
-import { collection, doc, getDoc, getDocs, setDoc, updateDoc } from 'firebase/firestore'
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  onSnapshot,
+  runTransaction,
+  setDoc,
+  updateDoc
+} from 'firebase/firestore'
 import { firestore } from './'
 import { CreateMarathon, MarathonData } from '@renderer/types/marathon'
 import { encryptData } from '@renderer/utils/crypto'
 import moment from 'moment'
 import { deleteDoc } from 'firebase/firestore'
+import { errorToast, successToast } from '@renderer/utils/toast'
+import { capitalizeSentence } from '@renderer/utils/functions'
 
 // functions to create marathon template data
 export const checkMarathonExists = async (uid: string, from_date: string, to_date: string) => {
@@ -17,16 +28,79 @@ export const checkMarathonExists = async (uid: string, from_date: string, to_dat
   return null
 }
 
+export const listenToMarathons = (uid: string, callback: (marathon: MarathonData[]) => void) => {
+  const marathonCollection = collection(firestore, `users/${uid}/marathon`)
+
+  const unsubscribe = onSnapshot(marathonCollection, (snapshot) => {
+    if (!snapshot.empty) {
+      const marathon: MarathonData[] = snapshot.docs.map((doc) => doc.data() as MarathonData)
+      callback(marathon)
+    } else {
+      callback([])
+    }
+  })
+
+  return unsubscribe
+}
+
+export const listenToSingleMarathon = (
+  uid: string,
+  mid: string,
+  callback: (marathon: MarathonData | null) => void
+) => {
+  const marathonDoc = doc(firestore, `users/${uid}/marathon/${mid}`)
+
+  const unsubscribe = onSnapshot(marathonDoc, (snapshot) => {
+    if (!snapshot.exists()) {
+      callback(null)
+    } else {
+      callback(snapshot.data() as unknown as MarathonData)
+    }
+  })
+
+  return unsubscribe
+}
+
+export const getMarathons = async (uid: string) => {
+  const marathonCollection = collection(firestore, `users/${uid}/marathon`)
+  const marathonRef = await getDocs(marathonCollection)
+
+  if (!marathonRef.empty) {
+    const marathons: MarathonData[] = marathonRef.docs.map((doc) => doc.data() as MarathonData)
+
+    return {
+      status: true,
+      data: marathons,
+      message: 'Marathons retrieved successfully'
+    }
+  }
+
+  return {
+    status: false,
+    data: null,
+    message: 'No marathons found'
+  }
+}
+
+const format = (m: string) => moment(m).format('DD_MM_YYYY')
+
 export const createMarathon = async (uid: string, data: CreateMarathon) => {
   try {
-    const colId = encryptData(`${data.from_date}_${data.to_date}`)
-    const docRef = doc(firestore, `marathon-${uid}/${colId}`)
-    const ref = await getDoc(docRef)
-
-    if (ref.exists()) {
+    if (moment(data.to_date).diff(moment(data.from_date).get('days'), 'days', true) < 6) {
       return {
         status: false,
-        message: 'Marathon Already Exists',
+        message: 'Enter a valid date'
+      }
+    }
+    const colId = encryptData(`${format(data.from_date)}_${format(data.to_date)}_${data?.type}`)
+    const docRef = doc(firestore, `users/${uid}/marathon/${colId}`)
+    const ref = await getDoc(docRef)
+    const d = ref.data() as MarathonData
+
+    if (ref.exists() && d.state !== 'CANCELLED' && d.state !== 'FINISHED') {
+      return {
+        status: false,
+        message: capitalizeSentence(d.type) + ' Marathon Already Exists on provided date',
         data: null
       }
     }
@@ -36,12 +110,13 @@ export const createMarathon = async (uid: string, data: CreateMarathon) => {
       created_by: {
         uid
       },
-      created_on: moment().toISOString(),
+      state: 'UPCOMING',
+      created_on: moment().toString(),
       customers: data.customers,
       data: [],
       from_date: data.from_date,
       to_date: data.to_date,
-      graph: [],
+      graph: {},
       positions: [],
       total_users: data.customers.length,
       type: data.type
@@ -72,15 +147,15 @@ export const createMarathon = async (uid: string, data: CreateMarathon) => {
 
 export const updateInitMarathon = async (data: MarathonData) => {
   try {
-    if (moment(data.from_date).isBefore(moment().add(1, 'day'))) {
+    if (moment(data.from_date).isBefore(moment())) {
       return {
         status: false,
-        message: 'The current day should be at least 1 days before the marathon date',
+        message: 'You cannot edit the data one day before marathon. Either you can delete it',
         data: null
       }
     }
 
-    const docRef = doc(firestore, `marathon-${data.created_by.uid}/${data.mid}`)
+    const docRef = doc(firestore, `users/${data.created_by.uid}/marathon/${data.mid}`)
     const ref = await getDoc(docRef)
 
     if (!ref.exists()) {
@@ -116,7 +191,7 @@ export const updateInitMarathon = async (data: MarathonData) => {
 export const deleteMarathon = async (uid: string, mid: string) => {
   try {
     // There might be other paths also like results, user, so delete the mid collection itself
-    const marathonDoc = doc(firestore, `marathon-${uid}/${mid}`)
+    const marathonDoc = doc(firestore, `users/${uid}/marathon/${mid}`)
     const ref = await getDoc(marathonDoc)
     if (ref.exists()) {
       await deleteDoc(marathonDoc)
@@ -141,7 +216,7 @@ export const deleteMarathon = async (uid: string, mid: string) => {
 }
 
 export const getMarathon = async (uid: string) => {
-  const marathonDoc = collection(firestore, `marathon-${uid}`)
+  const marathonDoc = collection(firestore, `users/${uid}/marathon`)
   const marathonRef = await getDocs(marathonDoc)
   if (!marathonRef?.empty) {
     const previous = [] as MarathonData[]
@@ -179,99 +254,341 @@ export const getMarathon = async (uid: string) => {
   }
 }
 
-export const updateCustomerData = async (
+type UpdateCustomerValues = {
+  weight: number
+  height: number
+}
+
+// Helper function to get initial weight
+const getInitialWeight = (
+  customer: MarathonData['customers'][number],
+  graph: MarathonData['graph']
+): number | undefined => {
+  const customerGraph = graph[customer.cid]
+  if (customerGraph && customerGraph.values.length > 0) {
+    // Find the entry with the minimum day
+    let initialEntry = customerGraph.values[0]
+    for (const entry of customerGraph.values) {
+      if (entry.day < initialEntry.day) {
+        initialEntry = entry
+      }
+    }
+    return initialEntry.weight
+  }
+  return undefined
+}
+
+export async function updateCustomerMarathonData(
+  uid: string,
   mid: string,
   cid: string,
   day: number,
   date: string,
-  values: { weight_loss: number; weight: number; height: number }
-) => {
+  values: UpdateCustomerValues
+) {
+  const marathonDocRef = doc(firestore, `users/${uid}/marathon/${mid}`)
   try {
-    const marathonDoc = doc(firestore, `marathon/${mid}`)
-    const ref = await getDoc(marathonDoc)
-
-    if (!ref.exists()) {
-      return {
-        status: false,
-        message: "Marathon data doesn't exist",
-        data: null
+    await runTransaction(firestore, async (transaction) => {
+      const docSnap = await transaction.get(marathonDocRef)
+      if (!docSnap.exists()) {
+        throw new Error(`Marathon document with mid: ${mid} not found.`)
       }
-    }
 
-    const marathonData = ref.data() as MarathonData
+      const marathonData = docSnap.data() as MarathonData
+      // --- Update graph and data ---
+      const customer = marathonData.customers.find((c) => c.cid === cid)
+      const initialWeight = customer ? getInitialWeight(customer, marathonData.graph) : undefined
+      const weightLossOrWeightGain =
+        initialWeight !== undefined
+          ? marathonData.type === 'weight_loss'
+            ? initialWeight - values.weight
+            : values.weight - initialWeight
+          : 0
 
-    // Find or create `dayData`
-    let dayData = marathonData.data.find((d) => d.day === day)
-    if (!dayData) {
-      dayData = { day, date, total_entries: 0, remaining_entries: 0, records: [] }
-      marathonData.data.push(dayData)
-    }
+      const dayDataIndex = marathonData.data.findIndex((d) => d.day === day && d.date === date)
+      if (dayDataIndex !== -1) {
+        marathonData.data[dayDataIndex].records[cid] = {
+          day: day,
+          date: date,
+          values: {
+            weightLossOrWeightGain: weightLossOrWeightGain,
+            weight: values.weight,
+            height: values.height
+          }
+        }
 
-    // Update or insert new record
-    const existingRecord = dayData.records.find((record) => record.cid === cid)
-    if (existingRecord) {
-      existingRecord.values = values
-    } else {
-      dayData.records.push({ cid, day, date, values })
-    }
+        // Update graph
+        if (marathonData.graph[cid]) {
+          const existingValueIndex = marathonData.graph[cid].values.findIndex(
+            (v) => v.day === day && v.date === date
+          )
+          if (existingValueIndex !== -1) {
+            marathonData.graph[cid].values[existingValueIndex] = {
+              weightLossOrWeightGain: weightLossOrWeightGain,
+              day: day,
+              date: date,
+              weight: values.weight,
+              height: values.height
+            }
+          } else {
+            marathonData.graph[cid].values.push({
+              weightLossOrWeightGain: weightLossOrWeightGain,
+              day: day,
+              date: date,
+              weight: values.weight,
+              height: values.height
+            })
+            marathonData.graph[cid].values.sort((a, b) => a.day - b.day)
+          }
+        } else {
+          marathonData.graph = {
+            ...marathonData.graph,
+            [cid]: {
+              values: [
+                {
+                  weightLossOrWeightGain: weightLossOrWeightGain,
+                  day: day,
+                  date: date,
+                  weight: values.weight,
+                  height: values.height
+                }
+              ]
+            }
+          }
+        }
 
-    // Update `total_entries` & `remaining_entries`
-    dayData.total_entries = dayData.records.length
-    dayData.remaining_entries = Math.max(0, marathonData.total_users - dayData.total_entries)
+        marathonData.data[dayDataIndex].total_entries = Object.keys(
+          marathonData.data[dayDataIndex].records
+        ).length
+        marathonData.data[dayDataIndex].remaining_entries =
+          marathonData.total_users - marathonData.data[dayDataIndex].total_entries
+      } else {
+        marathonData.data.push({
+          day: day,
+          date: date,
+          total_entries: 1,
+          remaining_entries: marathonData.total_users - 1,
+          records: {
+            [cid]: {
+              day: day,
+              date: date,
+              values: {
+                weightLossOrWeightGain: weightLossOrWeightGain,
+                weight: values.weight,
+                height: values.height
+              }
+            }
+          }
+        })
+        marathonData.data.sort((a, b) => a.day - b.day)
 
-    // Update Graph Data
-    let graphEntry = marathonData.graph.find((g) => g.cid === cid)
-    if (!graphEntry) {
-      graphEntry = { cid, values: [] }
-      marathonData.graph.push(graphEntry)
-    }
+        //update graph
+        marathonData.graph = {
+          ...marathonData.graph,
+          [cid]: {
+            values: [
+              {
+                weightLossOrWeightGain: weightLossOrWeightGain,
+                day: day,
+                date: date,
+                weight: values.weight,
+                height: values.height
+              }
+            ]
+          }
+        }
+      }
 
-    const graphValue = graphEntry.values.find((v) => v.day === day)
-    if (graphValue) {
-      Object.assign(graphValue, values)
-    } else {
-      graphEntry.values.push({ day, date, ...values })
-    }
+      // --- Update positions ---
+      const latestWeightLossOrGain: {
+        cid: string
+        weightLossOrWeightGain: number
+        weight: number
+        height: number
+        name: string
+      }[] = []
+      // Iterate through all customers to include those without entries
+      for (const customer of marathonData.customers) {
+        const customerGraph = marathonData.graph[customer.cid]
+        const latestEntry = customerGraph
+          ? [...customerGraph.values].sort((a, b) => b.day - a.day)[0]
+          : undefined
+        const initialWeight = customer ? getInitialWeight(customer, marathonData.graph) : undefined
 
-    // Compute Positions
-    const weightLossMap = marathonData.graph.map((g) => ({
-      cid: g.cid,
-      weight_loss: g.values.reduce((sum, v) => sum + v.weight_loss, 0),
-      weight: g.values[g.values.length - 1]?.weight || 0,
-      height: g.values[g.values.length - 1]?.height || 0
-    }))
+        const weightLoss = latestEntry
+          ? marathonData.type === 'weight_loss'
+            ? initialWeight
+              ? initialWeight - latestEntry.weight
+              : 0
+            : initialWeight
+              ? latestEntry.weight - initialWeight
+              : 0
+          : 0
+        latestWeightLossOrGain.push({
+          cid: customer.cid,
+          weightLossOrWeightGain: weightLoss,
+          weight: latestEntry?.weight || 0, // Use 0 if no entry
+          height: latestEntry?.height || 0, // Use 0 if no entry
+          name: customer.name
+        })
+      }
 
-    weightLossMap.sort((a, b) =>
-      marathonData.type === 'weight_loss' ? b.weight_loss - a.weight_loss : b.weight - a.weight
-    )
+      latestWeightLossOrGain.sort((a, b) => b.weightLossOrWeightGain - a.weightLossOrWeightGain)
+      marathonData.positions = latestWeightLossOrGain.map((item, index) => ({
+        cid: item.cid,
+        position: index + 1,
+        name: item.name,
+        weightLossOrWeightGain: item.weightLossOrWeightGain,
+        weight: item.weight,
+        height: item.height
+      }))
 
-    marathonData.positions = weightLossMap.map((entry, index) => ({
-      cid: entry.cid,
-      position: index + 1,
-      name: '', // Placeholder for name
-      weight_loss: entry.weight_loss,
-      weight: entry.weight,
-      height: entry.height
-    }))
+      marathonData.updatedOn = new Date().toISOString()
 
-    // Update only changed fields in Firestore
-    await updateDoc(marathonDoc, {
-      data: marathonData.data,
-      graph: marathonData.graph,
-      positions: marathonData.positions,
-      updatedOn: new Date().toISOString()
+      transaction.update(marathonDocRef, {
+        graph: marathonData.graph,
+        state: 'ONGOING',
+        data: marathonData.data,
+        positions: marathonData.positions,
+        updatedOn: marathonData.updatedOn
+      })
     })
 
-    return {
-      status: true,
-      message: 'Customer data updated successfully',
-      data: marathonData
-    }
-  } catch (err) {
-    return {
-      status: false,
-      message: (err as Error).message,
-      data: null
-    }
+    successToast('Customer data updated successfully.')
+    return true
+  } catch (error: any) {
+    console.error('Error updating customer marathon data:', error)
+    errorToast(error.message || 'Failed to update customer data.')
+    return false
+  }
+}
+
+export async function markMarathonFinished(uid: string, mid: string) {
+  const marathonDocRef = doc(firestore, `users/${uid}/marathon/${mid}`)
+
+  try {
+    await runTransaction(firestore, async (transaction) => {
+      const docSnap = await transaction.get(marathonDocRef)
+      if (!docSnap.exists()) {
+        errorToast('Marathon data not found. You may have already deleted it.')
+        throw new Error(`Marathon document with mid: ${mid} not found.`)
+      }
+
+      const marathonData = docSnap.data() as MarathonData
+
+      let newState = 'FINISHED'
+
+      // if (today > toDate) {
+      //   newState = 'FINISHED'
+      // }
+
+      // --- Calculate final positions ---
+      const latestWeightLossOrGain: {
+        cid: string
+        weightLossOrWeightGain: number
+        weight: number
+        height: number
+        name: string
+      }[] = []
+      for (const customer of marathonData.customers) {
+        const customerGraph = marathonData.graph[customer.cid]
+        const latestEntry = customerGraph
+          ? [...customerGraph.values].sort((a, b) => b.day - a.day)[0]
+          : undefined
+        const initialWeight = customer ? getInitialWeight(customer, marathonData.graph) : undefined
+        const weightLoss = latestEntry
+          ? marathonData.type === 'weight_loss'
+            ? initialWeight
+              ? initialWeight - latestEntry.weight
+              : 0
+            : initialWeight
+              ? latestEntry.weight - initialWeight
+              : 0
+          : 0
+        latestWeightLossOrGain.push({
+          cid: customer.cid,
+          weightLossOrWeightGain: weightLoss,
+          weight: latestEntry?.weight || 0,
+          height: latestEntry?.height || 0,
+          name: customer.name
+        })
+      }
+
+      latestWeightLossOrGain.sort((a, b) => b.weightLossOrWeightGain - a.weightLossOrWeightGain)
+      const finalPositions = latestWeightLossOrGain.map((item, index) => ({
+        cid: item.cid,
+        position: index + 1,
+        name: item.name,
+        weightLossOrWeightGain: item.weightLossOrWeightGain,
+        weight: item.weight,
+        height: item.height
+      }))
+
+      // --- Finalize graph and data (optional, depending on your needs) ---
+      // Here, you might want to ensure that the graph and data reflect the *final* state
+      // of the marathon.  This might involve pruning any incomplete data or
+      // calculating final summary values.
+      // For now, we'll just sort the graph data by day for consistency.  You can add
+      // more sophisticated logic here if needed.
+      for (const cid in marathonData.graph) {
+        marathonData.graph[cid].values.sort((a, b) => a.day - b.day)
+      }
+
+      // Update the marathon document with the final data
+      await transaction.update(marathonDocRef, {
+        state: newState,
+        positions: finalPositions,
+        graph: marathonData.graph, // Include the potentially modified graph
+        data: marathonData.data,
+        updatedOn: new Date().toISOString()
+      })
+    })
+    successToast(`Marathon with id: ${mid} has been successfully marked as FINISHED.`)
+    return true
+  } catch (error: any) {
+    console.error('Error marking marathon as finished:', error)
+    errorToast(error.message || 'Failed to mark marathon as finished.')
+    return false
+  }
+}
+
+export async function markMarathonCancelled(uid: string, mid: string) {
+  const marathonDocRef = doc(firestore, `users/${uid}/marathon/${mid}`)
+
+  try {
+    await runTransaction(firestore, async (transaction) => {
+      const docSnap = await transaction.get(marathonDocRef)
+      if (!docSnap.exists()) {
+        throw new Error(`Marathon document with mid: ${mid} not found.`)
+      }
+
+      const marathonData = docSnap.data() as MarathonData
+
+      // Reset relevant data fields
+      const resetPositions = marathonData.customers.map((c) => ({
+        cid: c.cid,
+        position: 0, // Or any appropriate default value
+        name: c.name,
+        weightLossOrWeightGain: 0,
+        weight: 0,
+        height: 0
+      }))
+      const resetGraph = {} // Or an initial empty state that matches your MarathonData type
+      const resetData = [] // Or an initial empty state
+
+      await transaction.update(marathonDocRef, {
+        state: 'CANCELLED',
+        positions: resetPositions,
+        graph: resetGraph,
+        data: resetData,
+        updatedOn: new Date().toLocaleDateString()
+      })
+    })
+    successToast(`Marathon with id: ${mid} has been successfully marked as CANCELLED`)
+    return true
+  } catch (error: any) {
+    console.error('Error marking marathon as cancelled:', error)
+    errorToast(error.message || 'Failed to mark marathon as cancelled.')
+    return false
   }
 }

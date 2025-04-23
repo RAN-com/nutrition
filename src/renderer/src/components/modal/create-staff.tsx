@@ -114,7 +114,10 @@ const CreateStaffModal = ({
             createdBy: user?.uid,
             available_limit: user?.subscription?.total_staffs as number,
             records: [],
-            ...formik.values
+            ...formik.values,
+            before_picture: before,
+            after_picture: after,
+            photo_url: profile
           })
             .then(() => {
               setLoading(false)
@@ -243,7 +246,7 @@ const CreateStaffModal = ({
                 }
               }}
               input={{
-                disabled: !!edit && k.includes('email'),
+                disabled: !!edit && k?.includes('phone'),
                 error: (
                   formik.touched[k as keyof typeof formik.touched] &&
                   Boolean(formik.errors[k as keyof typeof formik.errors])

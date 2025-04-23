@@ -27,13 +27,13 @@ import { encryptData } from '@renderer/utils/crypto'
 import moment from 'moment'
 
 const firebaseConfig = {
-  apiKey: 'AIzaSyCaElCmygA7RKHdn9xyx5bezzso_1xsVA8',
-  authDomain: 'ran-dev-6f346.firebaseapp.com',
-  projectId: 'ran-dev-6f346',
-  storageBucket: 'ran-dev-6f346.firebasestorage.app',
-  messagingSenderId: '161059016152',
-  appId: '1:161059016152:web:de8f684ab5cf8a28a936ad',
-  measurementId: 'G-TGH27VE51H'
+  apiKey: import.meta.env.VITE_VERCEL_APIKEY,
+  authDomain: import.meta.env.VITE_VERCEL_AUTHDOMAIN,
+  projectId: import.meta.env.VITE_VERCEL_PROJECTID,
+  storageBucket: import.meta.env.VITE_VERCEL_STORAGEBUCKET,
+  messagingSenderId: import.meta.env.VITE_VERCEL_MESSAGINGSENDERID,
+  appId: import.meta.env.VITE_VERCEL_APPID,
+  measurementId: import.meta.env.VITE_VERCEL_MEASUREMENTID
 }
 
 // Initialize Firebase

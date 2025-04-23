@@ -195,7 +195,7 @@ const StaffPage = () => {
                 ) : (
                   <>
                     <CustomTypography maxWidth={'340px'} textAlign={'center'}>
-                      Check your internet connection. If everything alright, refresh!!!!
+                      Your staff data will show here
                     </CustomTypography>
                   </>
                 )}

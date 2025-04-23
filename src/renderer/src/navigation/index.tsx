@@ -25,6 +25,7 @@ import MarathonPage from '@renderer/pages/marathon'
 import Notifications from '@renderer/pages/notifications'
 import { grey } from '@mui/material/colors'
 import CustomTypography from '@renderer/components/typography'
+import MarathonDetails from '@renderer/pages/marathon/marathon-details'
 
 const Navigation = () => {
   const user = useAppSelector((s) => s.auth.user)
@@ -44,7 +45,16 @@ const Navigation = () => {
                 },
                 {
                   path: '/marathon',
-                  element: <MarathonPage />
+                  children: [
+                    {
+                      index: true,
+                      element: <MarathonPage />
+                    },
+                    {
+                      path: ':marathonId',
+                      element: <MarathonDetails />
+                    }
+                  ]
                 },
                 {
                   path: '/customers',

@@ -181,6 +181,7 @@ function createWindow({ width, height }: { width: number; height: number }): voi
     }
 
     if (message === 'quit_app') {
+      mainWindow.destroy()
       mainWindow.close()
       return
     }

@@ -70,13 +70,13 @@ const options: (TSidebarOptions & { children: TSidebarOptions[] | null })[] = [
     icon: 'FaSitemap',
     children: null
   },
-  // {
-  //   label: 'Marathon',
-  //   value: '/marathon',
-  //   name: 'GAME_ICONS',
-  //   icon: 'GiHealthCapsule',
-  //   children: null
-  // },
+  {
+    label: 'Marathon',
+    value: '/marathon',
+    name: 'GAME_ICONS',
+    icon: 'GiHealthCapsule',
+    children: null
+  },
   {
     label: 'Notifications',
     children: null,
