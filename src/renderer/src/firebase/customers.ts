@@ -1,5 +1,15 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
-import { doc, getDoc, getDocs, setDoc, updateDoc, deleteDoc, collection } from 'firebase/firestore'
+import {
+  doc,
+  getDoc,
+  getDocs,
+  setDoc,
+  updateDoc,
+  deleteDoc,
+  collection,
+  onSnapshot,
+  query
+} from 'firebase/firestore'
 import { firestore } from '.'
 import {
   MarathonData,
@@ -14,6 +24,7 @@ import { encryptData } from '@renderer/utils/crypto'
 import moment from 'moment'
 import { updateStaffCount } from './staffs'
 import { RecordType } from '@renderer/types/record'
+import { deleteFile } from '@renderer/lib/upload-img'
 
 export const getCustomer = async (uid: string, cid: string) => {
   try {
@@ -28,7 +39,7 @@ export const getCustomer = async (uid: string, cid: string) => {
       // Return the customer data
       return {
         status: 'success',
-        data: customerDocSnap.data()
+        data: customerDocSnap.data() as CustomerResponse
       }
     } else {
       // Handle the case where the customer does not exist
@@ -128,13 +139,20 @@ export const addCustomer = async ({
   }
 }
 
-export const deleteCustomer = async (created_by_uid: string, uid: string) => {
+export const deleteCustomer = async (
+  created_by_uid: string,
+  uid: string,
+  photoUrl: undefined | string | null = null
+) => {
   try {
     const records = doc(firestore, `customers/${created_by_uid}/records/${uid}`)
     const attendance = doc(firestore, `customers/${created_by_uid}/attendance/${uid}`)
     const subscription = doc(firestore, `customers/${created_by_uid}/subscription/${uid}`)
     const docRef = doc(firestore, `users/${created_by_uid}/customers/${uid}`)
 
+    if (photoUrl) {
+      await deleteFile(photoUrl)
+    }
     await deleteDoc(docRef)
     await deleteDoc(attendance)
     await deleteDoc(subscription)
@@ -431,53 +449,48 @@ export const getAttendanceRecords = async ({
   }
 }
 
+type AddCustomerRecordParams = {
+  uid: string
+  cid: string
+  data: Partial<RecordType>
+}
+
 export const addCustomerRecord = async ({
   uid,
   cid,
   data
-}: {
-  uid: string
-  cid: string
-  data: Partial<RecordType>
-}) => {
+}: AddCustomerRecordParams): Promise<RecordType | void> => {
   try {
-    // Firestore document reference (single document for all records)
     const recordsRef = doc(firestore, `customers/${uid}/records/${cid}`)
-
-    // Fetch the current records
     const existingDoc = await getDoc(recordsRef)
 
-    const oneWeekAgo = new Date().getTime() - 7 * 24 * 60 * 60 * 1000
-    const oneWeekMoment = moment(oneWeekAgo)
+    const currentRecords: CustomerRecords[] =
+      existingDoc.exists() && Array.isArray(existingDoc.data().records)
+        ? existingDoc.data().records
+        : []
 
-    // Initialize an empty array if no records exist
-    const currentRecords = existingDoc.exists()
-      ? (existingDoc.data().records as CustomerRecords[]) || []
-      : []
+    const today = moment().format('YYYY-MM-DD')
 
-    if (currentRecords.length > 0) {
-      const lastRecord = currentRecords[currentRecords.length - 1]
-      const lastRecordDate = moment(lastRecord?.recorded_on).isAfter(oneWeekMoment)
-      if (lastRecordDate) {
-        errorToast('A record for this customer has already been added within the past week.')
-        return
-      }
+    // ❗ Check if a record already exists for today
+    const alreadyExists = currentRecords.some((record) =>
+      moment(record.recorded_on).isSame(today, 'day')
+    )
+
+    if (alreadyExists) {
+      errorToast('A record has already been added for this customer today.')
+      return
     }
-    // Calculate the timestamp for one week ago
-    // Check if there's already a record for the same `cid` within the last week
 
-    // Add the new record to the array
-    const newRecord = {
+    const newRecord: RecordType = {
       ...data,
       cid,
-      recorded_on: moment().format('YYYY-MM-DD'), // Timestamp
+      recorded_on: today,
       recorded_by: uid
     } as RecordType
 
-    // Update the Firestore document with the new record
     await setDoc(recordsRef, { records: [...currentRecords, newRecord] }, { merge: true })
 
-    return newRecord // Return the newly added record
+    return newRecord
   } catch (error) {
     console.error('Error adding customer record:', error)
     throw new Error('Failed to add customer record')
@@ -749,4 +762,63 @@ export const checkCustomerValidForConversion = async (uid: string, cid: string) 
   if (latestSubscription) return false
 
   return true
+}
+
+export const getAllAttendance = async (uid: string) => {
+  try {
+    const attendRec = collection(firestore, `customers/${uid}/attendance`)
+    const allCustomersSnapshot = await getDocs(attendRec)
+    const allCustomers = await Promise.all(
+      allCustomersSnapshot.docs.map(async (doc) => {
+        const customer = await getCustomer(uid, doc.id)
+        return {
+          customer: customer?.data as CustomerResponse,
+          attendance: doc.data().records as CustomerAttendance[]
+        }
+      })
+    )
+    return allCustomers
+  } catch (err) {
+    return false
+  }
+}
+
+type AttendanceListener = (
+  data: {
+    customer: CustomerResponse
+    attendance: CustomerAttendance[]
+  }[]
+) => void
+
+export const listenToAllAttendance = (
+  uid: string,
+  callback: AttendanceListener,
+  onError?: (error: unknown) => void
+) => {
+  const attendRef = collection(firestore, `customers/${uid}/attendance`)
+
+  const unsub = onSnapshot(
+    query(attendRef),
+    async (snapshot) => {
+      try {
+        const allData = await Promise.all(
+          snapshot.docs.map(async (doc) => {
+            const customer = await getCustomer(uid, doc.id)
+            return {
+              customer: customer?.data as CustomerResponse,
+              attendance: doc.data().records as CustomerAttendance[]
+            }
+          })
+        )
+        callback(allData)
+      } catch (error) {
+        onError?.(error)
+      }
+    },
+    (error) => {
+      onError?.(error)
+    }
+  )
+
+  return unsub // call this to unsubscribe when needed
 }

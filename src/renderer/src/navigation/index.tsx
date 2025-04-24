@@ -23,9 +23,9 @@ import EditProfile from '@renderer/pages/profile/edit'
 import CustomerRecords from '@renderer/pages/customer/records'
 import MarathonPage from '@renderer/pages/marathon'
 import Notifications from '@renderer/pages/notifications'
-import { grey } from '@mui/material/colors'
-import CustomTypography from '@renderer/components/typography'
 import MarathonDetails from '@renderer/pages/marathon/marathon-details'
+import PhotoGallery from '@renderer/pages/photo-gallery'
+import CustomerPhotoGallery from '@renderer/pages/customer/photo-gallery'
 
 const Navigation = () => {
   const user = useAppSelector((s) => s.auth.user)
@@ -57,6 +57,10 @@ const Navigation = () => {
                   ]
                 },
                 {
+                  path: '/photo_gallery',
+                  element: <PhotoGallery />
+                },
+                {
                   path: '/customers',
                   children: [
                     {
@@ -73,11 +77,7 @@ const Navigation = () => {
                         },
                         {
                           path: 'photo_gallery',
-                          element: (
-                            <CustomTypography color={grey['600']}>
-                              This page Will be available soon
-                            </CustomTypography>
-                          )
+                          element: <CustomerPhotoGallery />
                         }
                       ]
                     }

@@ -1,88 +1,141 @@
--------------------LEGEND-------------------
+# Product Requirements Document (PRD)
 
-Complexity:
+## Product Name: VesterShare
 
-L - LOW
-M - MEDIUM
-H - HIGH
-
-Time Required:
-
-{}m - n Minutes
-{}H - n Hours
-{}D - n Days
+**Prepared By:** Ebenezer
+**Date:** 11th, April 2025
 
 ---
 
-Task Bar buttons ✅
+## 1. Overview
 
-Authentication
+VesterShare is a hybrid platform that merges curated, real-time financial market information with social media capabilities tailored for traders and investors. The platform will enable users to stay updated, engage with like-minded individuals, and contribute their own insights.
 
-- Password Security 10M ✅
+---
 
-Signup
+## 2. Goals and Objectives
 
-- Remove email and make phone as primary 30M ✅
+### Primary Goals:
 
-Home
+- Provide real-time, curated financial news and market data.
+- Enable users to interact through posts, comments, and groups.
+- Foster a high-quality, moderated trading and investment community.
 
-- Profile Photo Update 10M ✅
+### Secondary Goals:
 
-Staff
+- Analyze user-generated content to extract sentiment trends.
+- Empower creators and analysts to build a following.
+- Offer premium tools and data for serious traders.
 
-- Free Trail One WEEK 10M ✅
-- Razor Pay not working 1H ✅
-- Domain Change herbal-life -> nutrition 10M ✅
+---
 
-Card
+## 3. Features
 
-- First Section Theme not working 10M ✅
-- Padding 10M ✅
-- Contact US ( Personal Details ) 30M ✅
-  - WhatsApp, Email, Get Direction ( Map )
+### 3.1 News Aggregation & Analysis
 
-Records
+- Aggregated financial news from reliable sources (RSS, APIs).
+- Manual and AI-driven content curation.
+- Market summaries and daily briefings.
 
-- Get Direct Input from user
-- Show Health Record
+### 3.2 Community Interaction
 
-## Upcoming :
+- User profiles (bio, trading style, portfolio tags).
+- Post creation: text, charts, polls, videos.
+- Likes, shares, bookmarks, and threaded comments.
+- Groups/communities based on topics, asset classes, regions.
 
-Pricing ✅
--> Free Trail ✅
+### 3.3 Sentiment Index
 
-    -> 10 customers
-    -> 5 staff
-    -> 30 Visitor
+- NLP analysis of posts and comments.
+- Community-wide sentiment dashboard (bullish/bearish).
+- Asset-specific sentiment charts.
 
--> Premium ✅
-1: Prestige | 1yr | 3650
-15 Customers
-15 Visitors
+### 3.4 Tiered Subscriptions
 
-2: Premium Pack | 1 Year | 6800
-30 Customers
-30 Staffs
-30 Visitors
-3: Premium+ | 1 Year | 8500
-50 Customers
-50 Staffs
-50 Visitors
-4: Premium++
-Unlimited Customers
-Unlimited Staffs
-Unlimited Visitors
+- **Free Tier**: Basic news feed, public discussions.
+- **Premium Tier**: Advanced analytics, customizable alerts.
+- **Pro Tier**: Real-time data (delayed), pro tools, sentiment filters.
 
-- Customer
+### 3.5 Creator Tools
 
--> Attendance -> 6800 -> 26D ✅
--> Health Records ( Shown Records in Table )
+- Verified profiles.
+- Creator dashboards (analytics, engagement).
+- Paywall/gated content.
+- Tipping/donations and premium community access.
 
-( Balance Requirements )
+### 3.6 Notifications and Alerts
 
--> Customer/Record -> Show in table
--> Slide Show
+- Price movement alerts.
+- New post/comment notifications.
+- Daily digest emails.
 
-( Future Requirements )
+---
 
-- Separate Show
+## 4. Target Users
+
+- Retail traders and investors (beginner to pro).
+- Financial analysts and educators.
+- Content creators in the finance space.
+
+---
+
+## 5. Tech Stack (Initial Recommendation)
+
+- Frontend: React (Web), React Native (Mobile)
+- Backend: Node.js, Express.js
+- Database: MongoDB Atlas, Redis (for caching)
+- Real-time: WebSockets (for feed updates, chat)
+- NLP & Sentiment: Python microservices using HuggingFace models
+- Hosting: Vercel/Render (Web), AWS/GCP for services
+
+---
+
+## 6. Milestones
+
+### Phase 1 (MVP) – 2 months
+
+- News feed and content curation
+- Social feed and user posting
+- Basic profile and group creation
+- Email-based sign up and onboarding
+
+### Phase 2 – 3 months
+
+- Sentiment index (basic NLP)
+- Tiered subscription system
+- Creator tools (basic tipping and stats)
+
+### Phase 3 – 3 months
+
+- Advanced analytics & custom alerts
+- Full-featured mobile app
+- Verified profiles and gated content
+- Ads & affiliate monetization layer
+
+---
+
+## 7. KPIs
+
+- Daily Active Users (DAU)
+- Engagement Rate (posts/user, comments/post)
+- Subscription Conversion Rate
+- Retention Rate (30/60/90 days)
+- Sentiment accuracy (model performance)
+
+---
+
+## 8. Risks & Assumptions
+
+- **Risk:** Spam, misinformation, and toxicity in user content
+  - _Mitigation:_ Moderation tools, verified users, NLP flagging
+- **Risk:** Difficulty in building initial community
+  - _Mitigation:_ Partner with influencers and run contests
+- **Assumption:** Users seek a blend of information and community in one platform
+
+---
+
+## 9. Appendix
+
+- Sample user journeys (Trader, Analyst, Creator)
+- Competitive benchmarking (StockTwits, Reddit, Yahoo Finance)
+- Wireframes (To be attached)

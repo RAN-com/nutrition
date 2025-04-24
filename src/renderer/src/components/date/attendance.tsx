@@ -141,6 +141,11 @@ const AttendanceDates = ({ values, onClick, onMonthChange }: Props) => {
 
   const due = (sub?.price || 0) - (sub?.amountPaid || 0)
 
+  const boughtOn = moment(sub?.boughtOn)
+  const threeDaysAgo = moment().subtract(3, 'days')
+
+  // Use the later of the two dates
+  const minDate = moment.max(boughtOn, threeDaysAgo)
   return (
     <LocalizationProvider dateAdapter={AdapterMoment}>
       <CustomTypography variant={'h6'}>Attendance</CustomTypography>
@@ -161,7 +166,7 @@ const AttendanceDates = ({ values, onClick, onMonthChange }: Props) => {
         slots={{
           day: ServerDay
         }}
-        minDate={moment().subtract(3, 'days')}
+        minDate={minDate}
         slotProps={{
           day: (e) => ({
             ...e,

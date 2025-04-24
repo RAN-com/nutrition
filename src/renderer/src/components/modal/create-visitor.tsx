@@ -26,6 +26,8 @@ import { useAppSelector, useAppDispatch } from '@renderer/redux/store/hook'
 import { VisitorData } from '@renderer/types/visitor'
 import { addVisitor, updateVisitor } from '@renderer/firebase/visitor'
 import { asyncGetVisitors } from '@renderer/redux/features/user/visitors'
+import { infoToast } from '@renderer/utils/toast'
+import { fileOrStringSchema } from '@renderer/lib/yup'
 
 const validationSchema = Yup.object({
   name: Yup.string()
@@ -50,7 +52,7 @@ const validationSchema = Yup.object({
   medical_issues: Yup.string()
     .optional()
     .max(200, 'Medical issues description cannot exceed 200 characters'),
-  photo_url: Yup.string().optional()
+  photo_url: fileOrStringSchema
 })
 
 const AddVisitorModal = ({
@@ -87,7 +89,6 @@ const AddVisitorModal = ({
       setLoading(true)
       if (!user) {
         setLoading(false)
-        alert('Login Again')
         return
       }
       try {
@@ -214,7 +215,7 @@ const AddVisitorModal = ({
                 onChange={(e) => {
                   const staff = staffs.filter((s) => s.data?.sid === e.target.value)[0]
                   if (!staff) {
-                    alert('Refresh and Try Again')
+                    infoToast('Refresh and Try Again')
                     return
                   }
                   console.log(staff)
@@ -248,8 +249,11 @@ const AddVisitorModal = ({
             </LocalizationProvider>
           ) : k.includes('photo_url') ? (
             <>
-              <CustomTypography marginTop={'12px'} color={grey['500']}>
-                Upload Image(Optional)
+              <CustomTypography
+                marginTop={'12px'}
+                color={!!formik.errors['photo_url'] ? 'red' : grey['500']}
+              >
+                Upload Image*
               </CustomTypography>
               <ImageUpload
                 onClear={async () => {

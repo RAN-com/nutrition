@@ -108,7 +108,7 @@ const Actions = ({
           disableRipple={true}
           disableTouchRipple={true}
           onClick={async () => {
-            await deleteCustomer(user?.created_by?.uid, user?.cid)
+            await deleteCustomer(user?.created_by?.uid, user?.cid, user?.photo_url)
             await dispatch(
               asyncGetCustomers({
                 uid: user?.created_by?.uid,

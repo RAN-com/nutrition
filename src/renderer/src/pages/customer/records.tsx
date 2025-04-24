@@ -85,11 +85,6 @@ const CustomerRecords = () => {
           <Button size="medium" onClick={() => setShowModal(true)} variant={'contained'}>
             Add Record
           </Button>
-
-          {/* <Menu open={!!menu} anchorEl={menu} onClose={() => setShowMenu(null)}>
-            <MenuItem>Weekly</MenuItem>
-            <MenuItem>Record</MenuItem>
-          </Menu> */}
           <div style={{ gap: 12, display: 'flex', alignItems: 'center' }}>
             <Tooltip title={'Download now'} placement="left">
               <span>
@@ -103,7 +98,6 @@ const CustomerRecords = () => {
                       '.download_customer_record',
                       `${current_customer?.data?.name}-Record`
                     )
-                    console.log(printDocument)
                     if (printDocument) {
                       window.electron?.ipcRenderer.send(
                         'generatePdf',

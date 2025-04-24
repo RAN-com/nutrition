@@ -150,7 +150,6 @@ function createWindow({ width, height }: { width: number; height: number }): voi
   ipcMain.on('readyToPrintPDF', (event) => {
     const pdfPath = join(os.tmpdir(), 'print.pdf')
     // Use default printing options
-    console.log('Hoiii, downloading pdf')
     workerWindow?.webContents
       .printToPDF({
         pageSize: 'A4',

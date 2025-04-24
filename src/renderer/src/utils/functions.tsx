@@ -77,7 +77,11 @@ export const extractNumFromString = (str: string) => {
   return parseInt(str.match(/\d/g)?.join('') ?? '0')
 }
 
-export const embedAllStyles = (selector: string, title: string = 'Health Record') => {
+export const embedAllStyles = (
+  selector: string,
+  title: string = 'Health Record',
+  scale: boolean = true
+) => {
   // Step 1: Render the React component as a static HTML string
   const element = document.querySelector(selector) as HTMLElement | null
   if (!element) return ''
@@ -132,8 +136,8 @@ export const embedAllStyles = (selector: string, title: string = 'Health Record'
           background-color: white;
           overflow: hidden;
           display: flex;
-          justify-content: center;
-          align-items: center;
+          ${scale ? 'justify-content: center; align-items: center;' : ''}
+
         }
 
         #root {
@@ -180,7 +184,7 @@ export const embedAllStyles = (selector: string, title: string = 'Health Record'
       </style>
     </head>
     <body>
-      <div id="root" style="transform: scale(${scaleFactor}); width: ${screenWidth}px">
+      <div id="root" style=${scale ? `transform: scale(${scaleFactor}); width: ${screenWidth}px` : ''}>
         ${clone.outerHTML}  <!-- Fully rendered React app -->
       </div>
     </body>

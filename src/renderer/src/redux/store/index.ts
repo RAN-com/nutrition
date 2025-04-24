@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
-import { combineReducers, configureStore } from '@reduxjs/toolkit'
+import { combineReducers, configureStore, createAction } from '@reduxjs/toolkit'
 import {
   FLUSH,
   PAUSE,
@@ -21,6 +21,10 @@ import pricingSlice from '../features/pricing/slice'
 import staffSlice from '../features/user/staff'
 import cardSlice from '../features/user/card'
 import uiSlice from './ui/slice'
+import gallerySlice from '../features/user/photo-gallery'
+
+export const RESET_APP = 'RESET_APP'
+export const resetApp = createAction(RESET_APP)
 
 // Define RootState type based on combined reducers
 const appReducer = combineReducers({
@@ -28,12 +32,22 @@ const appReducer = combineReducers({
   customer: customerSlice,
   product: productSlice,
   orders: orderSlice,
+  gallery: gallerySlice,
   visitor: visitorSlice,
   pricing: pricingSlice,
   staffs: staffSlice,
   card: cardSlice,
   ui: uiSlice
 })
+
+const rootReducer = (state: any, action: any) => {
+  if (action.type === RESET_APP) {
+    // Set state to undefined to trigger all reducers' initialState
+    return appReducer(undefined, action)
+  }
+
+  return appReducer(state, action)
+}
 
 // Persist configuration
 const persistConfig = {
@@ -43,9 +57,10 @@ const persistConfig = {
 }
 
 // Create persisted reducer
-const persistedReducer = persistReducer(persistConfig, appReducer)
+const persistedReducer = persistReducer(persistConfig, rootReducer)
 
 // Configure the store with proper typing
+
 export const store = configureStore({
   reducer: persistedReducer,
   devTools: import.meta.env.NODE_ENV !== 'production',

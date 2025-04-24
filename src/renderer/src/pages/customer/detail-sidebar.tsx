@@ -133,19 +133,35 @@ const CustomDetailSidebar = ({ data }: Props) => {
                   : 'Buy Subscription'}
               </CustomTypography>
             </Button>
-            <Button
-              sx={{
-                padding: '0px',
-                marginTop: '0.4rem',
-                cursor: 'default'
-              }}
-              disableElevation
-              disableFocusRipple
-              disableRipple
-              disableTouchRipple
-            >
-              Amount Pending: {due}
-            </Button>
+            <div style={{ display: 'flex', flexDirection: 'column', padding: '12px 0px' }}>
+              <Button
+                sx={{
+                  padding: '0px',
+                  marginTop: '0.4rem',
+                  cursor: 'default'
+                }}
+                disableElevation
+                disableFocusRipple
+                disableRipple
+                disableTouchRipple
+              >
+                Amount Pending: {due}
+              </Button>
+              <Button
+                sx={{
+                  padding: '0px',
+                  marginTop: '0.4rem',
+                  cursor: 'default'
+                }}
+                disableElevation
+                disableFocusRipple
+                disableRipple
+                disableTouchRipple
+              >
+                Total Amount Paid:
+                {sub?.amountPaid || 0}
+              </Button>
+            </div>
             <Tooltip title={''} placement="right">
               <span>
                 <Button

@@ -66,7 +66,7 @@ const UpdateVisitorRecord = ({ open, onClose, edit }: Props) => {
     onSubmit: async (values, { resetForm }) => {
       console.log('Submitted')
       setLoading(true)
-      if (!user) alert('Login again')
+      if (!user) return
       if (user) {
         setLoading(false)
         const add = await addVisitorRecord({

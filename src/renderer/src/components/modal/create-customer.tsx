@@ -28,6 +28,8 @@ import { addCustomer, updateCustomer } from '@renderer/firebase/customers'
 import { asyncGetCustomers } from '@renderer/redux/features/user/customers'
 import { CustomerResponse } from '@renderer/types/customers'
 import { encryptData } from '@renderer/utils/crypto'
+import { errorToast, infoToast } from '@renderer/utils/toast'
+import { fileOrStringSchema } from '@renderer/lib/yup'
 
 const validationSchema = Yup.object({
   name: Yup.string()
@@ -52,7 +54,7 @@ const validationSchema = Yup.object({
   medical_issues: Yup.string()
     .optional()
     .max(200, 'Medical issues description cannot exceed 200 characters'),
-  photo_url: Yup.string().optional()
+  photo_url: fileOrStringSchema
 })
 
 const CreateCustomerModal = ({
@@ -88,7 +90,7 @@ const CreateCustomerModal = ({
       setLoading(true)
       if (!user) {
         setLoading(false)
-        alert('Login Again')
+        errorToast('Login Again')
         return
       }
       try {
@@ -206,7 +208,7 @@ const CreateCustomerModal = ({
                 onChange={(e) => {
                   const staff = staffs.filter((s) => s.data?.sid === e.target.value)[0]
                   if (!staff) {
-                    alert('Refresh and Try Again')
+                    infoToast('Refresh and Try Again')
                     return
                   }
                   console.log(staff)
@@ -240,8 +242,11 @@ const CreateCustomerModal = ({
             </LocalizationProvider>
           ) : k.includes('photo_url') ? (
             <>
-              <CustomTypography marginTop={'12px'} color={grey['500']}>
-                Upload Image(Optional)
+              <CustomTypography
+                marginTop={'12px'}
+                color={formik.errors['photo_url'] ? 'red' : grey['500']}
+              >
+                Upload Image
               </CustomTypography>
               <ImageUpload
                 onClear={async () => {

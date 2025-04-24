@@ -8,6 +8,7 @@ import { grey } from '@mui/material/colors'
 import CustomTypography from '../typography'
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
+import { resetApp } from '@renderer/redux/store'
 
 const LogoutWarning = (): React.ReactNode => {
   const dispatch = useAppDispatch()
@@ -18,19 +19,21 @@ const LogoutWarning = (): React.ReactNode => {
     <Dialog
       open={open}
       onClose={() => dispatch(setLogoutFlag(false))}
-      PaperProps={{
-        square: false,
-        sx: {
-          '& *': {
-            userSelect: 'none',
-            msUserSelect: 'none',
-            MozUserSelect: 'none'
-          },
-          width: 'calc(100% - 12px)',
-          maxWidth: '420px',
-          borderRadius: '12px',
-          '.MuiTypography-root': {
-            textAlign: 'center'
+      slotProps={{
+        paper: {
+          square: false,
+          sx: {
+            '& *': {
+              userSelect: 'none',
+              msUserSelect: 'none',
+              MozUserSelect: 'none'
+            },
+            width: 'calc(100% - 12px)',
+            maxWidth: '420px',
+            borderRadius: '12px',
+            '.MuiTypography-root': {
+              textAlign: 'center'
+            }
           }
         }
       }}
@@ -62,6 +65,7 @@ const LogoutWarning = (): React.ReactNode => {
         <Button
           onClick={() => {
             dispatch(resetUser())
+            dispatch(resetApp())
             navigate('/auth/login')
           }}
           variant="contained"

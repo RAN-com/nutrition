@@ -16,6 +16,7 @@ import { errorToast, successToast } from '@renderer/utils/toast'
 import { encryptData } from '@renderer/utils/crypto'
 import { updateStaffCount } from './staffs'
 import { getCustomer } from './customers'
+import { deleteFile } from '@renderer/lib/upload-img'
 
 export const getVisitor = async (uid: string, vid: string) => {
   try {
@@ -175,11 +176,17 @@ export const updateVisitor = async (
   }
 }
 
-export const deleteVisitor = async (created_by_uid: string, uid: string) => {
+export const deleteVisitor = async (
+  created_by_uid: string,
+  uid: string,
+  photoUrl: undefined | string | null = null
+) => {
   try {
     const docRef = doc(firestore, `users/${created_by_uid}/visitors/${uid}`)
     await deleteDoc(docRef)
-
+    if (photoUrl) {
+      await deleteFile(photoUrl)
+    }
     successToast(`Visitor deleted successfully`)
     return { status: 'success', message: `Visitor ${uid} deleted successfully` }
   } catch (error) {

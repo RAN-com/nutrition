@@ -81,3 +81,8 @@ export type AttendanceSubscription = {
   isActive: boolean
   amountPaid: number
 }
+
+export type GalleryResponse = {
+  customer: CustomerResponse
+  attendance: CustomerAttendance[]
+}

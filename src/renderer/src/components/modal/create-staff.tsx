@@ -17,19 +17,20 @@ import { StaffData } from '@renderer/types/staff'
 import { addStaff, updateStaff } from '@renderer/firebase/staffs'
 import { asyncGetStaffs } from '@renderer/redux/features/user/staff'
 import React from 'react'
+import { fileOrStringSchema } from '@renderer/lib/yup'
 
 const validationSchema = Yup.object({
   name: Yup.string().required('Name is required'),
   email: Yup.string().email('Invalid email').optional(),
-  photo_url: Yup.string().url('Invalid URL').optional(),
   gender: Yup.string()
     .oneOf(['male', 'female', 'other'], 'Invalid gender')
     .required('Gender is required'),
   phone: Yup.string()
     .matches(/^\d{10}$/, 'Phone number must be 10 digits')
     .required('Phone is required'),
-  before_picture: Yup.string().required(),
-  after_picture: Yup.string().required(),
+  before_picture: fileOrStringSchema,
+  photo_url: fileOrStringSchema,
+  after_picture: fileOrStringSchema,
   address: Yup.string().required('Address is required'),
   about: Yup.string()
     .required('About is required')
@@ -80,7 +81,6 @@ const CreateStaffModal = ({
       setLoading(true)
       if (!user) {
         setLoading(false)
-        alert('Login Again')
         return
       }
       try {
@@ -206,9 +206,7 @@ const CreateStaffModal = ({
                 marginTop={'12px'}
                 color={!!formik.errors[k] ? red['400'] : grey['500']}
               >
-                {k.includes('photo_url')
-                  ? 'Upload Image(Optional)'
-                  : `Upload ${k.split('_').join(' ')}*`}
+                {k.includes('photo_url') ? 'Upload Image*' : `Upload ${k.split('_').join(' ')}*`}
               </CustomTypography>
               <ImageUpload
                 onClear={async () => {

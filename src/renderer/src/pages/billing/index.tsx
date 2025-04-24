@@ -20,7 +20,7 @@ const BillingPage = (): JSX.Element => {
     }
   }, [])
 
-  console.log(orders)
+  const filtered = orders.filter((e) => e.products.some((d) => d.detail.type === 'OUT_PURCHASE'))
 
   return (
     <Container
@@ -57,7 +57,7 @@ const BillingPage = (): JSX.Element => {
           data={{
             header: ['S.No', 'Order Id', 'Date', 'Price', 'Total Products'],
             row:
-              orders?.map((cst, idx) => [
+              filtered?.map((cst, idx) => [
                 <>{idx + 1 + (currentPage - 1) * limit}</>,
                 <Link to={`/billing/${cst?.orderId}`}>{cst?.orderId}</Link>,
                 <>{moment(cst?.order_on).format('DD/MM/YYYY')}</>,
@@ -66,7 +66,7 @@ const BillingPage = (): JSX.Element => {
               ]) ?? []
           }}
           clickable={true}
-          onClick={(idx) => router(`/billing/${orders[idx]?.orderId}`)}
+          onClick={(idx) => router(`/billing/${filtered[idx]?.orderId}`)}
           total={total_orders}
           page={currentPage - 1}
           rowsPerPage={limit}

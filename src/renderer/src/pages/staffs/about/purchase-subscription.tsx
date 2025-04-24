@@ -48,7 +48,10 @@ const PurchaseSubscription = ({}: Props) => {
     },
     validationSchema,
     async onSubmit(values) {
-      if (!staff) return alert('Staff Not found. Try Again')
+      if (!staff) {
+        errorToast('Staff Not found. Try Again')
+        return
+      }
       if (confirm('You cannot change this name. Do you want to continue ?')) {
         await assignOrUpdateDomain(values.domain, {
           created_by: user?.uid as string,

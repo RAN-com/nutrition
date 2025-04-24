@@ -1,4 +1,4 @@
-import { Button, styled, Tooltip } from '@mui/material'
+import { Button, Menu, MenuItem, styled, Tooltip } from '@mui/material'
 import PageHeader from '@renderer/components/header/pageHeader'
 import CustomTypography from '@renderer/components/typography'
 import { useAppSelector, useAppDispatch } from '@renderer/redux/store/hook'
@@ -58,6 +58,7 @@ const StaffPage = () => {
   }, [])
 
   const navigate = useNavigate()
+  const [more, setMore] = React.useState<Element | null>(null)
 
   return (
     <>
@@ -217,9 +218,9 @@ const StaffPage = () => {
                     )
                   }}
                   name={e.data?.name}
-                  onMoreClick={() => {
+                  onMoreClick={(evt) => {
+                    setMore(evt.currentTarget)
                     setEditData(e.data)
-                    setStaffModal(true)
                   }}
                   email={e.data?.email}
                   phone={e.data?.phone}
@@ -230,9 +231,50 @@ const StaffPage = () => {
           </div>
         </div>
       </Container>
+      <Menu
+        open={!!more}
+        anchorEl={more}
+        onClose={() => {
+          setMore(null)
+          setEditData(undefined)
+        }}
+      >
+        <MenuItem
+          onClick={() => {
+            setMore(null)
+            setStaffModal(true)
+          }}
+        >
+          Edit
+        </MenuItem>
+        <MenuItem
+          onClick={async () => {
+            await deleteStaff(edit_data?.createdBy as string, edit_data?.sid as string)
+            dispatch(asyncSetTotalStaff({ uid: user?.uid as string }))
+            dispatch(
+              asyncGetStaffs({
+                uid: user?.uid as string
+              })
+            )
+          }}
+        >
+          Delete
+        </MenuItem>
+      </Menu>
     </>
   )
 }
+
+//  ;<CustomIcon
+//    onClick={onDelete}
+//    name="MATERIAL_DESIGN"
+//    icon="MdDelete"
+//    color={red['600']}
+//    style={{
+//      gridColumn: 2,
+//      gridRow: 2
+//    }}
+//  />
 
 export default StaffPage
 

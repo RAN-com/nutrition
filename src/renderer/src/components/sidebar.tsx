@@ -78,6 +78,13 @@ const options: (TSidebarOptions & { children: TSidebarOptions[] | null })[] = [
     children: null
   },
   {
+    label: 'Photo Gallery',
+    children: null,
+    value: '/photo_gallery',
+    name: 'LUCIDE_ICONS',
+    icon: 'LuGalleryVerticalEnd'
+  },
+  {
     label: 'Notifications',
     children: null,
     value: '/notifications',

@@ -1,9 +1,9 @@
 // Import the functions you need from the SDKs you need
 
-import { CustomerResponse } from '@renderer/types/customers'
+import { AttendanceSubscription } from '@renderer/types/customers'
 import { OrderData } from '@renderer/types/product'
 import { CenterUser } from '@renderer/types/user'
-import { errorToast, successToast } from '@renderer/utils/toast'
+import { errorToast, infoToast, successToast } from '@renderer/utils/toast'
 import { initializeApp } from 'firebase/app'
 import { diff } from 'deep-diff'
 import {
@@ -126,7 +126,7 @@ export const createUserDocument = async ({
   const docRef = doc(firestore, `users/${data?.uid}`)
   const docSnap = await getDoc(docRef)
   if (docSnap?.exists()) {
-    alert('User Already Exists')
+    infoToast('User Already Exists')
     return { error: true, message: 'User Already Exists' }
   }
 
@@ -164,16 +164,23 @@ export const updateUserDocument = async ({ uid, ...data }: Partial<CenterUser>) 
 }
 
 export const getTotalRevenue = async (uid: string) => {
-  const customersRef = collection(firestore, `users/${uid}/customers`)
+  const customersRef = collection(firestore, `customers/${uid}/subscription`)
   const productsRef = collection(firestore, `users/${uid}/orders`)
 
   const productSnapshot = await getDocs(productsRef)
   const allProducts = productSnapshot.docs.map((doc) => doc.data() as OrderData)
 
   const allCustomersSnapshot = await getDocs(customersRef)
-  const allCustomers = allCustomersSnapshot.docs.map((doc) => doc.data() as CustomerResponse)
+  const allCustomers = allCustomersSnapshot.docs.map(
+    (doc) => doc.data().subscription as AttendanceSubscription[]
+  )
 
-  const customerRevenue = allCustomers.reduce((acc, obj) => acc + (obj?.amount_paid ?? 0), 0)
+  console.log(allCustomers, 'dataaaa')
+
+  const customerRevenue = allCustomers.reduce(
+    (acc, obj) => acc + (obj?.reduce((acc1, obj1) => acc1 + obj1.amountPaid, 0) ?? 0),
+    0
+  )
   const orderRevenue = allProducts.reduce((acc, obj) => acc + obj.total_price, 0)
 
   return {

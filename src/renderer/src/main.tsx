@@ -1,4 +1,5 @@
 import './assets/main.css'
+import 'react-responsive-carousel/lib/styles/carousel.min.css' // requires a loader
 
 import React from 'react'
 import ReactDOM from 'react-dom/client'

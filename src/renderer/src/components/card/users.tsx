@@ -1,5 +1,5 @@
 import { Avatar, styled } from '@mui/material'
-import { grey, red } from '@mui/material/colors'
+import { grey } from '@mui/material/colors'
 import CustomTypography from '../typography'
 import React from 'react'
 import CustomIcon from '../icons'
@@ -11,20 +11,11 @@ type Props = {
   photo_url?: string
   children?: React.ReactNode
   onClick(): void
-  onMoreClick?(): void
+  onMoreClick?(e: React.MouseEvent<HTMLDivElement>): void
   onDelete?(): void
 }
 
-const UserCard = ({
-  name,
-  email,
-  phone,
-  photo_url,
-  children,
-  onClick,
-  onMoreClick,
-  onDelete
-}: Props) => {
+const UserCard = ({ name, email, phone, photo_url, children, onClick, onMoreClick }: Props) => {
   return (
     <Card onClick={onClick}>
       <div
@@ -57,16 +48,6 @@ const UserCard = ({
           name="MATERIAL_DESIGN"
           icon="MdMoreVert"
           color={grey['600']}
-        />
-        <CustomIcon
-          onClick={onDelete}
-          name="MATERIAL_DESIGN"
-          icon="MdDelete"
-          color={red['600']}
-          style={{
-            gridColumn: 2,
-            gridRow: 2
-          }}
         />
       </div>
       {children}

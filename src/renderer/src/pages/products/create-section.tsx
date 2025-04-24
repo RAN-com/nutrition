@@ -22,6 +22,7 @@ import { uploadFiles } from '@renderer/lib/upload-img'
 import { errorToast } from '@renderer/utils/toast'
 import { grey, red } from '@mui/material/colors'
 import { capitalizeSentence } from '@renderer/utils/functions'
+import { fileOrStringSchema } from '@renderer/lib/yup'
 // import NotFound from "../../assets/image-not-found.jpg";
 
 type Props = {
@@ -56,7 +57,7 @@ const validationSchema = Yup.object().shape({
     .min(1, 'Stock quantity must be at least ₹1'),
   is_available: Yup.boolean().required('Availability status is required'),
   thumbnail: Yup.mixed().required('Thumbnail must be a valid URL'),
-  product_type: Yup.string().required('Product Type is required'),
+  product_type: fileOrStringSchema,
   flavour: Yup.string().when('name', (name: any, schema) => {
     return name && name.includes('Formula 1')
       ? schema.required('Flavour is required for Formula 1 products')

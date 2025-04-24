@@ -1,4 +1,13 @@
-import { Button, Dialog, FormControlLabel, Modal, Radio, RadioGroup } from '@mui/material'
+import {
+  Button,
+  Dialog,
+  Fade,
+  FormControlLabel,
+  InputLabel,
+  Modal,
+  Radio,
+  RadioGroup
+} from '@mui/material'
 import { CustomerAttendance } from '@renderer/types/customers'
 import { useFormik } from 'formik'
 import React from 'react'
@@ -25,15 +34,37 @@ import {
 } from '@renderer/redux/features/user/customers'
 import ImageUpload from '../image-upload'
 import { deleteFile, uploadFiles } from '@renderer/lib/upload-img'
+import { fileOrStringSchema } from '@renderer/lib/yup'
 
 const validationSchema = Yup.object().shape({
   date: Yup.string().required('Date is required').typeError('Invalid date format'),
-  weight: Yup.number().required('Weight is required').min(10, 'Enter valid weight'),
-  photo_url: Yup.array().required('Photo is required'),
-  amount_paid: Yup.number().optional().nullable(),
+
   mark_status: Yup.boolean()
     .required('Mark status is required')
-    .oneOf([true, false], 'Mark status must be true or false')
+    .oneOf([true, false], 'Mark status must be true or false'),
+
+  weight: Yup.number().when('mark_status', {
+    is: (val: boolean) => !!val,
+    then: (schema) => schema.required('Weight is required').min(10, 'Enter valid weight'),
+    otherwise: (schema) => schema.notRequired()
+  }),
+
+  photo_url: Yup.array()
+    .of(fileOrStringSchema)
+    .when('mark_status', {
+      is: (val: boolean) => !!val,
+      then: (schema) =>
+        schema.min(1, 'At least one image is required').required('Images are required'),
+      otherwise: (schema) => schema.notRequired()
+    }),
+
+  amount_paid: Yup.number()
+    .nullable()
+    .when('mark_status', {
+      is: (val: boolean) => !!val,
+      then: (schema) => schema.required('Amount paid is required'),
+      otherwise: (schema) => schema.notRequired()
+    })
 })
 
 const MarkAttendance = ({ open, onClose, edit }: Props) => {
@@ -58,7 +89,7 @@ const MarkAttendance = ({ open, onClose, edit }: Props) => {
     validationSchema,
     onSubmit: async (values) => {
       setLoading(true)
-      if (!user?.uid || !customer?.cid) return alert('Login again')
+      if (!user?.uid || !customer?.cid) return
       if (
         !!values.amount_paid &&
         values.amount_paid > 0 &&
@@ -188,67 +219,6 @@ const MarkAttendance = ({ open, onClose, edit }: Props) => {
             value={moment(formik.values.date)}
           />
         </LocalizationProvider>
-        <CustomTextInput
-          formProps={{
-            sx: {
-              marginTop: '12px'
-            }
-          }}
-          input={{
-            inputMode: 'decimal',
-            type: 'number',
-            error: (formik.touched.weight && Boolean(formik.errors.weight))?.valueOf(),
-            helperText: formik.touched.weight && formik.errors.weight,
-            label: <CustomTypography>Enter Weight</CustomTypography>,
-            name: 'weight',
-            value: formik.values.weight,
-            onChange: formik.handleChange,
-            placeholder: `Enter Weight`
-          }}
-        />
-        {!pending && (
-          <CustomTextInput
-            formProps={{
-              sx: {
-                marginTop: '12px'
-              }
-            }}
-            input={{
-              inputMode: 'decimal',
-              type: 'number',
-              error: (formik.touched.amount_paid && Boolean(formik.errors.amount_paid))?.valueOf(),
-              helperText: formik.touched.amount_paid && formik.errors.amount_paid,
-              label: <CustomTypography>Due amount {'(Optional)'}</CustomTypography>,
-              name: 'amount_paid',
-              value: formik.values.amount_paid,
-              onChange: formik.handleChange,
-              placeholder: `Enter Due Amount`
-            }}
-          />
-        )}
-        <ImageUpload
-          onClear={async (index: number) => {
-            // Delete the file when it's cleared
-            const split = formik.values.photo_url?.[index].split('.com')
-            const [, ...filename] = split?.[split?.length - 1].split('/') ?? ['']
-            await deleteFile(filename.join('/'))
-            const newPhotos = [...(formik.values?.photo_url ?? [])]
-            newPhotos.splice(index, 1) // Remove the deleted image from the list
-            formik.setFieldValue('photo_url', newPhotos) // Update the Formik field value
-          }}
-          uploaded_urls={formik.values.photo_url ?? []} // Pass all uploaded formik.values.photo_url?.
-          onChange={async (e) => {
-            if (e.target.files && e.target.files.length > 0) {
-              // Handle multiple file uploads
-              const newFiles = Array.from(e.target.files)
-              const uploadedUrls = await uploadFiles(user?.uid as string, newFiles, ['customers'])
-              const newUrls = uploadedUrls.map((url) => url.Location)
-              console.log(newUrls)
-              // Update state with the new photo URLs
-              formik.setFieldValue('photo_url', [...(formik.values?.photo_url ?? []), ...newUrls])
-            }
-          }}
-        />
         <RadioGroup
           sx={{
             paddingBottom: '12px'
@@ -271,7 +241,83 @@ const MarkAttendance = ({ open, onClose, edit }: Props) => {
             label="Present"
           />
         </RadioGroup>
-
+        <Fade in={formik.values.mark_status}>
+          {formik.values.mark_status ? (
+            <div>
+              <CustomTextInput
+                formProps={{
+                  sx: {
+                    marginTop: '12px'
+                  }
+                }}
+                input={{
+                  inputMode: 'decimal',
+                  type: 'number',
+                  error: (formik.touched.weight && Boolean(formik.errors.weight))?.valueOf(),
+                  helperText: formik.touched.weight && formik.errors.weight,
+                  label: <CustomTypography>Enter Weight</CustomTypography>,
+                  name: 'weight',
+                  value: formik.values.weight,
+                  onChange: formik.handleChange,
+                  placeholder: `Enter Weight`
+                }}
+              />
+              {!pending && (
+                <CustomTextInput
+                  formProps={{
+                    sx: {
+                      margin: '12px 0px'
+                    }
+                  }}
+                  input={{
+                    inputMode: 'decimal',
+                    type: 'number',
+                    error: (
+                      formik.touched.amount_paid && Boolean(formik.errors.amount_paid)
+                    )?.valueOf(),
+                    helperText: formik.touched.amount_paid && formik.errors.amount_paid,
+                    label: <CustomTypography>Due amount {'(Optional)'}</CustomTypography>,
+                    name: 'amount_paid',
+                    value: formik.values.amount_paid,
+                    onChange: formik.handleChange,
+                    placeholder: `Enter Due Amount`
+                  }}
+                />
+              )}
+              <ImageUpload
+                label={<InputLabel error={!!formik.errors['photo_url']}>Upload Image*</InputLabel>}
+                onClear={async (index: number) => {
+                  // Delete the file when it's cleared
+                  const split = formik.values.photo_url?.[index].split('.com')
+                  const [, ...filename] = split?.[split?.length - 1].split('/') ?? ['']
+                  await deleteFile(filename.join('/'))
+                  const newPhotos = [...(formik.values?.photo_url ?? [])]
+                  newPhotos.splice(index, 1) // Remove the deleted image from the list
+                  formik.setFieldValue('photo_url', newPhotos) // Update the Formik field value
+                }}
+                uploaded_urls={formik.values.photo_url ?? []} // Pass all uploaded formik.values.photo_url?.
+                onChange={async (e) => {
+                  if (e.target.files && e.target.files.length > 0) {
+                    // Handle multiple file uploads
+                    const newFiles = Array.from(e.target.files)
+                    const uploadedUrls = await uploadFiles(user?.uid as string, newFiles, [
+                      'customers'
+                    ])
+                    const newUrls = uploadedUrls.map((url) => url.Location)
+                    console.log(newUrls)
+                    // Update state with the new photo URLs
+                    formik.setFieldValue('photo_url', [
+                      ...(formik.values?.photo_url ?? []),
+                      ...newUrls
+                    ])
+                  }
+                }}
+              />
+            </div>
+          ) : (
+            <div></div>
+          )}
+        </Fade>
         <Button
           type={'submit'}
           sx={{ width: '100%', maxWidth: '240px', margin: 'auto' }}

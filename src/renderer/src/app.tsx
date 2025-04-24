@@ -1,6 +1,6 @@
 import Navigation from './navigation'
 import React from 'react'
-import { errorToast, successToast } from './utils/toast'
+import { errorToast, infoToast, successToast } from './utils/toast'
 import RestartModal from './components/modal/restart'
 import { useAppSelector, useAppDispatch } from './redux/store/hook'
 import {
@@ -120,7 +120,7 @@ const App = () => {
         const confirmDownload = window.confirm('New update available. Download now?')
         window.electron.updateResponse(confirmDownload ? 'startDownload' : 'startDownload')
         if (!confirmDownload) {
-          alert('Update will be downloaded for a smooth experience')
+          infoToast('Update will be downloaded for a smooth experience')
         }
       })
 
@@ -418,7 +418,7 @@ export const PaymentModel = ({ open }: { open: boolean }) => {
   const handleAdminPayment = async () => {
     const f = features.filter((e) => e.title === pendingOrder?.pricingType)[0]
     if (!f) {
-      alert('Pricing Not found. Contact admin to initialize refund process')
+      errorToast('Pricing Not found. Contact admin to initialize refund process')
       // refund process here
       return
     }

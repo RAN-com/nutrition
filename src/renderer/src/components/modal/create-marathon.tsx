@@ -175,7 +175,7 @@ export default function CreateMarathon({ onClose, open, edit }: Props) {
               minDate={minFromDate}
               onChange={(e) => {
                 if (e?.format('DD/MM/YYYY') === moment().format('DD/MM/YYYY')) {
-                  alert('You cannot select today date')
+                  errorToast('You cannot select today date')
                   return
                 }
                 formik.setFieldValue('from_date', e?.toDate().toLocaleString())
@@ -197,7 +197,7 @@ export default function CreateMarathon({ onClose, open, edit }: Props) {
               defaultValue={edit ? moment(edit?.to_date) : undefined}
               onChange={(e) => {
                 if (e && moment(e).diff(moment(formik.values.from_date), 'days') < 6) {
-                  alert('End date must be at least 7 days after the start date')
+                  errorToast('End date must be at least 7 days after the start date')
                   return
                 }
                 formik.setFieldValue('to_date', e?.toDate().toLocaleString())
