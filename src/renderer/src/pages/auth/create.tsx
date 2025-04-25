@@ -1,4 +1,4 @@
-import Logo from '@renderer/assets/logo.png'
+import Logo from '@renderer/assets/icon.png'
 import { Backdrop, CircularProgress, styled, Paper } from '@mui/material'
 import CustomTextInput from '@renderer/components/text-input'
 import CustomTypography from '@renderer/components/typography'
@@ -62,8 +62,8 @@ const AuthCreate = (): React.ReactNode => {
         <LogoContainer>
           <img src={Logo} />
         </LogoContainer>
-        <CustomTypography variant="h4" fontFamily={'Syne'} marginTop={'8px'} fontWeight={'normal'}>
-          Signup
+        <CustomTypography variant="h4" color={'#fff'} marginTop={'8px'} fontWeight={'normal'}>
+          Create your account
         </CustomTypography>
         <form onSubmit={formik.handleSubmit}>
           <CustomTextInput
@@ -277,14 +277,15 @@ const Container = styled('div')(({ theme }) => ({
 
 const LogoContainer = styled('div')({
   width: 'max-content',
-  height: '40px',
-  maxHeight: '40px',
+  height: '54px',
+  maxHeight: '54px',
   margin: 'auto',
   '& img': {
     margin: 'auto',
+    borderRadius: '12px',
     maxWidth: 'max-content',
-    height: '40px',
-    maxHeight: '40px',
+    height: '100%',
+    maxHeight: '100%',
     objectFit: 'contain'
   }
 })

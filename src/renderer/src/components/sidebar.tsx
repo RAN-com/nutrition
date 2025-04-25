@@ -172,7 +172,7 @@ const Sidebar = ({
         <LogoContainer>
           <img src={Logo} alt={'LOGO'} />
         </LogoContainer>
-        <OptionContainer className="hide-scrollbar">
+        <OptionContainer>
           {options.map((option) => (
             <>
               <Tooltip title={option.label} placement="right" arrow={true} followCursor={true}>
@@ -235,17 +235,18 @@ const Sidebar = ({
                         />
                       </ListItemIcon>
                     )}
-                    {expand && (
-                      <ListItemText>
+                    <ListItemText>
+                      {expand && (
                         <CustomTypography
+                          whiteSpace={'nowrap'}
                           variant={'body2'}
                           fontWeight={'500'}
                           color={option.value.includes(currentPath) ? '#262627' : '#9D9FA1'}
                         >
                           {option.label}
                         </CustomTypography>
-                      </ListItemText>
-                    )}
+                      )}
+                    </ListItemText>
                   </CustomListButton>
                 </span>
               </Tooltip>
@@ -254,7 +255,7 @@ const Sidebar = ({
         </OptionContainer>
         <div
           style={{
-            padding: '42px 12px 0px 12px',
+            padding: '42px 12px 12px 12px',
             position: 'relative',
             top: 0,
             height: 'auto'
@@ -266,7 +267,7 @@ const Sidebar = ({
               opacity: hideExpand ? 0 : 1,
               pointerEvents: hideExpand ? 'none' : 'all',
               position: 'absolute',
-              top: '-20px',
+              top: '0px',
               right: '12px',
               zIndex: 100,
               padding: '8px',
@@ -414,7 +415,8 @@ const OptionContainer = styled(List)({
   width: '100%',
   height: '100%',
   overflowY: 'auto',
-  padding: '0px 12px 0px 12px'
+  overflowX: 'hidden',
+  padding: '12px 12px 12px 12px'
 })
 
 const CustomListButton = styled(ListItemButton)({})

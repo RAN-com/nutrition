@@ -1,5 +1,5 @@
 import { Modal, Paper, styled } from '@mui/material'
-import Logo from '@renderer/assets/logo.png'
+import Logo from '@renderer/assets/icon.png'
 import * as yup from 'yup'
 import { useFormik } from 'formik'
 import { useAppDispatch, useAppSelector } from '@renderer/redux/store/hook'
@@ -52,10 +52,10 @@ const AuthLogin = () => {
       </Modal>
       <Paper elevation={2}>
         <LogoContainer>
-          <img src={Logo} />
+          <img src={Logo} alt={'HERBAL_LIFE'} />
         </LogoContainer>
-        <CustomTypography variant="h4" fontFamily={'Syne'} marginTop={'8px'} fontWeight={'normal'}>
-          Login
+        <CustomTypography variant="h4" color={'#fff'} marginTop={'8px'} fontWeight={'normal'}>
+          Welcome Again
         </CustomTypography>
 
         <form onSubmit={formik.handleSubmit}>
@@ -181,14 +181,16 @@ const Container = styled('div')(({ theme }) => ({
 
 const LogoContainer = styled('div')({
   width: 'max-content',
-  height: '40px',
-  maxHeight: '40px',
+  height: '54px',
+  maxHeight: '54px',
   margin: 'auto',
   '& img': {
+    borderRadius: '12px',
     margin: 'auto',
     maxWidth: 'max-content',
-    height: '40px',
-    maxHeight: '40px',
+    height: '100%',
+    maxHeight: '100%',
+    mixBlendMode: 'multiply',
     objectFit: 'contain'
   }
 })

@@ -114,17 +114,6 @@ const BillingModal = () => {
                           alignItems: 'center'
                         }}
                       >
-                        {user?.photo_url && (
-                          <img
-                            src={user?.photo_url}
-                            alt={user?.name}
-                            style={{
-                              width: '40px',
-                              height: '40px',
-                              borderRadius: '12px'
-                            }}
-                          />
-                        )}
                         <Avatar src={user?.photo_url ?? undefined} alt={user?.name ?? undefined} />
                         <div style={{ display: 'flex', flexDirection: 'column' }}>
                           <CustomTypography fontWeight={'bold'}>{user?.name}</CustomTypography>

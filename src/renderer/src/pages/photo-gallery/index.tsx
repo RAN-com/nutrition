@@ -22,6 +22,12 @@ export default function PhotoGallery() {
     return () => unsubscribe()
   }, [user])
 
+  const isDataAvailable = data.some((entry) =>
+    entry.attendance.some((a) => a.photo_url && a.photo_url.length >= 1)
+  )
+
+  console.log(isDataAvailable)
+
   return (
     <Container
       sx={{
@@ -38,6 +44,13 @@ export default function PhotoGallery() {
       }}
     >
       <PageHeader
+        sx={{
+          position: 'sticky',
+          top: 0,
+          background: 'white',
+          backgroundColor: '#ffffff99',
+          backdropFilter: 'blur(10px)'
+        }}
         start={
           <div>
             <CustomTypography variant={'h6'}>Photo Gallery</CustomTypography>
@@ -51,13 +64,11 @@ export default function PhotoGallery() {
           flexDirection: 'column',
           backgroundColor: 'white',
           padding: '16px',
-          height: '100%',
-          borderRadius: '12px'
+          borderRadius: '12px',
+          height: isDataAvailable ? 'auto' : '200px'
         }}
       >
-        {data.map((rec) => (
-          <GalleryContent {...rec} />
-        ))}
+        {isDataAvailable ? data.map((rec) => <GalleryContent {...rec} />) : <></>}
       </Box>
     </Container>
   )

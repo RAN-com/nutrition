@@ -32,73 +32,77 @@ export default function GalleryContent({
   const [idx, setIdx] = React.useState<number | null>(null)
   const [open, setOpen] = React.useState(false)
 
+  const isDataAvailable = customer && photos.length >= 1 && photos.every((p) => !!p.photo_url)
+
   return (
-    <Column sx={{ padding: '12px', backgroundColor: '#eefff995' }}>
-      {showInfo && (
-        <Column>
-          <Row sx={{ alignItems: 'center', gap: '12px' }}>
-            <Row>
-              <Avatar
-                variant="rounded"
-                sx={{ border: '1px solid' }}
-                src={customer?.photo_url}
-                alt={customer?.name}
-              />
+    isDataAvailable && (
+      <Column sx={{ padding: '12px', backgroundColor: '#eefff995' }}>
+        {showInfo && (
+          <Column>
+            <Row sx={{ alignItems: 'center', gap: '12px' }}>
+              <Row>
+                <Avatar
+                  variant="rounded"
+                  sx={{ border: '1px solid' }}
+                  src={customer?.photo_url}
+                  alt={customer?.name}
+                />
+              </Row>
+              <Column>
+                <CustomTypography fontWeight={'medium'} variant="h6">
+                  {customer?.name}
+                </CustomTypography>
+                <CustomTypography variant="body2" fontWeight={'light'}>
+                  {customer?.gender}
+                </CustomTypography>
+              </Column>
             </Row>
-            <Column>
-              <CustomTypography fontWeight={'medium'} variant="h6">
-                {customer?.name}
-              </CustomTypography>
-              <CustomTypography variant="body2" fontWeight={'light'}>
-                {customer?.gender}
-              </CustomTypography>
-            </Column>
-          </Row>
-        </Column>
-      )}
-      <Row
-        sx={{
-          overflowX: flexWrap ? 'none' : 'auto',
-          flexWrap: flexWrap ? 'wrap' : 'nowrap',
-          gap: '12px',
-          padding: '12px 0px 12px 0px',
-          flexDirection: 'row'
-        }}
-      >
-        {photos.map((e, i) =>
-          showMore && i < 7 ? (
+          </Column>
+        )}
+        <Row
+          sx={{
+            overflowX: flexWrap ? 'none' : 'auto',
+            flexWrap: flexWrap ? 'wrap' : 'nowrap',
+            gap: '12px',
+            padding: '12px 0px 12px 0px',
+            flexDirection: 'row'
+          }}
+        >
+          {photos.map((e, i) =>
+            showMore && i < 7 ? (
+              <Image
+                onClick={() => {
+                  setOpen(true)
+                  setIdx(i)
+                }}
+              >
+                <img src={e.photo_url} alt={e.date} />
+              </Image>
+            ) : (
+              <Image
+                onClick={() => {
+                  setOpen(true)
+                  setIdx(i)
+                }}
+              >
+                <img src={e.photo_url} alt={e.date} />
+              </Image>
+            )
+          )}
+          {showMore && photos.length > 7 && (
             <Image
               onClick={() => {
+                setIdx(7)
                 setOpen(true)
-                setIdx(i)
               }}
             >
-              <img src={e.photo_url} alt={e.date} />
+              <CustomTypography>See More</CustomTypography>
             </Image>
-          ) : (
-            <Image
-              onClick={() => {
-                setOpen(true)
-                setIdx(i)
-              }}
-            >
-              <img src={e.photo_url} alt={e.date} />
-            </Image>
-          )
-        )}
-        {showMore && photos.length > 7 && (
-          <Image
-            onClick={() => {
-              setIdx(7)
-              setOpen(true)
-            }}
-          >
-            <CustomTypography>See More</CustomTypography>
-          </Image>
-        )}
-      </Row>
-      <GalleryView open={open} onClose={() => setOpen(false)} data={photos} idx={idx} />
-    </Column>
+          )}
+        </Row>
+        <GalleryView open={open} onClose={() => setOpen(false)} data={photos} idx={idx} />
+      </Column>
+    )
   )
 }
 

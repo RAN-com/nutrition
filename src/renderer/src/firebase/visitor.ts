@@ -319,3 +319,21 @@ export const staffAssignedVisitors = async (uid: string, sid: string) => {
     return []
   }
 }
+
+export const whatsappTemplates = async () => {
+  // for more template, edit this
+  const templateRef = doc(firestore, 'templates/fWjnOHMgUFJhd11xthBP')
+  try {
+    const templateDoc = await getDoc(templateRef)
+
+    if (!templateDoc.exists()) {
+      return []
+    }
+
+    const data = (templateDoc.data()?.messges as string[]) || []
+
+    return data
+  } catch (err) {
+    return []
+  }
+}

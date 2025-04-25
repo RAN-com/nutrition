@@ -1,4 +1,4 @@
-import { styled } from '@mui/material'
+import { styled, Tab, Tabs } from '@mui/material'
 import { useAppSelector, useAppDispatch } from '@renderer/redux/store/hook'
 import PaginatedTable from '../customer/table'
 import { asyncGetOrders } from '@renderer/redux/features/user/order'
@@ -7,6 +7,9 @@ import moment from 'moment'
 import CustomTypography from '@renderer/components/typography'
 import { Link, Outlet, useNavigate } from 'react-router-dom'
 import PageHeader from '@renderer/components/header/pageHeader'
+import { capitalizeSentence } from '@renderer/utils/functions'
+
+const TAB_HEADER: string[] = ['out_purchase', 'center_usage']
 
 const BillingPage = (): JSX.Element => {
   const user = useAppSelector((s) => s.auth.user)
@@ -14,13 +17,21 @@ const BillingPage = (): JSX.Element => {
   const dispatch = useAppDispatch()
   const router = useNavigate()
 
+  const [tabs, setTabs] = React.useState('out_purchase')
+
   React.useEffect(() => {
     if (user?.uid) {
       dispatch(asyncGetOrders({ uid: user.uid }))
     }
   }, [])
 
-  const filtered = orders.filter((e) => e.products.some((d) => d.detail.type === 'OUT_PURCHASE'))
+  const filtered = React.useMemo(
+    () =>
+      orders.filter((e) => e.products.some((d) => d.detail?.type?.toLowerCase()?.includes(tabs))),
+    [tabs]
+  )
+
+  console.log(filtered)
 
   return (
     <Container
@@ -47,8 +58,13 @@ const BillingPage = (): JSX.Element => {
       >
         <PageHeader
           start={
-            <div>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
               <CustomTypography variant={'h6'}>Billing</CustomTypography>
+              <Tabs value={tabs}>
+                {TAB_HEADER.map((t) => (
+                  <Tab label={capitalizeSentence(t)} value={t} onClick={() => setTabs(t)} />
+                ))}
+              </Tabs>
             </div>
           }
         />

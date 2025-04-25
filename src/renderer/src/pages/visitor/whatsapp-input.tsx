@@ -1,7 +1,17 @@
-import { Button, Dialog, DialogContent, DialogContentText, DialogTitle } from '@mui/material'
+import {
+  Button,
+  Dialog,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  styled
+} from '@mui/material'
+import { grey } from '@mui/material/colors'
 import CustomTextInput from '@renderer/components/text-input'
 import CustomTypography from '@renderer/components/typography'
+import { whatsappTemplates } from '@renderer/firebase/visitor'
 import { useFormik } from 'formik'
+import React from 'react'
 import * as yup from 'yup'
 
 type Props = {
@@ -19,6 +29,14 @@ const validationSchema = yup.object().shape({
 })
 
 export default function WhatsAppInput({ onClose, open, phone }: Props) {
+  const [messages, setMessages] = React.useState<string[]>([])
+
+  React.useEffect(() => {
+    if (open) {
+      whatsappTemplates().then(setMessages).catch(setMessages)
+    }
+  }, [open])
+
   const formik = useFormik({
     initialValues: {
       message: ''
@@ -53,7 +71,7 @@ export default function WhatsAppInput({ onClose, open, phone }: Props) {
       {phone ? (
         <>
           <CustomTypography>
-            <CustomTypography fontSize={'14px'} fontWeight={'400'}>
+            <CustomTypography variant="h4" fontWeight={'600'}>
               Enter your WhatsApp message
             </CustomTypography>
           </CustomTypography>
@@ -75,6 +93,19 @@ export default function WhatsAppInput({ onClose, open, phone }: Props) {
               helperText: formik.touched.message && formik.errors.message
             }}
           />
+          <CustomTypography fontWeight={'bold'}>Message Templates</CustomTypography>
+          <MsgBoxContainer>
+            {messages.map((msg) => (
+              <MsgBox
+                onClick={(e) => {
+                  e.preventDefault()
+                  formik.setFieldValue('message', msg)
+                }}
+              >
+                <CustomTypography color={grey['800']}>{msg}</CustomTypography>
+              </MsgBox>
+            ))}
+          </MsgBoxContainer>
           <Button
             variant="contained"
             disabled={!formik.isValid || formik.isSubmitting || formik.values.message.length <= 9}
@@ -100,3 +131,24 @@ export default function WhatsAppInput({ onClose, open, phone }: Props) {
     </Dialog>
   )
 }
+
+const MsgBoxContainer = styled('div')({
+  width: '100%',
+  display: 'flex',
+  flexDirection: 'row',
+  flexWrap: 'nowrap',
+  overflowX: 'auto',
+  scrollSnapType: 'x mandatory',
+  padding: '12px 0px',
+  paddingBottom: '4px',
+  gap: '12px',
+  marginBottom: '12px'
+})
+
+const MsgBox = styled('div')({
+  width: '100%',
+  minWidth: '100%',
+  padding: '8px',
+  border: `1px solid ${grey['300']} `,
+  borderRadius: '12px'
+})
