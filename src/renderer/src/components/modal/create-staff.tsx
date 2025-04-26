@@ -29,7 +29,7 @@ const validationSchema = Yup.object({
     .matches(/^\d{10}$/, 'Phone number must be 10 digits')
     .required('Phone is required'),
   before_picture: fileOrStringSchema,
-  photo_url: fileOrStringSchema,
+  photo_url: fileOrStringSchema.optional(),
   after_picture: fileOrStringSchema,
   address: Yup.string().required('Address is required'),
   about: Yup.string()

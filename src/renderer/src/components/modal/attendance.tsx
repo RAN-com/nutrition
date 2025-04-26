@@ -54,7 +54,7 @@ const validationSchema = Yup.object().shape({
     .when('mark_status', {
       is: (val: boolean) => !!val,
       then: (schema) =>
-        schema.min(1, 'At least one image is required').required('Images are required'),
+        schema.optional().notRequired(),
       otherwise: (schema) => schema.notRequired()
     }),
 
@@ -168,7 +168,7 @@ const MarkAttendance = ({ open, onClose, edit }: Props) => {
   })
 
   const pending = subscription?.price === subscription?.amountPaid
-  console.log(formik.errors)
+  console.log(formik.errors, "Errors")
 
   return (
     <Dialog

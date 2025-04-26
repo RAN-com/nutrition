@@ -26,17 +26,12 @@ function createPdf() {
 
 function createWindow({ width, height }: { width: number; height: number }): void {
   const mainWindow = new BrowserWindow({
-    resizable: true,
     minWidth: 900,
     minHeight: 600,
     maxHeight: height,
     maxWidth: width,
     autoHideMenuBar: true,
-    backgroundMaterial: 'mica',
-    darkTheme: true,
     focusable: true,
-    fullscreen: false,
-    fullscreenable: true,
     movable: true,
     roundedCorners: true,
     title: 'Nutrition',
@@ -48,17 +43,15 @@ function createWindow({ width, height }: { width: number; height: number }): voi
       symbolColor: 'white'
     },
     icon: join(__dirname, '../../resources/icon.png'),
-    // ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       nodeIntegration: true,
       devTools: is.dev,
-      // devTools: process.env.NODE_ENV === "developm",
       contextIsolation: false
     }
   })
 
-  mainWindow.setMenu(null)
+  mainWindow.setMaximizable(true) // Enable the maximize button
   mainWindow.on('ready-to-show', () => {
     mainWindow.show()
     if (is.dev) {

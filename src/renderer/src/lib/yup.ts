@@ -8,6 +8,5 @@ export const fileOrStringSchema = Yup.mixed()
     // Accept non-empty strings
     if (typeof value === 'string' && value.trim() !== '') return true
 
-    return false
+    return true
   })
-  .required('This field is required')

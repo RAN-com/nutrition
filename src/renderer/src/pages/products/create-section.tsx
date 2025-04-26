@@ -57,7 +57,7 @@ const validationSchema = Yup.object().shape({
     .min(1, 'Stock quantity must be at least ₹1'),
   is_available: Yup.boolean().required('Availability status is required'),
   thumbnail: Yup.mixed().required('Thumbnail must be a valid URL'),
-  product_type: fileOrStringSchema,
+  product_type: fileOrStringSchema.required("Upload a valid image file"),
   flavour: Yup.string().when('name', (name: any, schema) => {
     return name && name.includes('Formula 1')
       ? schema.required('Flavour is required for Formula 1 products')

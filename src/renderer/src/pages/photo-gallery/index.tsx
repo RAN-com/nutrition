@@ -14,19 +14,28 @@ export default function PhotoGallery() {
 
   React.useEffect(() => {
     dispatch(setLoading(true))
-    const unsubscribe = listenToAllAttendance(user?.uid as string, (records) => {
-      dispatch(setGalleryData(records))
-      dispatch(setLoading(false))
-    })
+    try {
+      const unsubscribe = listenToAllAttendance(user?.uid as string, (records) => {
+        try {
+          dispatch(setGalleryData(records))
+        } catch (error) {
+          console.error('Error setting gallery data:', error)
+        } finally {
+          dispatch(setLoading(false))
+        }
+      })
 
-    return () => unsubscribe()
+      return () => unsubscribe()
+    } catch (error) {
+      console.error('Error listening to attendance:', error)
+      dispatch(setLoading(false))
+      return () => {}
+    }
   }, [user])
 
   const isDataAvailable = data.some((entry) =>
-    entry.attendance.some((a) => a.photo_url && a.photo_url.length >= 1)
+    entry?.attendance?.some((a) => a?.photo_url && a?.photo_url?.length >= 1)
   )
-
-  console.log(isDataAvailable)
 
   return (
     <Container
@@ -40,7 +49,8 @@ export default function PhotoGallery() {
         display: 'flex',
         flexDirection: 'column',
         flexGrow: 1,
-        gap: '12px'
+        gap: '12px',
+        paddingBottom: '12px',
       }}
     >
       <PageHeader
@@ -57,7 +67,6 @@ export default function PhotoGallery() {
           </div>
         }
       />
-      {loading && <CircularProgress variant="indeterminate" />}
       <Box
         sx={{
           display: 'flex',
@@ -67,8 +76,8 @@ export default function PhotoGallery() {
           borderRadius: '12px',
           height: isDataAvailable ? 'auto' : '200px'
         }}
-      >
-        {isDataAvailable ? data.map((rec) => <GalleryContent {...rec} />) : <></>}
+        >
+        {loading ?  <CircularProgress variant="indeterminate" /> : isDataAvailable ? data.map((rec) => <GalleryContent {...rec} />) : <></>}
       </Box>
     </Container>
   )

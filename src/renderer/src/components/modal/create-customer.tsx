@@ -54,7 +54,7 @@ const validationSchema = Yup.object({
   medical_issues: Yup.string()
     .optional()
     .max(200, 'Medical issues description cannot exceed 200 characters'),
-  photo_url: fileOrStringSchema
+  photo_url: fileOrStringSchema.optional()
 })
 
 const CreateCustomerModal = ({
