@@ -13,7 +13,6 @@ type Props = {
     photo_url: string
   })[]
 }
-
 export default function GalleryView({ data, onClose, open, idx }: Props) {
   const carouselRef = useRef<Carousel>(null)
 
@@ -21,8 +20,11 @@ export default function GalleryView({ data, onClose, open, idx }: Props) {
   const handlePrevious = () => carouselRef?.current?.onClickPrev()
 
   React.useEffect(() => {
-    if (idx) carouselRef?.current?.changeItem(idx)
-  }, [])
+    // Using typeof to properly check for null or undefined
+    if (idx !== null && idx !== undefined) {
+      carouselRef?.current?.changeItem(idx)
+    }
+  }, [idx]) // Add idx as a dependency to react when it changes
 
   return (
     <Modal
@@ -101,6 +103,7 @@ export default function GalleryView({ data, onClose, open, idx }: Props) {
             dynamicHeight={true}
             swipeable={true}
             showThumbs={true}
+            selectedItem={idx !== null && idx !== undefined ? idx : 0}
           >
             {data.map((e) => (
               <div>

@@ -27,15 +27,29 @@ export default function GalleryContent({
   flexWrap = false,
   showMore = true
 }: GalleryResponse & { showInfo?: boolean; flexWrap?: boolean; showMore?: boolean }) {
-  const photos = generatePhotos(attendance)
+  const photos = React.useMemo(() => {
+    const gen = generatePhotos(attendance);
+    return [...gen, ...gen, ...gen, ...gen]
+  }, [attendance]);
+  const [idx, setIdx] = React.useState<number | null>(null);
+  const [open, setOpen] = React.useState(false);
 
-  const [idx, setIdx] = React.useState<number | null>(null)
-  const [open, setOpen] = React.useState(false)
+  const INITIAL_PHOTOS_COUNT = 4;
+  const hasMorePhotos = photos.length > INITIAL_PHOTOS_COUNT;
+  const displayedPhotos = photos.slice(0, INITIAL_PHOTOS_COUNT);
 
-  const isDataAvailable = customer && photos.length >= 1 && photos.every((p) => !!p.photo_url)
+  const isDataAvailable = !!customer && 
+  Array.isArray(photos) && 
+  photos.length >= 1 && 
+  photos.every((p) => !!p && !!p.photo_url);
+
+  const handlePhotoClick = (index: number) => {
+    setOpen(true);
+    setIdx(index);
+  };
 
   return (
-    isDataAvailable && (
+    isDataAvailable ? (
       <Column sx={{ padding: '12px', backgroundColor: '#eefff995' }}>
         {showInfo && (
           <Column>
@@ -68,43 +82,53 @@ export default function GalleryContent({
             flexDirection: 'row'
           }}
         >
-          {photos.map((e, i) =>
-            showMore && i < 7 ? (
-              <Image
-                onClick={() => {
-                  setOpen(true)
-                  setIdx(i)
-                }}
-              >
-                <img src={e.photo_url} alt={e.date} />
-              </Image>
-            ) : (
-              <Image
-                onClick={() => {
-                  setOpen(true)
-                  setIdx(i)
-                }}
-              >
-                <img src={e.photo_url} alt={e.date} />
-              </Image>
-            )
-          )}
-          {showMore && photos.length > 7 && (
+         {displayedPhotos.map((photo, index) => (
             <Image
-              onClick={() => {
-                setIdx(7)
-                setOpen(true)
-              }}
+              key={`photo-${index}-${photo.date}`}
+              onClick={() => handlePhotoClick(index)}
             >
-              <CustomTypography>See More</CustomTypography>
+              <img src={photo.photo_url} alt={photo.date} />
             </Image>
+          ))}
+          
+          {showMore && hasMorePhotos  && (
+            <ShowMoreBox 
+              onClick={() => handlePhotoClick(INITIAL_PHOTOS_COUNT)}
+            >
+              <CustomTypography variant="h6" color="primary">
+                +{photos.length - INITIAL_PHOTOS_COUNT}
+              </CustomTypography>
+              <CustomTypography variant="body2" color="primary">
+                Show More
+              </CustomTypography>
+            </ShowMoreBox>
           )}
         </Row>
         <GalleryView open={open} onClose={() => setOpen(false)} data={photos} idx={idx} />
       </Column>
-    )
+    ) : null
   )
 }
+const ShowMoreBox = styled('div')(({ theme }) => ({
+  height: '240px',
+  minWidth: '240px',
+  maxHeight: '240px',
+  cursor: 'pointer',
+  aspectRatio: '1/1',
+  overflow: 'hidden',
+  borderRadius: '12px',
+  backgroundColor: 'rgba(0, 0, 0, 0.04)',
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  justifyContent: 'center',
+  border: '1px solid',
+  borderColor: theme.palette.divider,
+  transition: 'background-color 0.3s',
+  '&:hover': {
+    backgroundColor: 'rgba(0, 0, 0, 0.08)',
+  },
+}));
 
 const Column = styled('div')({
   width: 'auto',

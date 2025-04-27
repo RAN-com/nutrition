@@ -26,12 +26,16 @@ function createPdf() {
 
 function createWindow({ width, height }: { width: number; height: number }): void {
   const mainWindow = new BrowserWindow({
+    resizable: true,
     minWidth: 900,
     minHeight: 600,
     maxHeight: height,
     maxWidth: width,
     autoHideMenuBar: true,
+    backgroundMaterial: 'mica',
+    darkTheme: true,
     focusable: true,
+    fullscreenable: true,
     movable: true,
     roundedCorners: true,
     title: 'Nutrition',
@@ -43,6 +47,7 @@ function createWindow({ width, height }: { width: number; height: number }): voi
       symbolColor: 'white'
     },
     icon: join(__dirname, '../../resources/icon.png'),
+    // ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       nodeIntegration: true,
@@ -51,7 +56,7 @@ function createWindow({ width, height }: { width: number; height: number }): voi
     }
   })
 
-  mainWindow.setMaximizable(true) // Enable the maximize button
+  mainWindow.setMenu(null)
   mainWindow.on('ready-to-show', () => {
     mainWindow.show()
     if (is.dev) {
@@ -64,6 +69,7 @@ function createWindow({ width, height }: { width: number; height: number }): voi
       height: size[1]
     }
 
+    mainWindow.webContents.send("app_version", app.getVersion());
     mainWindow.webContents.send('sizeChanged', JSON.stringify(data))
   })
 
@@ -173,9 +179,13 @@ function createWindow({ width, height }: { width: number; height: number }): voi
     }
 
     if (message === 'quit_app') {
-      mainWindow.destroy()
-      mainWindow.close()
+      app.quit();
       return
+    }
+
+    if(message === "restart") {
+      app.relaunch();
+      app.quit();
     }
 
     if (message === 'minimize_app') {
@@ -210,13 +220,22 @@ function createWindow({ width, height }: { width: number; height: number }): voi
         }).show()
       }
     }
+
+    if(message.includes("startDownload")) {
+      autoUpdater.downloadUpdate();
+    }
   })
+
   autoUpdater.autoDownload = false // Disable auto-download
 
   // Checking for updates
   autoUpdater.on('checking-for-update', () => {
     console.log('Checking for updates...')
     mainWindow.webContents.send('update-check', 'Checking for updates...')
+  })
+
+  autoUpdater.on("download-progress", (event) => {
+    mainWindow.webContents.send("downloadProgress", JSON.stringify(event));
   })
 
   // When an update is available, notify the renderer

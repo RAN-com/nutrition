@@ -1,7 +1,6 @@
 import Navigation from './navigation'
 import React from 'react'
-import { errorToast, infoToast, successToast } from './utils/toast'
-import RestartModal from './components/modal/restart'
+import { errorToast, successToast } from './utils/toast'
 import { useAppSelector, useAppDispatch } from './redux/store/hook'
 import {
   Button,
@@ -32,18 +31,18 @@ import { asyncGetCurrentStaffDomainData } from './redux/features/user/staff'
 import zIndex from '@mui/material/styles/zIndex'
 import { setAppVersion, setNotifications } from './redux/features/user/auth'
 import { listenToNotifications } from './firebase/notifications'
-import { setDimensions, toggleDevMode } from './redux/store/ui/slice'
+import { setDimensions, setDownloadProgress, setShowAvailableModal, setShowDownloadedModal, setUpdateAvailableStatus, setUpdateDownloaded, toggleDevMode } from './redux/store/ui/slice'
 import CustomTextInput from './components/text-input'
+import AppUpdate from './components/modal/app-update'
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const App = () => {
-  const [updateDownloaded, setUpdateDownloaded] = React.useState(false)
+  // const [updateDownloaded, setUpdateDownloaded] = React.useState(false)
   const dispatch = useAppDispatch()
   const { user } = useAppSelector((s) => s.auth)
   const staff = useAppSelector((s) => s.staffs.current_staff)
   const { dimensions, toggle_dev_mode } = useAppSelector((s) => s.ui)
   const [showModal, setShowModal] = React.useState(false)
-
   const [password, setPassword] = React.useState('')
 
   React.useEffect(() => {
@@ -87,9 +86,8 @@ const App = () => {
     return () => window.removeEventListener('keydown', handlePress)
   }, [])
 
+  const { ipcRenderer } = window?.electron || {}
   React.useEffect(() => {
-    const { ipcRenderer } = window.electron || {}
-
     if (ipcRenderer) {
       ipcRenderer.on('app_version', (_e, props) => {
         dispatch(setAppVersion(props))
@@ -117,15 +115,17 @@ const App = () => {
       })
 
       ipcRenderer.on('updateAvailable', () => {
-        const confirmDownload = window.confirm('New update available. Download now?')
-        window.electron.updateResponse(confirmDownload ? 'startDownload' : 'startDownload')
-        if (!confirmDownload) {
-          infoToast('Update will be downloaded for a smooth experience')
-        }
+        dispatch(setUpdateAvailableStatus(true));
+        dispatch(setShowAvailableModal(true));
       })
 
       ipcRenderer.on('updateDownloaded', () => {
-        setUpdateDownloaded(true)
+        dispatch(setShowDownloadedModal(true));
+        dispatch(setUpdateDownloaded(true));
+      })
+
+      ipcRenderer.on("downloadProgress", (_, progress) => {
+        dispatch(setDownloadProgress(JSON.parse(progress)));
       })
     }
 
@@ -135,7 +135,7 @@ const App = () => {
       ipcRenderer?.removeAllListeners('updateAvailable')
       ipcRenderer?.removeAllListeners('updateDownloaded')
     }
-  }, [dispatch])
+  }, [dispatch, ipcRenderer])
 
   React.useEffect(() => {
     if (!user) return
@@ -200,8 +200,9 @@ const App = () => {
         })
       )}
     >
+      <AppUpdate />
       <PaymentModel open={!!pendingOrder} />
-      <RestartModal
+      {/* <RestartModal
         open={updateDownloaded}
         onClose={() => {
           setUpdateDownloaded(false)
@@ -210,7 +211,7 @@ const App = () => {
         onRestart={() => {
           window.electron?.updateResponse('install_now')
         }}
-      />
+      /> */}
       <Dialog
         open={showModal}
         onClose={() => {
