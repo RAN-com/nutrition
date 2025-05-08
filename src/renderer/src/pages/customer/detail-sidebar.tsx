@@ -51,7 +51,7 @@ const CustomDetailSidebar = ({ data }: Props) => {
     const [month, year] = [e.month(), e.year()]
     if (admin && user) {
       if (moment(data?.data?.created_on).isAfter(e)) {
-        infoToast('Cannot mark attendance before customer was added')
+        // infoToast('Cannot mark attendance before customer was added')
         return
       } else {
         setDate(e)
@@ -59,6 +59,8 @@ const CustomDetailSidebar = ({ data }: Props) => {
       }
     }
   }
+
+  const customer = useAppSelector((s) => s.customer.current_customer?.data)
 
   const [showAttendanceForm, setShowAttendanceForm] = React.useState(false)
 
@@ -140,6 +142,7 @@ const CustomDetailSidebar = ({ data }: Props) => {
                   marginTop: '0.4rem',
                   cursor: 'default'
                 }}
+                color={'error'}
                 disableElevation
                 disableFocusRipple
                 disableRipple
@@ -154,6 +157,7 @@ const CustomDetailSidebar = ({ data }: Props) => {
                   cursor: 'default'
                 }}
                 disableElevation
+                color={'success'}
                 disableFocusRipple
                 disableRipple
                 disableTouchRipple
@@ -208,6 +212,11 @@ const CustomDetailSidebar = ({ data }: Props) => {
           <AttendanceDates
             onMonthChange={handleGetAttendance}
             onClick={(e) => {
+              if (!e) return
+              if (moment(data?.data?.created_on).isAfter(moment(e.data?.date))) {
+                infoToast('Cannot mark attendance before customer was added')
+                return
+              }
               console.log(e, 'Onclick')
               setShowAttendanceForm(true)
               setEdit(e.data ?? undefined)
@@ -216,7 +225,7 @@ const CustomDetailSidebar = ({ data }: Props) => {
               attendance?.filter((e) => e.month === date.month() && e.year === date.year())?.[0]
                 ?.data ?? []
             }
-            maxPrevDate={moment(data?.data?.created_on).toString()}
+            maxPrevDate={moment(customer?.created_on).toString()}
           />
         </Content>
         {/* <Content>
@@ -286,7 +295,7 @@ const HandlePayment = ({ onClose, open }: { open: boolean; onClose(): void }) =>
       setLoading(true)
       try {
         const sub = await setSubscriptionToUser({
-          price: Number(values.totalDays) * Number(formik.values.price),
+          price: Number(formik.values.price),
           uid: admin as string,
           cid: customer as string,
           totalDays: Number(values.totalDays),
@@ -294,7 +303,7 @@ const HandlePayment = ({ onClose, open }: { open: boolean; onClose(): void }) =>
         })
         if (sub) {
           addTransaction(admin as string, {
-            amount: Number(values.totalDays) * Number(formik.values.price),
+            amount: Number(formik.values.price),
             currency: 'inr',
             data: sub
           })

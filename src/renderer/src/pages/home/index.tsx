@@ -31,7 +31,7 @@ const Home = () => {
   const navigate = useNavigate()
 
   React.useEffect(() => {
-    if (user) {
+    if (user?.uid) {
       setLoading(true)
       debounce(() => {
         dispatch(

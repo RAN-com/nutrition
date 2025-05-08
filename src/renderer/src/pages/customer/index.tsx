@@ -151,10 +151,10 @@ const CustomerPage = (): React.ReactNode => {
     useAppSelector((s) => s.auth.user?.subscription?.total_customers ?? 0) <= customers.length
 
   React.useEffect(() => {
-    if (!user) return
+    if (!user?.uid) return
     dispatch(
       asyncGetCustomers({
-        uid: user?.uid,
+        uid: user.uid,
         limit,
         page
       })

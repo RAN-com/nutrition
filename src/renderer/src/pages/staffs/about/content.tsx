@@ -150,7 +150,9 @@ const StaffContent = ({ appointments, customers, loading, visitors, records }: P
         </Box>
       </div>
       {current !== 'about' && current !== 'records' && (
-        <CustomTypography variant="h4">Recent {capitalize(current ?? '')}</CustomTypography>
+        <>
+          <CustomTypography variant="h4">Recent {capitalize(current ?? '')}</CustomTypography>
+        </>
       )}
       {/* <div className="table-container"> */}
       {rows?.[current]?.length === 0 ? (
@@ -171,13 +173,18 @@ const StaffContent = ({ appointments, customers, loading, visitors, records }: P
           <CustomTypography>{capitalize(current)} data couldn't be found</CustomTypography>
         </Box>
       ) : current.includes('about') ? (
-        <CustomTypography
-          textAlign={'center'}
-          width={'100%'}
-          sx={{ alignItems: 'center', justifyContent: 'center' }}
-        >
-          {staff?.data?.about}
-        </CustomTypography>
+        <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <CustomTypography variant="h4" textAlign={'center'} width={'100%'}>
+            {staff?.data?.name}
+          </CustomTypography>
+          <CustomTypography
+            textAlign={'center'}
+            width={'100%'}
+            sx={{ alignItems: 'center', justifyContent: 'center' }}
+          >
+            {staff?.data?.about}
+          </CustomTypography>
+        </div>
       ) : current === 'records' ? (
         <Records
           records={records}

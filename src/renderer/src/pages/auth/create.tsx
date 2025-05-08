@@ -1,4 +1,4 @@
-import Logo from '@renderer/assets/icon.png'
+import Logo from '@renderer/assets/logo.png'
 import { Backdrop, CircularProgress, styled, Paper } from '@mui/material'
 import CustomTextInput from '@renderer/components/text-input'
 import CustomTypography from '@renderer/components/typography'

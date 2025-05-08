@@ -1,5 +1,5 @@
 import { Modal, Paper, styled } from '@mui/material'
-import Logo from '@renderer/assets/icon.png'
+import Logo from '@renderer/assets/logo.png'
 import * as yup from 'yup'
 import { useFormik } from 'formik'
 import { useAppDispatch, useAppSelector } from '@renderer/redux/store/hook'

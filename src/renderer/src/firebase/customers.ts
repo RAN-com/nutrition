@@ -710,7 +710,8 @@ export const payDueAmount = async ({
       e.id === activeSubscription.id
         ? {
             ...e,
-            amountPaid: e.amountPaid + dueAmount
+            amountPaid: e.amountPaid + dueAmount,
+            updatedAt: moment().format('YYYY-MM-DD HH:mm:ss')
           }
         : e
     )
