@@ -31,7 +31,15 @@ import { asyncGetCurrentStaffDomainData } from './redux/features/user/staff'
 import zIndex from '@mui/material/styles/zIndex'
 import { setAppVersion, setNotifications } from './redux/features/user/auth'
 import { listenToNotifications } from './firebase/notifications'
-import { setDimensions, setDownloadProgress, setShowAvailableModal, setShowDownloadedModal, setUpdateAvailableStatus, setUpdateDownloaded, toggleDevMode } from './redux/store/ui/slice'
+import {
+  setDimensions,
+  setDownloadProgress,
+  setShowAvailableModal,
+  setShowDownloadedModal,
+  setUpdateAvailableStatus,
+  setUpdateDownloaded,
+  toggleDevMode
+} from './redux/features/ui/slice'
 import CustomTextInput from './components/text-input'
 import AppUpdate from './components/modal/app-update'
 
@@ -115,17 +123,17 @@ const App = () => {
       })
 
       ipcRenderer.on('updateAvailable', () => {
-        dispatch(setUpdateAvailableStatus(true));
-        dispatch(setShowAvailableModal(true));
+        dispatch(setUpdateAvailableStatus(true))
+        dispatch(setShowAvailableModal(true))
       })
 
       ipcRenderer.on('updateDownloaded', () => {
-        dispatch(setShowDownloadedModal(true));
-        dispatch(setUpdateDownloaded(true));
+        dispatch(setShowDownloadedModal(true))
+        dispatch(setUpdateDownloaded(true))
       })
 
-      ipcRenderer.on("downloadProgress", (_, progress) => {
-        dispatch(setDownloadProgress(JSON.parse(progress)));
+      ipcRenderer.on('downloadProgress', (_, progress) => {
+        dispatch(setDownloadProgress(JSON.parse(progress)))
       })
     }
 

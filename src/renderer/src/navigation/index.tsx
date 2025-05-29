@@ -26,6 +26,8 @@ import Notifications from '@renderer/pages/notifications'
 import MarathonDetails from '@renderer/pages/marathon/marathon-details'
 import PhotoGallery from '@renderer/pages/photo-gallery'
 import CustomerPhotoGallery from '@renderer/pages/customer/photo-gallery'
+import Posts from '@renderer/pages/posts'
+import PostDetails from '@renderer/pages/posts/details'
 
 const Navigation = () => {
   const user = useAppSelector((s) => s.auth.user)
@@ -139,6 +141,15 @@ const Navigation = () => {
                       element: <BillingModal />
                     }
                   ]
+                },
+                {
+                  // nutritional-information, work
+                  path: '/posts/:type',
+                  element: <Posts />
+                },
+                {
+                  path: '/post-details/:type/:id',
+                  element: <PostDetails />
                 }
               ]
             },

@@ -44,7 +44,7 @@ const Layout: React.FC<Props> = ({ children }) => {
           </Tooltip>
         </TabBarButtonContainer>
       </TabBar> */}
-      <MainContainer>{children}</MainContainer>
+      <MainContainer className="main-container">{children}</MainContainer>
     </Container>
   )
 }
