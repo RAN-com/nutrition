@@ -20,8 +20,9 @@ import visitorSlice from '../features/user/visitors'
 import pricingSlice from '../features/pricing/slice'
 import staffSlice from '../features/user/staff'
 import cardSlice from '../features/user/card'
-import uiSlice from './ui/slice'
+import uiSlice from '../features/ui/slice'
 import gallerySlice from '../features/user/photo-gallery'
+import postsSlice from "../features/user/posts"
 
 export const RESET_APP = 'RESET_APP'
 export const resetApp = createAction(RESET_APP)
@@ -37,7 +38,8 @@ const appReducer = combineReducers({
   pricing: pricingSlice,
   staffs: staffSlice,
   card: cardSlice,
-  ui: uiSlice
+  ui: uiSlice,
+  post: postsSlice
 })
 
 const rootReducer = (state: any, action: any) => {

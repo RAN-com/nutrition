@@ -3,7 +3,7 @@ import CustomIcon from '@renderer/components/icons'
 import { TSidebarOptions } from '@renderer/components/sidebar'
 import CustomTypography from '@renderer/components/typography'
 import { useAppSelector, useAppDispatch } from '@renderer/redux/store/hook'
-import { setShowAvailableModal } from '@renderer/redux/store/ui/slice'
+import { setShowAvailableModal } from '@renderer/redux/features/ui/slice'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 
 const menu: TSidebarOptions[] = [
@@ -12,7 +12,7 @@ const menu: TSidebarOptions[] = [
     value: ''
   },
   {
-    label: "App Updates",
+    label: 'App Updates',
     value: ''
   }
 ]
@@ -21,7 +21,7 @@ const ProfilePage = () => {
   const path = useLocation()
 
   const version = useAppSelector((s) => s.auth.app_version)
-  const dispatch = useAppDispatch();
+  const dispatch = useAppDispatch()
 
   return (
     <Container>
@@ -36,9 +36,9 @@ const ProfilePage = () => {
           <MenuItem
             selected={(path.pathname.split('/profile/')?.[1] ?? '') === e.value}
             onClick={() => {
-              if(e.label === "App Updates") {
-                dispatch(setShowAvailableModal(true));
-                return;
+              if (e.label === 'App Updates') {
+                dispatch(setShowAvailableModal(true))
+                return
               }
               navigate(`/profile${e.value === '' ? '' : `/${e.value}`}`)
             }}
@@ -56,7 +56,12 @@ const ProfilePage = () => {
             {/* </ListItemIcon> */}
           </MenuItem>
         ))}
-        <CustomTypography fontSize={'12px'} margin={'auto'} padding={'12px 0px 4px 0px'} sx={{cursor: "pointer"}}>
+        <CustomTypography
+          fontSize={'12px'}
+          margin={'auto'}
+          padding={'12px 0px 4px 0px'}
+          sx={{ cursor: 'pointer' }}
+        >
           v.{version}
         </CustomTypography>
       </Sidebar>

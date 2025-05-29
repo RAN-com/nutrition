@@ -1,10 +1,10 @@
 import Logo from '@renderer/assets/logo.png'
 import {
+  Divider,
   Fade,
   List,
   ListItemButton,
   ListItemIcon,
-  ListItemText,
   styled,
   Tooltip,
   useMediaQuery,
@@ -97,27 +97,41 @@ const options: (TSidebarOptions & { children: TSidebarOptions[] | null })[] = [
     name: 'MATERIAL_DESIGN',
     icon: 'MdAttachMoney',
     children: null
-  }
-]
-
-const logoutOption: TSidebarOptions[] = [
+  },
+  {
+    label: 'Nutrition Information',
+    value: '/posts/nutrition-information',
+    name: 'FONT_AWESOME',
+    icon: 'FaNutritionix',
+    children: null
+  },
+  {
+    label: 'Work',
+    value: '/posts/work',
+    name: 'BOOTSTRAP_ICONS',
+    children: null,
+    icon: 'BsPersonWorkspace'
+  },
   {
     label: 'Pricing',
     value: '/pricing',
     name: 'MATERIAL_DESIGN',
-    icon: 'MdPriceChange'
+    icon: 'MdPriceChange',
+    children: null
   },
   {
     label: 'Profile',
     value: '/profile',
     name: 'BOX_ICONS',
-    icon: 'BiUser'
+    icon: 'BiUser',
+    children: null
   },
   {
     label: 'Logout',
     value: 'logout',
     name: 'MATERIAL_DESIGN',
-    icon: 'MdLogout'
+    icon: 'MdLogout',
+    children: null
   }
 ]
 
@@ -130,8 +144,11 @@ const Sidebar = ({
 }: SidebarProps): JSX.Element => {
   const dispatch = useAppDispatch()
   const path = useLocation().pathname
-  const splitPath = path.split('/')?.[1]
+  const [_, ...others] = path.split('/')
+  const splitPath = (others || [])?.join('/')
   const currentPath = splitPath === '/' ? 'home' : splitPath
+
+  console.log('path::', currentPath)
   const navigate = useNavigate()
   const th = useTheme()
   const isMobile = useMediaQuery(th.breakpoints.down(680))
@@ -151,6 +168,8 @@ const Sidebar = ({
       }
     })
   }, [])
+
+  const showDivider = 10
 
   return (
     <Fade in={!isMobile ? true : isOpened}>
@@ -173,7 +192,7 @@ const Sidebar = ({
           <img src={Logo} alt={'LOGO'} />
         </LogoContainer>
         <OptionContainer>
-          {options.map((option) => (
+          {options.map((option, idx) => (
             <>
               <Tooltip title={option.label} placement="right" arrow={true} followCursor={true}>
                 <span>
@@ -190,11 +209,11 @@ const Sidebar = ({
                       handleToggle(option.value)
                     }}
                     sx={{
-                      padding: '6px 24px',
-                      width: 'calc(100% - 12px)',
+                      padding: '6px 12px',
+                      width: '100%',
                       margin: 'auto',
-                      marginTop: '8px',
                       borderRadius: '12px',
+                      gap: '12px',
                       ...(option.value === 'logout'
                         ? {
                             '& *': {
@@ -206,11 +225,11 @@ const Sidebar = ({
                           }),
                       ...(option.value.includes(currentPath)
                         ? {
-                            backgroundColor: '#FFFEFE',
-                            boxShadow: '0px 0px 3px 0px #9c9c9c',
+                            backgroundColor: '#ffffff52',
+                            boxShadow: '0px 0px 2px 0px #30303065',
 
                             '&:hover': {
-                              backgroundColor: '#FFFEFE'
+                              backgroundColor: '#f0f0f0'
                             }
                           }
                         : {
@@ -224,50 +243,49 @@ const Sidebar = ({
                     {option?.name && option?.icon && (
                       <ListItemIcon
                         sx={{
+                          minWidth: 'auto',
                           justifyContent: !expand ? 'center' : 'initial'
                         }}
                       >
                         <CustomIcon
                           stopPropagation={false}
                           name={option.name}
+                          size={22}
                           icon={option.icon}
                           color={option.value.includes(currentPath) ? '#262627' : '#9D9FA1'}
                         />
                       </ListItemIcon>
                     )}
-                    <ListItemText>
-                      {expand && (
-                        <CustomTypography
-                          whiteSpace={'nowrap'}
-                          variant={'body2'}
-                          fontWeight={'500'}
-                          color={option.value.includes(currentPath) ? '#262627' : '#9D9FA1'}
-                        >
-                          {option.label}
-                        </CustomTypography>
-                      )}
-                    </ListItemText>
+                    {expand && (
+                      <CustomTypography
+                        whiteSpace={'nowrap'}
+                        fontSize={'14px'}
+                        fontWeight={'600'}
+                        color={option.value.includes(currentPath) ? '#262627' : '#9D9FA1'}
+                      >
+                        {option.label}
+                      </CustomTypography>
+                    )}
                   </CustomListButton>
                 </span>
               </Tooltip>
+              {idx === showDivider && (
+                <Divider
+                  sx={{
+                    marginTop: '12px',
+                    marginBottom: '12px'
+                  }}
+                />
+              )}
             </>
           ))}
-        </OptionContainer>
-        <div
-          style={{
-            padding: '42px 12px 12px 12px',
-            position: 'relative',
-            top: 0,
-            height: 'auto'
-          }}
-        >
           <div
             onClick={() => handleExpand(!expand)}
             style={{
               opacity: hideExpand ? 0 : 1,
               pointerEvents: hideExpand ? 'none' : 'all',
               position: 'absolute',
-              top: '0px',
+              bottom: '8px',
               right: '12px',
               zIndex: 100,
               padding: '8px',
@@ -296,95 +314,7 @@ const Sidebar = ({
               </span>
             </Tooltip>
           </div>
-          {logoutOption.map((option, idx) => (
-            <Tooltip title={option.label} placement="right" arrow={true} followCursor={true}>
-              <span>
-                <CustomListButton
-                  key={idx}
-                  disableRipple={true}
-                  focusRipple={false}
-                  disableTouchRipple={true}
-                  onClick={() => {
-                    if (option.value === 'logout') {
-                      // return handleToggle();
-                      dispatch(setLogoutFlag(true))
-                      return handleToggle()
-                    }
-                    handleToggle(option.value)
-                  }}
-                  sx={{
-                    padding: '6px 24px',
-                    width: 'calc(100% - 12px)',
-                    margin: 'auto',
-                    borderRadius: '12px',
-                    ...(option.value === 'logout'
-                      ? {
-                          '& *': {
-                            color: 'red'
-                          }
-                        }
-                      : {
-                          color: 'inherit'
-                        }),
-                    ...(option.value.includes(currentPath)
-                      ? {
-                          backgroundColor: '#FFFEFE',
-                          boxShadow: '0px 0px 3px 0px #9c9c9c',
-
-                          '&:hover': {
-                            backgroundColor: '#FFFEFE'
-                          }
-                        }
-                      : {
-                          backgroundColor: 'transparent',
-                          '&:hover': {
-                            backgroundColor: 'transparent'
-                          }
-                        })
-                  }}
-                >
-                  {option?.name && option?.icon && (
-                    <ListItemIcon
-                      sx={{
-                        justifyContent: !expand ? 'center' : 'initial'
-                      }}
-                    >
-                      <CustomIcon
-                        stopPropagation={false}
-                        name={option.name}
-                        icon={option.icon}
-                        color={
-                          option.value.includes('logout')
-                            ? 'red'
-                            : option.value.includes(currentPath)
-                              ? '#262627'
-                              : '#9D9FA1'
-                        }
-                      />
-                    </ListItemIcon>
-                  )}
-                  {expand && (
-                    <ListItemText>
-                      <CustomTypography
-                        variant={'body2'}
-                        fontWeight={'500'}
-                        color={
-                          option.value.includes('logout')
-                            ? 'red'
-                            : option.value.includes(currentPath)
-                              ? '#262627'
-                              : '#9D9FA1'
-                        }
-                      >
-                        {option.label}
-                      </CustomTypography>
-                    </ListItemText>
-                  )}
-                </CustomListButton>
-              </span>
-            </Tooltip>
-          ))}
-        </div>
+        </OptionContainer>
       </Container>
     </Fade>
   )
@@ -416,7 +346,10 @@ const OptionContainer = styled(List)({
   height: '100%',
   overflowY: 'auto',
   overflowX: 'hidden',
-  padding: '12px 12px 12px 12px'
+  padding: '12px 12px 12px 12px',
+  gap: '8px',
+  display: 'flex',
+  flexDirection: 'column'
 })
 
 const CustomListButton = styled(ListItemButton)({})

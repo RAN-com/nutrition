@@ -1,4 +1,5 @@
 import { grey } from '@mui/material/colors'
+import zIndex from '@mui/material/styles/zIndex'
 import toast, { ToastOptions } from 'react-hot-toast'
 
 // Common toast options for consistency
@@ -8,7 +9,8 @@ const commonOptions: ToastOptions = {
   style: {
     borderRadius: '8px',
     background: grey['100'],
-    color: grey['700']
+    color: grey['700'],
+    zIndex: zIndex.modal * zIndex.modal // Ensure toasts appear above other elements
   }
 }
 
