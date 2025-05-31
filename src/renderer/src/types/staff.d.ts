@@ -43,6 +43,7 @@ export type AppointmentData = {
   phone: string
   email?: string
   appointment_date: string
+  mapLocation?: string
   assigned_to: {
     sid: string
   }

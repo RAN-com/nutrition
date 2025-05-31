@@ -9,7 +9,6 @@ import {
 import { grey } from '@mui/material/colors'
 import CustomTextInput from '@renderer/components/text-input'
 import CustomTypography from '@renderer/components/typography'
-import { whatsappTemplates } from '@renderer/firebase/visitor'
 import { useFormik } from 'formik'
 import React from 'react'
 import * as yup from 'yup'
@@ -28,14 +27,32 @@ const validationSchema = yup.object().shape({
     .max(500, 'Message cannot exceed 500 characters')
 })
 
+/**
+ * Renders a dialog for composing and sending a WhatsApp message to a specified phone number.
+ *
+ * If a phone number is provided, displays a message input field with validation, a list of the last 5 sent messages as selectable templates, and a button to send the message via WhatsApp. If no phone number is provided, shows an error dialog.
+ *
+ * @param onClose - Callback to close the dialog.
+ * @param open - Controls whether the dialog is visible.
+ * @param phone - The recipient's phone number. If not provided, an error dialog is shown.
+ *
+ * @remark The last 5 sent messages are stored in local storage and displayed as templates for quick reuse.
+ */
 export default function WhatsAppInput({ onClose, open, phone }: Props) {
   const [messages, setMessages] = React.useState<string[]>([])
 
   React.useEffect(() => {
-    if (open) {
-      whatsappTemplates().then(setMessages).catch(setMessages)
-    }
-  }, [open])
+    // Fetch the last 5 messages from local storage
+    const storedMessages = JSON.parse(localStorage.getItem('lastSentMessages') || '[]') as string[]
+    setMessages(storedMessages.slice(0, 5)) // Limit to last 5 messages
+  }, [])
+
+  const saveMessageToLocalStorage = (message: string) => {
+    const storedMessages = JSON.parse(localStorage.getItem('lastSentMessages') || '[]') as string[]
+    const updatedMessages = [message, ...storedMessages].slice(0, 5) // Keep only the last 5 messages
+    localStorage.setItem('lastSentMessages', JSON.stringify(updatedMessages))
+    setMessages(updatedMessages)
+  }
 
   const formik = useFormik({
     initialValues: {
@@ -44,11 +61,14 @@ export default function WhatsAppInput({ onClose, open, phone }: Props) {
     enableReinitialize: true,
     validationSchema,
     onSubmit(values, { resetForm }) {
-      // considering the mobile number as IN  without +91
       const url = new URL(`https://wa.me/91${phone}`)
       url.searchParams.append('text', values.message)
       console.log(url)
       window.open(url, '_blank')
+
+      // Save the message to local storage
+      saveMessageToLocalStorage(values.message)
+
       resetForm()
       onClose()
     }
@@ -95,8 +115,9 @@ export default function WhatsAppInput({ onClose, open, phone }: Props) {
           />
           <CustomTypography fontWeight={'bold'}>Message Templates</CustomTypography>
           <MsgBoxContainer>
-            {messages.map((msg) => (
+            {messages.map((msg, idx) => (
               <MsgBox
+                key={idx}
                 onClick={(e) => {
                   e.preventDefault()
                   formik.setFieldValue('message', msg)
@@ -116,7 +137,7 @@ export default function WhatsAppInput({ onClose, open, phone }: Props) {
         </>
       ) : (
         <>
-          <DialogTitle variant="h6">Opps</DialogTitle>
+          <DialogTitle variant="h6">Oops</DialogTitle>
           <DialogContent>
             <DialogContentText>
               <CustomTypography>Mobile not found for this visitor</CustomTypography>
@@ -150,5 +171,10 @@ const MsgBox = styled('div')({
   minWidth: '100%',
   padding: '8px',
   border: `1px solid ${grey['300']} `,
-  borderRadius: '12px'
+  borderRadius: '12px',
+  cursor: 'pointer',
+  scrollSnapAlign: 'start',
+  '&:hover': {
+    backgroundColor: grey['100']
+  }
 })
