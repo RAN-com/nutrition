@@ -1,4 +1,4 @@
-import { Avatar, styled } from '@mui/material'
+import { Avatar, Checkbox, Chip, styled } from '@mui/material'
 import { grey } from '@mui/material/colors'
 import CustomTypography from '../typography'
 import React from 'react'
@@ -13,11 +13,35 @@ type Props = {
   onClick(): void
   onMoreClick?(e: React.MouseEvent<HTMLDivElement>): void
   onDelete?(): void
+  attendance?: 'present' | 'absent'
+  markAttendance?: boolean
+  onMarkAttendanceChange?(e: 'present' | 'absent'): void
+  attendanceStatus?: 'present' | 'absent' | 'unknown'
 }
 
-const UserCard = ({ name, email, phone, photo_url, children, onClick, onMoreClick }: Props) => {
+const UserCard = ({
+  name,
+  email,
+  phone,
+  photo_url,
+  children,
+  onClick,
+  onMoreClick,
+  markAttendance = true,
+  attendance,
+  attendanceStatus = 'unknown',
+  onMarkAttendanceChange
+}: Props) => {
   return (
-    <Card onClick={onClick}>
+    <Card
+      onClick={() => {
+        if (markAttendance) {
+          onMarkAttendanceChange?.(attendance === 'present' ? 'absent' : 'present')
+          return
+        }
+        onClick?.()
+      }}
+    >
       <div
         className="ig"
         style={{
@@ -43,12 +67,80 @@ const UserCard = ({ name, email, phone, photo_url, children, onClick, onMoreClic
         </div>
       </div>
       <div style={{ gap: '12px', display: 'flex', flexDirection: 'column' }}>
-        <CustomIcon
-          onClick={onMoreClick}
-          name="MATERIAL_DESIGN"
-          icon="MdMoreVert"
-          color={grey['600']}
-        />
+        {markAttendance ? (
+          <Checkbox
+            onClick={(e) => {
+              e.stopPropagation()
+            }}
+            color="primary"
+            icon={
+              <CustomIcon
+                name="MATERIAL_DESIGN"
+                icon="MdCheckBoxOutlineBlank"
+                color={grey['600']}
+              />
+            }
+            value={attendance === 'present'}
+            checked={attendance === 'present'}
+            checkedIcon={
+              <CustomIcon name="MATERIAL_DESIGN" icon="MdCheckBox" color={grey['600']} />
+            }
+            sx={{
+              padding: 0,
+              margin: 0,
+              width: 'max-content',
+              height: 'max-content',
+              '&.Mui-checked': {
+                color: grey['600']
+              }
+            }}
+            onChange={(e) => {
+              e.stopPropagation()
+              if (!onMarkAttendanceChange) return
+              if (attendance === 'present') {
+                onMarkAttendanceChange('absent')
+                return
+              }
+
+              if (attendance === 'absent') {
+                onMarkAttendanceChange('present')
+                return
+              }
+
+              // Toggle attendance state
+              onMarkAttendanceChange?.(e.target.checked ? 'present' : 'absent')
+              // Handle attendance marking logic here
+            }}
+          />
+        ) : (
+          <>
+            <CustomIcon
+              onClick={onMoreClick}
+              name="MATERIAL_DESIGN"
+              icon="MdMoreVert"
+              color={grey['600']}
+            />
+            {attendanceStatus !== 'unknown' && (
+              <Chip
+                label={attendanceStatus}
+                size="small"
+                color={
+                  attendanceStatus === 'present'
+                    ? 'success'
+                    : attendanceStatus === 'absent'
+                      ? 'error'
+                      : 'default'
+                }
+                sx={{
+                  width: 'max-content',
+                  height: 'max-content',
+                  fontSize: '0.8rem',
+                  textTransform: 'capitalize'
+                }}
+              />
+            )}
+          </>
+        )}
       </div>
       {children}
     </Card>
