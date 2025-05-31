@@ -1,6 +1,16 @@
-import { collection, doc, getDoc, getDocs, updateDoc, setDoc, deleteDoc } from 'firebase/firestore'
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  updateDoc,
+  setDoc,
+  deleteDoc,
+  writeBatch,
+  arrayUnion
+} from 'firebase/firestore'
 import { firestore } from './'
-import { StaffData } from '@renderer/types/staff'
+import { StaffData, StaffAttendance } from '@renderer/types/staff'
 import { errorToast, successToast } from '@renderer/utils/toast'
 import { encryptData } from '@renderer/utils/crypto'
 import { CustomerResponse } from '@renderer/types/customers'
@@ -123,6 +133,7 @@ export const addStaff = async (
       total_appointments_recorded: 0,
       total_customers_assigned: 0,
       total_visitors_assigned: 0,
+      attendance: [],
       records: records
     } as StaffData)
 
@@ -266,5 +277,114 @@ export const convertCustomerToStaff = async (uid: string, cid: string, limit: nu
   } catch (error: any) {
     errorToast(error.message || 'An error occurred while converting the visitor')
     return { status: 'error', message: error.message }
+  }
+}
+
+export const updateStaffAttendance = async (
+  uid: string,
+  attendanceData: StaffAttendance[]
+): Promise<{ message: string; status: boolean }> => {
+  try {
+    const batch = writeBatch(firestore)
+    // First get all staff data
+    await Promise.all(
+      attendanceData.map(async ({ sid, status, date }) => {
+        const staffDocRef = doc(firestore, `users/${uid}/staffs/${sid}`)
+        const staffDoc = await getDoc(staffDocRef)
+
+        if (staffDoc.exists()) {
+          const staffData = staffDoc.data() as StaffData
+          const attendance = staffData.attendance || []
+
+          // Check if an entry with the same date exists
+          const existingIndex = attendance.findIndex((entry) => entry.date === date)
+
+          if (existingIndex >= 0) {
+            // Update existing entry
+            attendance[existingIndex] = { status, date, sid }
+            batch.update(staffDocRef, { attendance })
+          } else {
+            // Add new entry
+            batch.update(staffDocRef, {
+              attendance: arrayUnion({ status, date })
+            })
+          }
+        }
+      })
+    )
+    await batch.commit()
+    successToast('Attendance updated successfully')
+    return {
+      message: 'Attendance updated successfully',
+      status: true
+    }
+  } catch (error) {
+    console.error('Error updating attendance:', error)
+    errorToast('Failed to update attendance')
+    return {
+      message: 'Failed to update attendance',
+      status: false
+    }
+  }
+}
+
+export const markStaffAttendance = async (uid: string, attendanceData: StaffAttendance[]) => {
+  try {
+    const batch = writeBatch(firestore)
+
+    attendanceData.forEach(({ sid, status, date }) => {
+      const staffDocRef = doc(firestore, `users/${uid}/staffs/${sid}`)
+      batch.update(staffDocRef, {
+        attendance: arrayUnion({
+          status,
+          date
+        })
+      })
+    })
+
+    await batch.commit()
+
+    successToast('Attendance marked successfully')
+    return {
+      message: 'Attendance marked successfully',
+      status: true
+    }
+  } catch (error) {
+    console.error('Error marking attendance:', error)
+    errorToast('Failed to mark attendance')
+    return {
+      message: 'Failed to mark attendance',
+      status: false
+    }
+  }
+}
+
+export const deleteStaffAttendance = async (uid: string) => {
+  try {
+    const batch = writeBatch(firestore)
+    const staffQuery = collection(firestore, `users/${uid}/staffs`)
+    const staffSnapshot = await getDocs(staffQuery)
+
+    staffSnapshot.forEach((doc) => {
+      const staffDocRef = doc.ref
+      batch.update(staffDocRef, {
+        attendance: []
+      })
+    })
+
+    await batch.commit()
+
+    successToast('All staff attendance deleted successfully')
+    return {
+      message: 'All staff attendance deleted successfully',
+      status: true
+    }
+  } catch (error) {
+    console.error('Error deleting staff attendance:', error)
+    errorToast('Failed to delete all staff attendance')
+    return {
+      message: 'Failed to delete all staff attendance',
+      status: false
+    }
   }
 }

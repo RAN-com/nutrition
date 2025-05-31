@@ -21,11 +21,18 @@ export type CreateStaff = {
   about?: string
 }
 
+export type StaffAttendance = {
+  sid: string
+  date: string
+  status: 'present' | 'absent'
+}
+
 export type StaffData = {
   data: CreateStaff & { sid: string }
   total_customers_assigned: number
   total_visitors_assigned: number
   total_appointments_recorded: number
+  attendance: StaffAttendance[]
   records: RecordType[]
 }
 
