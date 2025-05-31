@@ -27,6 +27,17 @@ const validationSchema = yup.object().shape({
     .max(500, 'Message cannot exceed 500 characters')
 })
 
+/**
+ * Renders a dialog for composing and sending a WhatsApp message to a specified phone number.
+ *
+ * If a phone number is provided, displays a message input field with validation, a list of the last 5 sent messages as selectable templates, and a button to send the message via WhatsApp. If no phone number is provided, shows an error dialog.
+ *
+ * @param onClose - Callback to close the dialog.
+ * @param open - Controls whether the dialog is visible.
+ * @param phone - The recipient's phone number. If not provided, an error dialog is shown.
+ *
+ * @remark The last 5 sent messages are stored in local storage and displayed as templates for quick reuse.
+ */
 export default function WhatsAppInput({ onClose, open, phone }: Props) {
   const [messages, setMessages] = React.useState<string[]>([])
 
