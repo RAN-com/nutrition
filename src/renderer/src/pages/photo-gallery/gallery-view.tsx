@@ -99,7 +99,7 @@ export default function GalleryView({ data, onClose, open, idx }: Props) {
             autoFocus={true}
             autoPlay={true}
             infiniteLoop={true}
-            interval={3000}
+            interval={1500}
             dynamicHeight={true}
             swipeable={true}
             showThumbs={true}
