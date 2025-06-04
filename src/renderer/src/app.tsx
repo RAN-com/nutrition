@@ -59,29 +59,22 @@ const App = () => {
     const handlePress = (ev: KeyboardEvent) => {
       const now = Date.now()
 
-      if (ev.ctrlKey && ev.shiftKey && ev.altKey && ev.key === 'D') {
+      if (ev.ctrlKey && ev.shiftKey && ev.altKey && (ev.key === 'D' || ev.key === 'd')) {
         lastKeyPressTime = now
-        console.log('Combination ctrl+shift+alt+D detected')
       }
 
-      if (ev.ctrlKey && ev.shiftKey && ev.altKey && ev.key === 'O') {
+      if (ev.ctrlKey && ev.shiftKey && ev.altKey && (ev.key === 'O' || ev.key === 'o')) {
         if (now - lastKeyPressTime <= 2000) {
-          console.log('Combination ctrl+shift+alt+E detected within 2 seconds of O')
           setShowModal(true)
-        } else {
-          console.log('Action dismissed as E was not pressed within 2 seconds of O')
         }
 
         lastKeyPressTime = 0
       }
 
-      if (ev.ctrlKey && ev.shiftKey && ev.altKey && ev.key === 'F') {
+      if (ev.ctrlKey && ev.shiftKey && ev.altKey && (ev.key === 'F' || ev.key === 'f')) {
         if (now - lastKeyPressTime <= 2000) {
-          console.log('Combination ctrl+shift+alt+E detected within 2 seconds of F')
           dispatch(toggleDevMode(false))
           setShowModal(false)
-        } else {
-          console.log('Action dismissed as E was not pressed within 2 seconds of F')
         }
 
         lastKeyPressTime = 0
