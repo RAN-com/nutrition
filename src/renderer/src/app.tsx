@@ -37,10 +37,8 @@ import {
   setShowAvailableModal,
   setShowDownloadedModal,
   setUpdateAvailableStatus,
-  setUpdateDownloaded,
-  toggleDevMode
+  setUpdateDownloaded
 } from './redux/features/ui/slice'
-import CustomTextInput from './components/text-input'
 import AppUpdate from './components/modal/app-update'
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
@@ -49,43 +47,7 @@ const App = () => {
   const dispatch = useAppDispatch()
   const { user } = useAppSelector((s) => s.auth)
   const staff = useAppSelector((s) => s.staffs.current_staff)
-  const { dimensions, toggle_dev_mode } = useAppSelector((s) => s.ui)
-  const [showModal, setShowModal] = React.useState(false)
-  const [password, setPassword] = React.useState('')
-
-  React.useEffect(() => {
-    let lastKeyPressTime = 0
-
-    const handlePress = (ev: KeyboardEvent) => {
-      const now = Date.now()
-
-      if (ev.ctrlKey && ev.shiftKey && ev.altKey && (ev.key === 'D' || ev.key === 'd')) {
-        lastKeyPressTime = now
-      }
-
-      if (ev.ctrlKey && ev.shiftKey && ev.altKey && (ev.key === 'O' || ev.key === 'o')) {
-        if (now - lastKeyPressTime <= 2000) {
-          setShowModal(true)
-        }
-
-        lastKeyPressTime = 0
-      }
-
-      if (ev.ctrlKey && ev.shiftKey && ev.altKey && (ev.key === 'F' || ev.key === 'f')) {
-        if (now - lastKeyPressTime <= 2000) {
-          dispatch(toggleDevMode(false))
-          setShowModal(false)
-        }
-
-        lastKeyPressTime = 0
-      }
-
-      console.log(ev.key)
-    }
-
-    window.addEventListener('keydown', handlePress)
-    return () => window.removeEventListener('keydown', handlePress)
-  }, [])
+  const { dimensions } = useAppSelector((s) => s.ui)
 
   const { ipcRenderer } = window?.electron || {}
   React.useEffect(() => {
@@ -203,94 +165,6 @@ const App = () => {
     >
       <AppUpdate />
       <PaymentModel open={!!pendingOrder} />
-      {/* <RestartModal
-        open={updateDownloaded}
-        onClose={() => {
-          setUpdateDownloaded(false)
-          window.electron?.updateResponse('install_later')
-        }}
-        onRestart={() => {
-          window.electron?.updateResponse('install_now')
-        }}
-      /> */}
-      <Dialog
-        open={showModal}
-        onClose={() => {
-          setShowModal(false)
-          setPassword('')
-        }}
-        sx={{
-          '.MuiPaper-root': {
-            width: '100%',
-            maxWidth: '320px',
-            padding: '16px 24px',
-            paddingBottom: '32px',
-            position: 'relative',
-            top: 0,
-            gap: '12px'
-          },
-          zIndex: zIndex.modal * zIndex.modal
-        }}
-      >
-        {toggle_dev_mode ? (
-          <div
-            style={{
-              display: 'flex',
-              width: '100%',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flexDirection: 'column',
-              gap: '8px',
-              padding: '0px'
-            }}
-          >
-            <CustomTypography textAlign={'center'}>
-              You already have access to dev mode
-            </CustomTypography>
-            <Button
-              fullWidth
-              variant="contained"
-              onClick={() => {
-                setPassword('')
-                setShowModal(false)
-              }}
-            >
-              Close
-            </Button>
-          </div>
-        ) : (
-          <>
-            <CustomTypography variant="h6">Enable Access</CustomTypography>
-            <CustomTextInput
-              input={{
-                size: 'small',
-                onChange: (e) => setPassword(e.target.value),
-                type: 'password',
-                label: 'Enter your developer password'
-              }}
-            />
-            <Button
-              disabled={password.length === 0 || password.length < 8}
-              variant="contained"
-              onClick={() => {
-                setPassword('')
-                setShowModal(false)
-                if (password === 'devmodeaccess') {
-                  dispatch(toggleDevMode(true))
-                  successToast('You have the developer access')
-                  return
-                } else {
-                  setPassword('')
-                  setShowModal(false)
-                  errorToast('Wrong Password')
-                }
-              }}
-            >
-              Submit
-            </Button>
-          </>
-        )}
-      </Dialog>
       <Navigation />
     </ThemeProvider>
   )
