@@ -25,7 +25,6 @@ export function encryptData(data: string | null) {
       padding: CryptoJS.pad.Pkcs7
     }).toString()
     const encryptedData = base64UrlEncode(encrypted)
-    console.log('Encrypted data:', encryptedData)
     return encryptedData
   } catch (error) {
     console.error('Error encrypting data:', error)
