@@ -1,7 +1,3 @@
-## Generate PAT
-
-set env GH_TOKEN in your system
-
 ## Code Commit
 
 ```powershell
@@ -37,23 +33,23 @@ git push origin {TAG_VERSION}
 For Windows
 
 ```powershell
-npm run build:win
+npx electron-builder --win
 ```
 
 For Mac
 
 ```powershell
-npm run build:mac
+npx electron-builder --mac
 ```
 
 For Linux
 
 ```powershell
-npm run build:linux
+npx electron-builder --linux
 ```
 
 ### Create Release using GH
 
 ```powershell
-gh release create v0.0.0 'FILE_PATH' --title "TITLE" --notes "___"
+gh release create v0.0.0 './resources/' --title "your title goes here" --notes "add about changes and other things"
 ```
