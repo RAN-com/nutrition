@@ -28,7 +28,6 @@ import PhotoGallery from '@renderer/pages/photo-gallery'
 import CustomerPhotoGallery from '@renderer/pages/customer/photo-gallery'
 import Posts from '@renderer/pages/posts'
 import PostDetails from '@renderer/pages/posts/details'
-import moment from 'moment'
 
 const Navigation = () => {
   const user = useAppSelector((s) => s.auth.user)

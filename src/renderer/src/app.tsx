@@ -26,7 +26,7 @@ import { CreateAdminPayment } from './types/payment'
 import CustomTypography from './components/typography'
 import { deleteOrder } from './firebase/pricing'
 import { updateCardValidity } from './firebase/card'
-import { addTransaction, getUserDocument, setAdminSubscription } from './firebase'
+import { addTransaction, setAdminSubscription } from './firebase'
 import { asyncGetCurrentStaffDomainData } from './redux/features/user/staff'
 import zIndex from '@mui/material/styles/zIndex'
 import { asyncRefreshUser, setAppVersion, setNotifications } from './redux/features/user/auth'
@@ -41,7 +41,6 @@ import {
 } from './redux/features/ui/slice'
 import AppUpdate from './components/modal/app-update'
 import { encryptData } from './utils/crypto'
-import { asyncGetUserSubscription } from './redux/features/user/customers'
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const App = () => {
