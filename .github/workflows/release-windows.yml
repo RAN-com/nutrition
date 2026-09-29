@@ -10,7 +10,6 @@ permissions:
 
 jobs:
   build-windows:
-    name: Build Windows Electron App
     runs-on: windows-latest
 
     steps:
