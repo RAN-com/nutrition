@@ -45,9 +45,6 @@ latest.yml
 .env
 .env.local
 
-# GitHub-specific artifacts
-.github/workflows/*.yml
-
 # Ignore Electron Vite-specific cache and metadata
 .vite/
 *.tsbuildinfo
