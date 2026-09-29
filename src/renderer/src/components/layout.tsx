@@ -39,13 +39,13 @@ const LayoutV2: React.FC<Props> = ({ children }: Props) => {
           auth.signOut()
         } else {
           dispatch(setUser(data.data))
-          if (!hasActiveSubscription) {
-            errorToast(
-              'Your subscription has expired. Please renew your subscription to continue using the app.'
-            )
-            navigate('/pricing', { replace: true })
-            return
-          }
+          // if (!hasActiveSubscription) {
+          //   errorToast(
+          //     'Your subscription has expired. Please renew your subscription to continue using the app.'
+          //   )
+          //   navigate('/pricing', { replace: true })
+          //   return
+          // }
         }
       })
     } else {

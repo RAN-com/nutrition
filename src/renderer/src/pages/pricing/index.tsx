@@ -233,24 +233,24 @@ const Pricing = () => {
             </PricingContainer>
           ))}
         </InnerContainer>
-        {isSubscriptionActive ||
-          (user?.subscription?.type === 'FREE_TRAIL' && (
-            <Button
-              sx={{
-                zIndex: 100,
-                padding: '12px 24px',
-                marginTop: '12px'
-              }}
-              variant={'contained'}
-              // fullWidth={true}
-              onClick={() => {
-                navigate('/home')
-                setShowPricing(false)
-              }}
-            >
-              Back to Home
-            </Button>
-          ))}
+        {isSubscriptionActive && (
+          // user?.subscription?.type === 'FREE_TRAIL' &&
+          <Button
+            sx={{
+              zIndex: 100,
+              padding: '12px 24px',
+              marginTop: '12px'
+            }}
+            variant={'contained'}
+            // fullWidth={true}
+            onClick={() => {
+              navigate('/home')
+              setShowPricing(false)
+            }}
+          >
+            Back to Home
+          </Button>
+        )}
       </Dialog>
     </Container>
   )
