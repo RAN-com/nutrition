@@ -33,17 +33,20 @@
     "directories": {
       "output": "release"
     },
-    "publish": {
-      "provider": "github",
-      "owner": "RAN-com",
-      "repo": "nutrition",
-      "releaseType": "release"
-    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "RAN-com",
+        "repo": "nutrition"
+      }
+    ],
     "win": {
       "target": "nsis"
     },
     "mac": {
-      "target": "dmg"
+      "target": [
+        "dmg"
+      ]
     },
     "linux": {
       "target": [
@@ -84,6 +87,7 @@
     "editorjs-table": "^1.4.10",
     "editorjs-text-alignment-blocktune": "^1.0.3",
     "editorjs-text-color-plugin": "^2.0.4",
+    "electron-log": "^5.4.4",
     "electron-updater": "^6.3.9",
     "express": "^4.21.2",
     "file-loader": "^6.2.0",
@@ -117,11 +121,11 @@
     "@electron-toolkit/eslint-config-prettier": "^2.0.0",
     "@electron-toolkit/eslint-config-ts": "^2.0.0",
     "@electron-toolkit/tsconfig": "^1.0.1",
-    "@types/node": "^20.14.8",
+    "@types/node": "^26.6.3",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.3.1",
-    "electron": "^31.0.2",
+    "electron": "^44.4.5",
     "electron-builder": "^24.13.3",
     "electron-vite": "^2.3.0",
     "eslint": "^8.57.0",

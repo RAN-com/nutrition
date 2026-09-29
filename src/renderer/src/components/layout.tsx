@@ -12,6 +12,7 @@ import { errorToast } from '@renderer/utils/toast'
 import zIndex from '@mui/material/styles/zIndex'
 import CustomIcon from './icons'
 import { green } from '@mui/material/colors'
+import moment from 'moment'
 
 type Props = {
   children?: React.ReactNode
@@ -25,6 +26,9 @@ const LayoutV2: React.FC<Props> = ({ children }: Props) => {
   const isOnboarding = useLocation().pathname.includes('onboarding')
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
+  const hasActiveSubscription = user?.subscription
+    ? moment(user?.subscription?.valid_till).isAfter(moment())
+    : false
 
   React.useEffect(() => {
     if (user) {
@@ -35,6 +39,13 @@ const LayoutV2: React.FC<Props> = ({ children }: Props) => {
           auth.signOut()
         } else {
           dispatch(setUser(data.data))
+          if (!hasActiveSubscription) {
+            errorToast(
+              'Your subscription has expired. Please renew your subscription to continue using the app.'
+            )
+            navigate('/pricing', { replace: true })
+            return
+          }
         }
       })
     } else {

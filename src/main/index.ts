@@ -10,7 +10,7 @@ import {
 } from 'electron'
 import fs from 'fs'
 import os from 'os'
-
+import log from 'electron-log/main'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { autoUpdater } from 'electron-updater'
@@ -23,6 +23,11 @@ function createPdf() {
     movable: true
   })
 }
+
+log.transports.file.level = 'info'
+log.transports.file.maxSize = 10 * 1024 * 1024 // 10 MB file size limit before rotation
+log.transports.console.format = '[{y}-{m}-{d} {h}:{i}:{s}.{ms}] [{level}] {text}'
+Object.assign(console, log.functions)
 
 function createWindow({ width, height }: { width: number; height: number }): void {
   const mainWindow = new BrowserWindow({
@@ -69,7 +74,7 @@ function createWindow({ width, height }: { width: number; height: number }): voi
       height: size[1]
     }
 
-    mainWindow.webContents.send("app_version", app.getVersion());
+    mainWindow.webContents.send('app_version', app.getVersion())
     mainWindow.webContents.send('sizeChanged', JSON.stringify(data))
   })
 
@@ -100,6 +105,19 @@ function createWindow({ width, height }: { width: number; height: number }): voi
     }
 
     mainWindow.webContents.send('sizeChanged', JSON.stringify(data))
+  })
+
+  ipcMain.on('log-message', (_event, { level, message }) => {
+    if (log[level as keyof typeof log]) {
+      ;(log[level as keyof typeof log] as Function)(`[Renderer]: ${message}`)
+    }
+  })
+
+  ipcMain.on('renderer-console-log', (_event, { level, args }) => {
+    const logMethod = log[level as keyof typeof log] || log.info
+    if (typeof logMethod === 'function') {
+      logMethod('[Renderer]:', ...args)
+    }
   })
 
   ipcMain.on('openUrl', (_event, url: string) => {
@@ -179,13 +197,13 @@ function createWindow({ width, height }: { width: number; height: number }): voi
     }
 
     if (message === 'quit_app') {
-      app.quit();
+      app.quit()
       return
     }
 
-    if(message === "restart") {
-      app.relaunch();
-      app.quit();
+    if (message === 'restart') {
+      app.relaunch()
+      app.quit()
     }
 
     if (message === 'minimize_app') {
@@ -221,8 +239,8 @@ function createWindow({ width, height }: { width: number; height: number }): voi
       }
     }
 
-    if(message.includes("startDownload")) {
-      autoUpdater.downloadUpdate();
+    if (message.includes('startDownload')) {
+      autoUpdater.downloadUpdate()
     }
   })
 
@@ -234,8 +252,8 @@ function createWindow({ width, height }: { width: number; height: number }): voi
     mainWindow.webContents.send('update-check', 'Checking for updates...')
   })
 
-  autoUpdater.on("download-progress", (event) => {
-    mainWindow.webContents.send("downloadProgress", JSON.stringify(event));
+  autoUpdater.on('download-progress', (event) => {
+    mainWindow.webContents.send('downloadProgress', JSON.stringify(event))
   })
 
   // When an update is available, notify the renderer
@@ -269,6 +287,9 @@ app.whenReady().then(() => {
   const { height, width } = display.workAreaSize
   console.log(display.size, display.bounds, display.workArea, display.workAreaSize)
   electronApp.setAppUserModelId('com.ran.nutrition')
+
+  log.info('App started successfully')
+  console.log('Logs stored at:', log.transports.file.getFile().path)
 
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)

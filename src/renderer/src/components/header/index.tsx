@@ -53,6 +53,9 @@ const Header = ({ toggleSidebar, showToggle }: Props) => {
   const [showNotification, setShowNotification] = React.useState<Element | null>(null)
   const notifications = useAppSelector((s) => s.auth.notifications?.filter((e) => !e.read))
   const isMoreNotification = notifications?.length > 7
+
+  const validSubscription =
+    user?.subscription && moment(user?.subscription?.valid_till).isAfter(moment())
   return (
     <HeaderContainer className="header" sx={{ backgroundColor: isDev ? '#96c9fa' : '#fff' }}>
       <div className="greet">
@@ -84,7 +87,7 @@ const Header = ({ toggleSidebar, showToggle }: Props) => {
         </Tooltip>
         <Tooltip
           title={
-            user?.subscription
+            validSubscription
               ? `Valid till ${moment(user?.subscription?.valid_till).format('DD MMM YYYY')}`
               : 'No Subscription'
           }
@@ -92,7 +95,7 @@ const Header = ({ toggleSidebar, showToggle }: Props) => {
         >
           <Chip
             sx={{
-              backgroundColor: user?.subscription ? '#4caf4f55' : '#f44336',
+              backgroundColor: validSubscription ? '#4caf4f55' : '#f44336',
               color: 'white',
               '& .MuiChip-label': {
                 fontSize: '0.75rem'
@@ -104,13 +107,13 @@ const Header = ({ toggleSidebar, showToggle }: Props) => {
                   width: '15px',
                   height: '15px',
                   borderRadius: '50%',
-                  backgroundColor: user?.subscription ? '#4caf4f' : '#f44336'
+                  backgroundColor: validSubscription ? '#4caf4f' : '#f44336'
                 }}
               ></div>
             }
             label={
-              <CustomTypography variant="body2" color={user?.subscription ? '#4caf4f' : 'black'}>
-                {user?.subscription
+              <CustomTypography variant="body2" color={validSubscription ? '#4caf4f' : 'black'}>
+                {validSubscription
                   ? `
                   ${user?.subscription?.type}
                 `

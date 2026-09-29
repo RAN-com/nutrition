@@ -7,9 +7,13 @@ interface El extends ElectronAPI {
   generatePdf(id: string, fileName?: string): void
 }
 
+export interface IElectronAPI {
+  log: (level: 'info' | 'warn' | 'error', message: string) => void
+}
+
 declare global {
   interface Window {
     electron: El
-    api: unknown
+    api: unknown & IElectronAPI
   }
 }

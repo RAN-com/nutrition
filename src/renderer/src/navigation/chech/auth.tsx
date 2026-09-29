@@ -11,6 +11,16 @@ const CheckAuth = ({ user }: Props) => {
 
   React.useEffect(() => {
     if (user) {
+      if (user?.subscription && user?.subscription?.valid_till) {
+        const isValid = new Date(user?.subscription?.valid_till).getTime() > new Date().getTime()
+        if (!isValid) {
+          navigate('/pricing', { replace: true })
+          return
+        }
+      } else {
+        navigate('/pricing', { replace: true })
+        return
+      }
       return
       // navigate(window.location.href/)
     } else {

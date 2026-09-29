@@ -26,10 +26,10 @@ import { CreateAdminPayment } from './types/payment'
 import CustomTypography from './components/typography'
 import { deleteOrder } from './firebase/pricing'
 import { updateCardValidity } from './firebase/card'
-import { addTransaction, setAdminSubscription } from './firebase'
+import { addTransaction, getUserDocument, setAdminSubscription } from './firebase'
 import { asyncGetCurrentStaffDomainData } from './redux/features/user/staff'
 import zIndex from '@mui/material/styles/zIndex'
-import { setAppVersion, setNotifications } from './redux/features/user/auth'
+import { asyncRefreshUser, setAppVersion, setNotifications } from './redux/features/user/auth'
 import { listenToNotifications } from './firebase/notifications'
 import {
   setDimensions,
@@ -40,6 +40,8 @@ import {
   setUpdateDownloaded
 } from './redux/features/ui/slice'
 import AppUpdate from './components/modal/app-update'
+import { encryptData } from './utils/crypto'
+import { asyncGetUserSubscription } from './redux/features/user/customers'
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const App = () => {
@@ -123,9 +125,16 @@ const App = () => {
     }
   }, [user, staff])
 
+  React.useEffect(() => {
+    if (user) {
+      dispatch(asyncRefreshUser({ uid: user?.uid as string }))
+    }
+  }, [])
+
   const pendingOrder = useAppSelector((s) => s.pricing.pending_order)
   const th = useTheme()
 
+  console.log('Dimensions:', encryptData('developer'))
   return (
     <ThemeProvider
       theme={responsiveFontSizes(

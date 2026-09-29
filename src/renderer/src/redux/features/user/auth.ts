@@ -37,6 +37,13 @@ const initialState: INITIAL_STATE = {
 
 const name = 'user'
 
+export const asyncRefreshUser = createAsyncThunk(
+  `${name}/asyncRefreshUser`,
+  async ({ uid }: { uid: string }) => {
+    return await getUserDocument(uid)
+  }
+)
+
 export const asyncUpdateUser = createAsyncThunk(
   `${name}/asyncUpdateUser`,
   async ({ ...data }: Partial<CenterUser>) => {
@@ -150,6 +157,21 @@ const userSlice = createSlice({
 
     builders.addCase(asyncCreateUser.fulfilled, (state) => {
       state.login_loading = false
+    })
+
+    builders.addCase(asyncRefreshUser.pending, (state) => {
+      state.updating = true
+    })
+
+    builders.addCase(asyncRefreshUser.rejected, (state) => {
+      state.updating = false
+    })
+
+    builders.addCase(asyncRefreshUser.fulfilled, (state, action) => {
+      if (action.payload?.data) {
+        state.user = action.payload?.data as unknown as CenterUser
+      }
+      state.updating = false
     })
   }
 })

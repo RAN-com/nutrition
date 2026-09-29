@@ -48,7 +48,9 @@ const AuthCreate = (): React.ReactNode => {
   })
 
   React.useEffect(() => {
+    console.log(user)
     if (user) {
+      console.log(user)
       navigate('/home', { replace: true })
     }
   }, [user])
