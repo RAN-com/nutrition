@@ -25,6 +25,26 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Create production environment file
+        shell: pwsh
+        run: |
+          @"
+          VITE_VERCEL_AWS_BUCKET_REGION=${{ secrets.VITE_VERCEL_AWS_BUCKET_REGION }}
+          VITE_VERCEL_AWS_BUCKET_ID=${{ secrets.VITE_VERCEL_AWS_BUCKET_ID }}
+          VITE_VERCEL_APIKEY=${{ secrets.VITE_VERCEL_APIKEY }}
+          VITE_VERCEL_AUTHDOMAIN=${{ secrets.VITE_VERCEL_AUTHDOMAIN }}
+          VITE_VERCEL_PROJECTID=${{ secrets.VITE_VERCEL_PROJECTID }}
+          VITE_VERCEL_STORAGEBUCKET=${{ secrets.VITE_VERCEL_STORAGEBUCKET }}
+          VITE_VERCEL_MESSAGINGSENDERID=${{ secrets.VITE_VERCEL_MESSAGINGSENDERID }}
+          VITE_VERCEL_APPID=${{ secrets.VITE_VERCEL_APPID }}
+          VITE_VERCEL_MEASUREMENTID=${{ secrets.VITE_VERCEL_MEASUREMENTID }}
+          "@ | Out-File -FilePath .env.production -Encoding utf8
+
+      # 1. ADD THIS STEP: Compile the Vite source code into the 'out/' directory
+      - name: Compile source code
+        run: npm run build
+
+      # 2. RUN PACKAGER: Electron-builder will now find 'out/main/index.js' intact
       - name: Build and publish Windows app
         run: npx electron-builder --win --publish always
         env:
