@@ -15,6 +15,8 @@ jobs:
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Fetches full history so the runner can read the commit message
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -40,12 +42,19 @@ jobs:
           VITE_VERCEL_MEASUREMENTID=${{ secrets.VITE_VERCEL_MEASUREMENTID }}
           "@ | Out-File -FilePath .env.production -Encoding utf8
 
-      # 1. ADD THIS STEP: Compile the Vite source code into the 'out/' directory
       - name: Compile source code
         run: npm run build
 
-      # 2. RUN PACKAGER: Electron-builder will now find 'out/main/index.js' intact
+      - name: Fetch latest commit message
+        id: get_commit
+        shell: pwsh
+        run: |
+          # Retrieve the subject line of the latest commit
+          $msg = git log -1 --pretty=%s
+          echo "RELEASE_NOTES=$msg" >> $env:GITHUB_ENV
+
       - name: Build and publish Windows app
         run: npx electron-builder --win --publish always
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_NOTES: ${{ env.RELEASE_NOTES }}
