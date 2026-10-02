@@ -31,15 +31,18 @@ jobs:
         shell: pwsh
         run: |
           @"
-          VITE_VERCEL_AWS_BUCKET_REGION=${{ secrets.VITE_VERCEL_AWS_BUCKET_REGION }}
-          VITE_VERCEL_AWS_BUCKET_ID=${{ secrets.VITE_VERCEL_AWS_BUCKET_ID }}
+          VITE_VERCEL_APPID=${{ secrets.VITE_VERCEL_APPID }}
+          VITE_VERCEL_AWS_SECRET_ACCESS_KEY=${{ secrets.VITE_VERCEL_AWS_SECRET_ACCESS_KEY }}
           VITE_VERCEL_APIKEY=${{ secrets.VITE_VERCEL_APIKEY }}
           VITE_VERCEL_AUTHDOMAIN=${{ secrets.VITE_VERCEL_AUTHDOMAIN }}
           VITE_VERCEL_PROJECTID=${{ secrets.VITE_VERCEL_PROJECTID }}
           VITE_VERCEL_STORAGEBUCKET=${{ secrets.VITE_VERCEL_STORAGEBUCKET }}
           VITE_VERCEL_MESSAGINGSENDERID=${{ secrets.VITE_VERCEL_MESSAGINGSENDERID }}
-          VITE_VERCEL_APPID=${{ secrets.VITE_VERCEL_APPID }}
           VITE_VERCEL_MEASUREMENTID=${{ secrets.VITE_VERCEL_MEASUREMENTID }}
+          VITE_VERCEL_AWS_BUCKET_REGION=${{ secrets.VITE_VERCEL_AWS_BUCKET_REGION }}
+          VITE_VERCEL_AWS_ACCESS_KEY_ID=${{ secrets.VITE_VERCEL_AWS_ACCESS_KEY_ID }}
+          VITE_VERCEL_AWS_BUCKET_ID=${{ secrets.VITE_VERCEL_AWS_BUCKET_ID }}
+          VITE_VERCEL_DEVMODE_KEY=${{ secrets.VITE_VERCEL_DEVMODE_KEY }}
           "@ | Out-File -FilePath .env.production -Encoding utf8
 
       - name: Compile source code
