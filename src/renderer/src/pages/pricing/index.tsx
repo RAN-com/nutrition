@@ -1,4 +1,4 @@
-import { Button, Dialog, Divider, styled, capitalize } from '@mui/material'
+import { Button, Dialog, Divider, styled } from '@mui/material'
 import BGImg from '@renderer/assets/login-bg.png'
 import CustomTypography from '@renderer/components/typography'
 import { useAppSelector, useAppDispatch } from '@renderer/redux/store/hook'
