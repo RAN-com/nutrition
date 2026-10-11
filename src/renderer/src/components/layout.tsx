@@ -12,6 +12,7 @@ import { errorToast } from '@renderer/utils/toast'
 import zIndex from '@mui/material/styles/zIndex'
 import CustomIcon from './icons'
 import { green } from '@mui/material/colors'
+import moment from 'moment'
 // import moment from 'moment'
 
 type Props = {
@@ -23,37 +24,54 @@ const LayoutV2: React.FC<Props> = ({ children }: Props) => {
   const user = useAppSelector((s) => s.auth.user)
   const isMobile = useMediaQuery(th.breakpoints.down(680))
   const [showSidebar, setShowSidebar] = React.useState(true)
-  const isOnboarding = useLocation().pathname.includes('onboarding')
+  const location = useLocation()
+  const isOnboarding = location.pathname.includes('onboarding')
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
-  // const hasActiveSubscription = user?.subscription
-  //   ? moment(user?.subscription?.valid_till).isAfter(moment())
-  //   : false
+  const [redirectToPricing, setRedirectToPricing] = React.useState(false)
+  const hasActiveSubscription = user?.subscription
+    ? moment(user?.subscription?.valid_till).isSameOrAfter(moment())
+    : false
+  const isPricingRoute = location.pathname === '/pricing' || location.pathname.startsWith('/pricing/')
 
   React.useEffect(() => {
-    if (user) {
-      refreshData(user).then((data) => {
-        if (data.error && !data.data) {
-          errorToast('Failed to fetch data. Please check your internet connection and try again')
-          dispatch(resetUser())
-          auth.signOut()
-        } else {
-          dispatch(setUser(data.data))
-          // if (!hasActiveSubscription) {
-          //   errorToast(
-          //     'Your subscription has expired. Please renew your subscription to continue using the app.'
-          //   )
-          //   navigate('/pricing', { replace: true })
-          //   return
-          // }
-        }
-      })
-    } else {
-      navigate('/auth/login')
+    if (!user) {
+      navigate('/auth/login', { replace: true })
+      return
     }
-  }, [])
+
+    if (hasActiveSubscription || isPricingRoute) {
+      return
+    }
+
+    refreshData(user).then((data) => {
+      if (data.error && !data.data) {
+        errorToast('Failed to fetch data. Please check your internet connection and try again')
+        dispatch(resetUser())
+        auth.signOut()
+        navigate('/auth/login', { replace: true })
+        return
+      }
+
+      dispatch(setUser(data.data))
+      if (!data.data?.subscription || !moment(data.data.subscription.valid_till).isSameOrAfter(moment())) {
+        errorToast(
+          'Your subscription has expired. Please renew your subscription to continue using the app.'
+        )
+        setRedirectToPricing(true)
+      }
+    })
+  }, [user, hasActiveSubscription, isPricingRoute, navigate, dispatch])
 
   React.useEffect(() => {
+    if (redirectToPricing) {
+      setRedirectToPricing(false)
+      navigate('/pricing', { replace: true })
+    }
+  }, [redirectToPricing, navigate])
+
+  React.useEffect(() => {
+    console.log('window.location.pathname', window.location.pathname)
     if (isMobile) {
       setShowSidebar(true)
       return
@@ -95,6 +113,10 @@ const LayoutV2: React.FC<Props> = ({ children }: Props) => {
         }
       })
   }, [])
+
+  if (!user || (!hasActiveSubscription && !isPricingRoute)) {
+    return null
+  }
 
   return (
     <>

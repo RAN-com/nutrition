@@ -14,6 +14,19 @@ import log from 'electron-log/main'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { autoUpdater } from 'electron-updater'
+import iconMac from '../../resources/macos/512x512.png?asset'
+
+const getAppIconPath = (): string => {
+  if (process.platform === 'win32') {
+    return join(__dirname, '../../resources/windows/icon.ico')
+  }
+
+  if (process.platform === 'linux') {
+    return join(__dirname, '../../resources/linux/icons/512x512.png')
+  }
+
+  return join(__dirname, '../../resources/macos/icon.icns')
+}
 
 let workerWindow: BrowserWindow | undefined
 function createPdf() {
@@ -51,8 +64,7 @@ function createWindow({ width, height }: { width: number; height: number }): voi
       height: 40,
       symbolColor: 'white'
     },
-    icon: join(__dirname, '../../resources/icon.png'),
-    // ...(process.platform === 'linux' ? { icon } : {}),
+    icon: getAppIconPath(),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       nodeIntegration: true,
@@ -290,6 +302,10 @@ app.whenReady().then(() => {
 
   log.info('App started successfully')
   console.log('Logs stored at:', log.transports.file.getFile().path)
+
+  if (process.platform === 'darwin') {
+    app?.dock?.setIcon(iconMac)
+  }
 
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)

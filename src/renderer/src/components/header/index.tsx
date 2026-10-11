@@ -56,6 +56,12 @@ const Header = ({ toggleSidebar, showToggle }: Props) => {
 
   const validSubscription =
     user?.subscription && moment(user?.subscription?.valid_till).isAfter(moment())
+
+  React.useEffect(() => {
+    if (!validSubscription) {
+      navigate('/pricing', { replace: true })
+    }
+  }, [validSubscription])
   return (
     <HeaderContainer className="header" sx={{ backgroundColor: isDev ? '#96c9fa' : '#fff' }}>
       <div className="greet">

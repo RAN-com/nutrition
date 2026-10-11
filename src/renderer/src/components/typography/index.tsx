@@ -22,6 +22,7 @@ type Props = TypographyProps & {
     | 'inherit'
   fontSize?: string
   error?: boolean
+  caps?: boolean
 }
 
 const CustomTypography = ({ ...props }: Props): React.ReactNode => {
@@ -41,7 +42,7 @@ const CustomTypography = ({ ...props }: Props): React.ReactNode => {
       }}
     >
       {typeof props.children === 'string'
-        ? capitalizeSentence(props.children.toLowerCase().split('_').join(' '))
+        ? capitalizeSentence(props.children.toLowerCase().split('_').join(' '), props?.caps)
         : props.children}
     </Typography>
   )

@@ -41,18 +41,21 @@
       }
     ],
     "win": {
-      "target": "nsis"
+      "target": "nsis",
+      "icon": "./resources/windows/icon.ico"
     },
     "mac": {
       "target": [
         "dmg"
-      ]
+      ],
+      "icon": "./resources/macos/icon.icns"
     },
     "linux": {
       "target": [
         "AppImage",
         "deb"
-      ]
+      ],
+      "icon": "./resources/linux/icons/512x512.png"
     }
   },
   "dependencies": {

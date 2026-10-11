@@ -2,7 +2,10 @@ const capitalize = (str: string): string => {
   return str.charAt(0).toUpperCase() + str.slice(1)
 }
 
-export const capitalizeSentence = (str: string): string => {
+export const capitalizeSentence = (str: string, cap?: boolean): string => {
+  if (typeof cap === 'undefined' || !cap) {
+    return str
+  }
   return str?.split('_').join(' ').split(' ').map(capitalize).join(' ')
 }
 

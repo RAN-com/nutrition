@@ -6,18 +6,22 @@ import { Outlet, useNavigate } from 'react-router-dom'
 const Auth = () => {
   const user = useAppSelector((s) => s.auth.user)
   const navigate = useNavigate()
+  const hasActiveSubscription = user?.subscription
+    ? moment(user.subscription.valid_till).isSameOrAfter(moment())
+    : false
 
   React.useEffect(() => {
-    if (user) {
-      if (!user?.subscription) {
-        navigate('/pricing')
-      } else if (moment(user?.subscription?.valid_till).isAfter(moment())) {
-        navigate('/pricing')
-      } else {
-        navigate('/home')
-      }
+    if (!user) {
+      return
     }
-  }, [user])
+
+    if (hasActiveSubscription) {
+      navigate('/home', { replace: true })
+      return
+    }
+
+    navigate('/pricing', { replace: true })
+  }, [user, hasActiveSubscription, navigate])
 
   return <Outlet />
 }

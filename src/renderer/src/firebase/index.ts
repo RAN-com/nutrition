@@ -25,6 +25,7 @@ import {
 } from 'firebase/firestore'
 import { encryptData } from '@renderer/utils/crypto'
 import moment from 'moment'
+import { getAuthErrorMessage } from './errors'
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_VERCEL_APIKEY,
@@ -69,7 +70,11 @@ export const firebaseSignIn = async ({
 }): Promise<User | null> => {
   return signInWithEmailAndPassword(auth, email, password)
     .then((data) => data.user)
-    .catch(null)
+    .catch((err) => {
+      console.log(err, 'error', err?.code, err?.message)
+      errorToast(getAuthErrorMessage(err))
+      return null
+    })
 }
 
 export const refreshData = async (data: CenterUser) => {

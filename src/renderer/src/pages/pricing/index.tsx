@@ -1,4 +1,4 @@
-import { Button, Dialog, Divider, styled } from '@mui/material'
+import { Button, Dialog, Divider, styled, capitalize } from '@mui/material'
 import BGImg from '@renderer/assets/login-bg.png'
 import CustomTypography from '@renderer/components/typography'
 import { useAppSelector, useAppDispatch } from '@renderer/redux/store/hook'
@@ -14,7 +14,10 @@ import { createAdminPayment } from '@renderer/firebase/pricing'
 import { setOrderPendingData } from '@renderer/redux/features/pricing/slice'
 import React from 'react'
 import { PaymentModel } from '@renderer/app'
+import { resetUser } from '@renderer/redux/features/user/auth'
+import { resetApp } from '@renderer/redux/store'
 
+const SHOW_SUBSCRIPTION = false
 const Pricing = () => {
   const dispatch = useAppDispatch()
   const pricing = useAppSelector((s) => s.pricing.center_user)
@@ -75,7 +78,192 @@ const Pricing = () => {
     ? moment(user?.subscription?.valid_till).isBefore(moment())
     : false
 
-  return !showPricing && user?.subscription && !isSubscriptionActive ? (
+  return SHOW_SUBSCRIPTION ? (
+    !showPricing && user?.subscription && !isSubscriptionActive ? (
+      <Container>
+        <Dialog
+          open={true}
+          style={{ flexDirection: 'column', flexWrap: 'wrap' }}
+          slotProps={{
+            paper: {
+              className: 'scrollbar'
+            }
+          }}
+          sx={(theme) => ({
+            '.MuiPaper-root': {
+              width: '100%',
+              zIndex: 100,
+              padding: '24px 32px',
+              maxWidth: 'max-content',
+              height: 'max-content',
+              maxHeight: 'calc(100% - 24px)',
+              display: 'flex',
+              flexWrap: 'wrap',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: '#ffffffdc',
+              '& form': {
+                width: '100%',
+                padding: '24px 0px 8px 0px'
+              },
+              [theme.breakpoints.down('sm')]: {
+                padding: '16px 24px'
+              }
+            }
+          })}
+        >
+          <CustomTypography
+            variant="h5"
+            fontFamily={'Syne'}
+            fontWeight={'700'}
+            textAlign={'center'}
+          >
+            Subscription Status
+          </CustomTypography>
+          <CustomTypography variant="body1" textAlign={'center'}>
+            You have an active subscription till{' '}
+            {moment(user?.subscription?.valid_till).format('DD MMM YYYY')}
+          </CustomTypography>
+
+          <Button
+            disableElevation={true}
+            sx={{
+              padding: '12px 24px',
+              marginTop: '12px'
+            }}
+            variant={'contained'}
+            fullWidth={true}
+            onClick={() => navigate('/')}
+          >
+            Go To Home
+          </Button>
+          {user?.subscription?.type === 'FREE_TRAIL' && (
+            <Button
+              disableElevation
+              disableFocusRipple
+              disableRipple
+              disableTouchRipple
+              variant={'text'}
+              sx={{
+                zIndex: 100,
+                textTransform: 'none'
+              }}
+              // fullWidth={true}
+              onClick={() => setShowPricing(true)}
+            >
+              Buy Subscription
+            </Button>
+          )}
+        </Dialog>
+      </Container>
+    ) : (
+      <Container>
+        <PaymentModel open={!!pendingOrder} />
+        <Dialog
+          open={true}
+          style={{ flexDirection: 'column', flexWrap: 'wrap' }}
+          slotProps={{
+            paper: {
+              className: 'scrollbar'
+            }
+          }}
+          sx={(theme) => ({
+            '.MuiPaper-root': {
+              width: '100%',
+              zIndex: 100,
+              padding: '24px 32px',
+              maxWidth: 'max-content',
+              height: 'max-content',
+              maxHeight: 'calc(100% - 24px)',
+              display: 'flex',
+              flexWrap: 'wrap',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: '#bebebe9d',
+              '& form': {
+                width: '100%',
+                padding: '24px 0px 8px 0px'
+              },
+              [theme.breakpoints.down('sm')]: {
+                padding: '16px 24px'
+              }
+            }
+          })}
+        >
+          <CustomTypography variant="h3" fontFamily={'Syne'} fontWeight={'700'}>
+            Choose a Plan
+          </CustomTypography>
+          <CustomTypography
+            variant="body1"
+            maxWidth={'420px'}
+            textAlign={'center'}
+            lineHeight={'1'}
+            marginBottom={'12px'}
+            marginTop={'4px'}
+            color="#0000007d"
+          >
+            Enjoy flexibility, transparency, and unmatched value with our subscription packages.
+          </CustomTypography>
+          <InnerContainer>
+            {pricing.map((price) => (
+              <PricingContainer key={price.priceId}>
+                <Wrapper>
+                  <div className="price">
+                    <CustomTypography variant={'h4'} fontWeight={'800'}>
+                      {price.price}&nbsp;
+                    </CustomTypography>
+                    {price?.validity && (
+                      <CustomTypography variant={'body1'}>
+                        / {capitalizeSentence(price?.validity)}
+                      </CustomTypography>
+                    )}
+                  </div>
+                  <Divider sx={{ margin: '12px 0px' }} />
+                  <CustomTypography variant="h5" marginBottom={'8px'}>
+                    Features
+                  </CustomTypography>
+                  {price.features.map((e) => (
+                    <CustomTypography variant={'body2'}>✅ {e}</CustomTypography>
+                  ))}
+                </Wrapper>
+                <Button
+                  disableElevation={true}
+                  sx={{
+                    padding: '12px 24px'
+                  }}
+                  variant={'contained'}
+                  fullWidth={true}
+                  onClick={() => handlePayment(price)}
+                >
+                  Select & Pay {price.price}
+                </Button>
+              </PricingContainer>
+            ))}
+          </InnerContainer>
+          {isSubscriptionActive && (
+            // user?.subscription?.type === 'FREE_TRAIL' &&
+            <Button
+              sx={{
+                zIndex: 100,
+                padding: '12px 24px',
+                marginTop: '12px'
+              }}
+              variant={'contained'}
+              // fullWidth={true}
+              onClick={() => {
+                navigate('/home')
+                setShowPricing(false)
+              }}
+            >
+              Back to Home
+            </Button>
+          )}
+        </Dialog>
+      </Container>
+    )
+  ) : (
     <Container>
       <Dialog
         open={true}
@@ -101,6 +289,7 @@ const Pricing = () => {
             backgroundColor: '#ffffffdc',
             '& form': {
               width: '100%',
+              maxWidth: '420px',
               padding: '24px 0px 8px 0px'
             },
             [theme.breakpoints.down('sm')]: {
@@ -109,148 +298,46 @@ const Pricing = () => {
           }
         })}
       >
-        <CustomTypography variant="h5" fontFamily={'Syne'} fontWeight={'700'} textAlign={'center'}>
+        <CustomTypography variant="h5" fontFamily={'Syne'} fontWeight={'700'}>
           Subscription Status
-        </CustomTypography>
-        <CustomTypography variant="body1" textAlign={'center'}>
-          You have an active subscription till{' '}
-          {moment(user?.subscription?.valid_till).format('DD MMM YYYY')}
-        </CustomTypography>
-
-        <Button
-          disableElevation={true}
-          sx={{
-            padding: '12px 24px',
-            marginTop: '12px'
-          }}
-          variant={'contained'}
-          fullWidth={true}
-          onClick={() => navigate('/')}
-        >
-          Go To Home
-        </Button>
-        {user?.subscription?.type === 'FREE_TRAIL' && (
-          <Button
-            disableElevation
-            disableFocusRipple
-            disableRipple
-            disableTouchRipple
-            variant={'text'}
-            sx={{
-              zIndex: 100,
-              textTransform: 'none'
-            }}
-            // fullWidth={true}
-            onClick={() => setShowPricing(true)}
-          >
-            Buy Subscription
-          </Button>
-        )}
-      </Dialog>
-    </Container>
-  ) : (
-    <Container>
-      <PaymentModel open={!!pendingOrder} />
-      <Dialog
-        open={true}
-        style={{ flexDirection: 'column', flexWrap: 'wrap' }}
-        slotProps={{
-          paper: {
-            className: 'scrollbar'
-          }
-        }}
-        sx={(theme) => ({
-          '.MuiPaper-root': {
-            width: '100%',
-            zIndex: 100,
-            padding: '24px 32px',
-            maxWidth: 'max-content',
-            height: 'max-content',
-            maxHeight: 'calc(100% - 24px)',
-            display: 'flex',
-            flexWrap: 'wrap',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            backgroundColor: '#bebebe9d',
-            '& form': {
-              width: '100%',
-              padding: '24px 0px 8px 0px'
-            },
-            [theme.breakpoints.down('sm')]: {
-              padding: '16px 24px'
-            }
-          }
-        })}
-      >
-        <CustomTypography variant="h3" fontFamily={'Syne'} fontWeight={'700'}>
-          Choose a Plan
         </CustomTypography>
         <CustomTypography
           variant="body1"
-          maxWidth={'420px'}
           textAlign={'center'}
-          lineHeight={'1'}
-          marginBottom={'12px'}
-          marginTop={'4px'}
-          color="#0000007d"
+          style={{
+            display: 'inline-block',
+            textAlign: 'center',
+            maxWidth: '420px',
+            marginTop: '12px'
+          }}
         >
-          Enjoy flexibility, transparency, and unmatched value with our subscription packages.
-        </CustomTypography>
-        <InnerContainer>
-          {pricing.map((price) => (
-            <PricingContainer key={price.priceId}>
-              <Wrapper>
-                <div className="price">
-                  <CustomTypography variant={'h4'} fontWeight={'800'}>
-                    {price.price}&nbsp;
-                  </CustomTypography>
-                  {price?.validity && (
-                    <CustomTypography variant={'body1'}>
-                      / {capitalizeSentence(price?.validity)}
-                    </CustomTypography>
-                  )}
-                </div>
-                <Divider sx={{ margin: '12px 0px' }} />
-                <CustomTypography variant="h5" marginBottom={'8px'}>
-                  Features
-                </CustomTypography>
-                {price.features.map((e) => (
-                  <CustomTypography variant={'body2'}>✅ {e}</CustomTypography>
-                ))}
-              </Wrapper>
-              <Button
-                disableElevation={true}
-                sx={{
-                  padding: '12px 24px'
-                }}
-                variant={'contained'}
-                fullWidth={true}
-                onClick={() => handlePayment(price)}
-              >
-                Select & Pay {price.price}
-              </Button>
-            </PricingContainer>
-          ))}
-        </InnerContainer>
-        {isSubscriptionActive && (
-          // user?.subscription?.type === 'FREE_TRAIL' &&
-          <Button
-            sx={{
-              zIndex: 100,
-              padding: '12px 24px',
-              marginTop: '12px'
-            }}
-            variant={'contained'}
-            // fullWidth={true}
-            onClick={() => {
-              navigate('/home')
-              setShowPricing(false)
-            }}
+          Contact support to enable subscription for your account. You can also logout and login
+          with a different account. For more information, contact support at&nbsp;
+          <a
+            href={`mailto:${import.meta.env.VITE_VERCEL_SUPPORT_EMAIL}`}
+            style={{ textDecoration: 'none' }}
           >
-            Back to Home
-          </Button>
-        )}
+            <CustomTypography
+              variant="body1"
+              fontWeight={'700'}
+              color={'#000000'}
+              align="center"
+              caps={false}
+              justifyContent={'center'}
+            >
+              {import.meta.env.VITE_VERCEL_SUPPORT_EMAIL}
+            </CustomTypography>
+          </a>
+        </CustomTypography>
+        <Button
+          onClick={() => {
+            dispatch(resetUser())
+            dispatch(resetApp())
+            navigate('/auth/login')
+          }}
+        >
+          Logout
+        </Button>
       </Dialog>
     </Container>
   )
