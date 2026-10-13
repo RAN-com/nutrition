@@ -1,6 +1,6 @@
-# Nutrition App
+# Ran Infotech
 
-This repository contains the source code for the Nutrition desktop application. The build, packaging, and release pipelines are fully automated using GitHub Actions.
+This repository contains the source code for the Ran Infotech desktop application. The build, packaging, and release pipelines are fully automated using GitHub Actions.
 
 ## Development Workflow
 

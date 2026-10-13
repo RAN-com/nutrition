@@ -56,7 +56,7 @@ function createWindow({ width, height }: { width: number; height: number }): voi
     fullscreenable: true,
     movable: true,
     roundedCorners: true,
-    title: 'Nutrition',
+    title: 'raninfotech',
     show: true,
     titleBarStyle: 'default',
     titleBarOverlay: {
@@ -99,7 +99,7 @@ function createWindow({ width, height }: { width: number; height: number }): voi
     process.env.APPIMAGE = join(
       __dirname,
       'out',
-      `Nutrition Setup ${app.getVersion()}_linux.AppImage`
+      `Ran InfoTech Setup ${app.getVersion()}_linux.AppImage`
     )
   }
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
@@ -144,7 +144,7 @@ function createWindow({ width, height }: { width: number; height: number }): voi
       dialog
         .showSaveDialog({
           filters: [{ name: 'PDF Files', extensions: ['pdf'] }],
-          defaultPath: join(app.getPath('documents'), `${fileName || 'nutrition'}.pdf`) // Default save location and filename
+          defaultPath: join(app.getPath('documents'), `${fileName || 'raninfotech'}.pdf`) // Default save location and filename
         })
         .then((result) => {
           if (!result.canceled && result.filePath) {
@@ -298,7 +298,7 @@ app.whenReady().then(() => {
   const display = screen.getPrimaryDisplay()
   const { height, width } = display.workAreaSize
   console.log(display.size, display.bounds, display.workArea, display.workAreaSize)
-  electronApp.setAppUserModelId('com.ran.nutrition')
+  electronApp.setAppUserModelId('com.ran.raninfotech')
 
   log.info('App started successfully')
   console.log('Logs stored at:', log.transports.file.getFile().path)

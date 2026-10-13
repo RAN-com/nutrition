@@ -1,7 +1,7 @@
 {
-  "name": "nutrition",
+  "name": "ran-infotech",
   "version": "1.24.2",
-  "description": "The Nutrition Dashboard is a powerful and intuitive platform designed to provide Nutrition members with easy access to vital business and health data",
+  "description": "The Ran InfoTech Dashboard is a powerful and intuitive platform designed to provide Ran InfoTech members with easy access to vital business and health data",
   "main": "./out/main/index.js",
   "author": "example.com",
   "homepage": "https://raninfo.in",
@@ -22,8 +22,8 @@
   },
   "icon": "./resources/icon.png",
   "build": {
-    "appId": "com.ran.nutrition",
-    "productName": "Nutrition",
+    "appId": "com.ran.raninfotech",
+    "productName": "Ran Infotech",
     "files": [
       "./out/**/*",
       "dist/**/*",
@@ -37,7 +37,7 @@
       {
         "provider": "github",
         "owner": "RAN-com",
-        "repo": "nutrition"
+        "repo": "raninfotech"
       }
     ],
     "win": {

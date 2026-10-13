@@ -178,8 +178,11 @@ const AboutStaff = () => {
       current_staff_domain?.subscription?.valid_till
         ? timer(current_staff_domain?.subscription?.valid_till)
         : null,
-    []
+    [current_staff_domain?.subscription?.valid_till]
   )
+  const hasActiveCardAccess =
+    Boolean(current_staff_domain?.subscription?.valid_till) &&
+    new Date(current_staff_domain?.subscription?.valid_till ?? '').getTime() > Date.now()
 
   const [query] = useSearchParams()
   const fullWidth = query.get('tab') === 'records'
@@ -234,7 +237,7 @@ const AboutStaff = () => {
                   <CircularProgress variant="indeterminate" size={24} />
                 ) : (
                   <>
-                    {!current_staff_domain?.subscription ? (
+                    {!hasActiveCardAccess ? (
                       <PurchaseSubscription handleFunc={() => setRefresh(true)} />
                     ) : (
                       <Button
@@ -263,13 +266,13 @@ const AboutStaff = () => {
                         }
                       >
                         <CustomTypography variant="body2" lineHeight={'1'}>
-                          {!current_staff_domain?.subscription
+                          {!hasActiveCardAccess
                             ? 'Buy Subscription'
                             : 'Customize Card'}
                         </CustomTypography>
                       </Button>
                     )}
-                    {!current_staff_domain?.subscription && (
+                    {!hasActiveCardAccess && (
                       <>
                         <CustomTypography
                           fontSize={'0.7rem'}
@@ -284,7 +287,7 @@ const AboutStaff = () => {
                     )}
                   </>
                 )}
-                {current_staff_domain && current_staff_domain?.subscription && (
+                {current_staff_domain && hasActiveCardAccess && (
                   <div>
                     <CustomTypography>
                       Valid till&nbsp;
