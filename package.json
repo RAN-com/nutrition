@@ -1,6 +1,6 @@
 {
   "name": "ran-infotech",
-  "version": "1.24.2",
+  "version": "1.25.0",
   "description": "The Ran InfoTech Dashboard is a powerful and intuitive platform designed to provide Ran InfoTech members with easy access to vital business and health data",
   "main": "./out/main/index.js",
   "author": "example.com",
